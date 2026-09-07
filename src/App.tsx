@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { Sidebar, type Screen } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
+import { NouveauProjetModal } from "./components/NouveauProjetModal";
 import { Dashboard } from "./screens/Dashboard";
 import { Projets } from "./screens/Projets";
 import { Calendrier } from "./screens/Calendrier";
@@ -10,6 +11,7 @@ import { Objectifs } from "./screens/Objectifs";
 import { Backlog } from "./screens/Backlog";
 import { RechercheNotes } from "./screens/RechercheNotes";
 import { Parametres } from "./screens/Parametres";
+import { PremierLancement } from "./screens/PremierLancement";
 import { FicheProjet } from "./screens/FicheProjet";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
@@ -21,6 +23,7 @@ function App() {
   const [openProjetId, setOpenProjetId] = useState<string | null>(null);
   const [data, setData] = useState<AppData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [modalOuvert, setModalOuvert] = useState(false);
 
   const refreshData = useCallback(() => {
     return loadAppData()
@@ -56,15 +59,32 @@ function App() {
     setScreen(next);
   }
 
+  function handleNoterIdee() {
+    setOpenProjetId(null);
+    setScreen("backlog");
+  }
+
+  async function handleProjetCree(id: string) {
+    setModalOuvert(false);
+    await refreshData();
+    setOpenProjetId(id);
+  }
+
+  const aucunProjet = data ? data.projets.length === 0 : false;
+  const montrerPremierLancement = !openProjetId && (screen === "premier-lancement" || (screen === "dashboard" && aucunProjet));
+
   return (
     <div className="app-shell">
       <Sidebar screen={screen} onNavigate={handleSidebarNavigate} counts={counts} streakJours={stats?.streakJours ?? 0} />
       <div className="app-main">
-        <TopBar />
+        <TopBar onNouveauProjet={() => setModalOuvert(true)} />
         <div className="app-content">
           {error && <div className="app-error">Erreur de chargement : {error}</div>}
           {!error && !data && <div className="app-loading">Chargement…</div>}
-          {data && stats && !openProjetId && screen === "dashboard" && (
+          {data && montrerPremierLancement && (
+            <PremierLancement onCreerProjet={() => setModalOuvert(true)} onNoterIdee={handleNoterIdee} />
+          )}
+          {data && stats && !openProjetId && !montrerPremierLancement && screen === "dashboard" && (
             <Dashboard data={data} stats={stats} onOpenProjet={openProjet} />
           )}
           {data && !openProjetId && screen === "projets" && <Projets data={data} onOpenProjet={openProjet} />}
@@ -83,6 +103,9 @@ function App() {
           )}
         </div>
       </div>
+      {modalOuvert && data && (
+        <NouveauProjetModal data={data} onClose={() => setModalOuvert(false)} onCreated={handleProjetCree} />
+      )}
     </div>
   );
 }

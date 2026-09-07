@@ -1,6 +1,10 @@
 import "./TopBar.css";
 
-export function TopBar() {
+interface TopBarProps {
+  onNouveauProjet: () => void;
+}
+
+export function TopBar({ onNouveauProjet }: TopBarProps) {
   return (
     <header className="topbar">
       <div className="topbar__search">
@@ -10,8 +14,10 @@ export function TopBar() {
       </div>
       <div className="topbar__title">CENTRE DE COMMANDE</div>
       <div className="topbar__actions">
-        <button className="btn btn--ghost">Panneau</button>
-        <button className="btn btn--accent">
+        <button className="btn btn--ghost" title="Bientôt disponible">
+          Panneau
+        </button>
+        <button className="btn btn--accent" onClick={onNouveauProjet}>
           <span>+</span> Nouveau projet
         </button>
       </div>

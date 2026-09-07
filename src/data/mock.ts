@@ -12,7 +12,7 @@ import type {
   ProjetObjectif,
   StatutEtape,
 } from "../types";
-import type { NewIdeeInput, NewJournalEntryInput } from "./db";
+import type { NewIdeeInput, NewJournalEntryInput, NewProjetInput } from "./db";
 
 // Miroir des migrations src-tauri/migrations/*.sql, utilisé uniquement quand
 // l'app tourne hors runtime Tauri (aperçu navigateur pendant le développement).
@@ -515,6 +515,25 @@ export const mockData: AppData = {
   projetObjectifs,
   idees,
 };
+
+export function mockCreerProjet(id: string, input: NewProjetInput): void {
+  const now = new Date().toISOString();
+  projets.push({
+    id,
+    titre: input.titre,
+    categorie_id: input.categorieId,
+    statut: input.statut,
+    description: input.description,
+    objectif_final: input.objectifFinal,
+    echeance_date: null,
+    seuil_depenses: null,
+    created_at: now,
+    updated_at: now,
+  });
+  for (const objectifId of input.objectifIds) {
+    projetObjectifs.push({ projet_id: id, objectif_id: objectifId });
+  }
+}
 
 export function mockAddCategorie(label: string, color: string): void {
   categories.push({ id: uuidLib(), label, color, sort_order: categories.length + 1 });

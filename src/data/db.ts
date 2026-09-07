@@ -12,6 +12,7 @@ import type {
   Projet,
   ProjetObjectif,
   StatutEtape,
+  StatutProjet,
   TypeJournal,
 } from "../types";
 import {
@@ -21,6 +22,7 @@ import {
   mockAddIdee,
   mockAddJournalEntry,
   mockAddNote,
+  mockCreerProjet,
   mockPromouvoirIdee,
   mockToggleEtape,
 } from "./mock";
@@ -141,6 +143,32 @@ export async function promouvoirIdee(idee: Idee): Promise<string> {
   }
   await db.execute("DELETE FROM idees WHERE id = $1", [idee.id]);
   return nouveauId;
+}
+
+export interface NewProjetInput {
+  titre: string;
+  categorieId: string;
+  statut: StatutProjet;
+  description: string;
+  objectifFinal: string;
+  objectifIds: string[];
+}
+
+export async function creerProjet(input: NewProjetInput): Promise<string> {
+  const id = uuid();
+  if (!isTauriRuntime()) {
+    mockCreerProjet(id, input);
+    return id;
+  }
+  const db = await getDb();
+  await db.execute(
+    "INSERT INTO projets (id, titre, categorie_id, statut, description, objectif_final) VALUES ($1, $2, $3, $4, $5, $6)",
+    [id, input.titre, input.categorieId, input.statut, input.description, input.objectifFinal],
+  );
+  for (const objectifId of input.objectifIds) {
+    await db.execute("INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES ($1, $2)", [id, objectifId]);
+  }
+  return id;
 }
 
 export async function addCategorie(label: string, color: string): Promise<void> {
