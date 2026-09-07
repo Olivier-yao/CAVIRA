@@ -613,6 +613,23 @@ export function mockSupprimerCategorie(id: string): void {
   removeWhere(categories, (c) => c.id === id);
 }
 
+function remplacerContenu<T>(arr: T[], nouveauContenu: T[]): void {
+  arr.length = 0;
+  arr.push(...nouveauContenu);
+}
+
+export function mockRestaurerDonnees(data: AppData): void {
+  remplacerContenu(categories, data.categories);
+  remplacerContenu(objectifs, data.objectifs);
+  remplacerContenu(projets, data.projets);
+  remplacerContenu(etapes, data.etapes);
+  remplacerContenu(journal, data.journal);
+  remplacerContenu(notes, data.notes);
+  remplacerContenu(calendrier, data.calendrier);
+  remplacerContenu(projetObjectifs, data.projetObjectifs);
+  remplacerContenu(idees, data.idees);
+}
+
 export function mockAddCategorie(label: string, color: string): void {
   categories.push({ id: uuidLib(), label, color, sort_order: categories.length + 1 });
 }

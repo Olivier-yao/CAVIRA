@@ -29,6 +29,7 @@ import {
   mockModifierObjectif,
   mockModifierProjet,
   mockPromouvoirIdee,
+  mockRestaurerDonnees,
   mockSupprimerCategorie,
   mockSupprimerEtape,
   mockSupprimerObjectif,
@@ -314,4 +315,100 @@ export async function addNote(projetId: string, titre: string, contenu: string, 
     contenu,
     tags,
   ]);
+}
+
+/**
+ * Remplace toutes les données locales par celles d'un export JSON.
+ * Pas de transaction explicite (tauri-plugin-sql ne garantit pas que les
+ * appels execute() successifs partagent la même connexion) : on vide et
+ * réinsère dans un ordre qui respecte les clés étrangères (enfants avant
+ * parents à la suppression, parents avant enfants à l'insertion). Le
+ * fichier importé est validé (voir estAppDataValide) avant d'être appelé.
+ */
+export async function restaurerDonnees(data: AppData): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockRestaurerDonnees(data);
+    return;
+  }
+  const db = await getDb();
+
+  await db.execute("DELETE FROM projet_objectifs");
+  await db.execute("DELETE FROM plan_etapes");
+  await db.execute("DELETE FROM journal_entries");
+  await db.execute("DELETE FROM notes");
+  await db.execute("DELETE FROM calendrier_entries");
+  await db.execute("DELETE FROM idees");
+  await db.execute("DELETE FROM projets");
+  await db.execute("DELETE FROM categories");
+  await db.execute("DELETE FROM objectifs");
+
+  for (const c of data.categories) {
+    await db.execute("INSERT INTO categories (id, label, color, sort_order) VALUES ($1, $2, $3, $4)", [
+      c.id,
+      c.label,
+      c.color,
+      c.sort_order,
+    ]);
+  }
+  for (const o of data.objectifs) {
+    await db.execute("INSERT INTO objectifs (id, titre, description, created_at) VALUES ($1, $2, $3, $4)", [
+      o.id,
+      o.titre,
+      o.description,
+      o.created_at,
+    ]);
+  }
+  for (const p of data.projets) {
+    await db.execute(
+      "INSERT INTO projets (id, titre, categorie_id, statut, description, objectif_final, echeance_date, seuil_depenses, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+      [
+        p.id,
+        p.titre,
+        p.categorie_id,
+        p.statut,
+        p.description,
+        p.objectif_final,
+        p.echeance_date,
+        p.seuil_depenses,
+        p.created_at,
+        p.updated_at,
+      ],
+    );
+  }
+  for (const e of data.etapes) {
+    await db.execute(
+      "INSERT INTO plan_etapes (id, projet_id, parent_id, titre, statut, priorite, date_cible, note, sort_order, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+      [e.id, e.projet_id, e.parent_id, e.titre, e.statut, e.priorite, e.date_cible, e.note, e.sort_order, e.created_at],
+    );
+  }
+  for (const j of data.journal) {
+    await db.execute(
+      "INSERT INTO journal_entries (id, projet_id, type, titre, montant, duree_minutes, description, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      [j.id, j.projet_id, j.type, j.titre, j.montant, j.duree_minutes, j.description, j.created_at],
+    );
+  }
+  for (const n of data.notes) {
+    await db.execute(
+      "INSERT INTO notes (id, projet_id, etape_id, titre, contenu, tags, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [n.id, n.projet_id, n.etape_id, n.titre, n.contenu, n.tags, n.created_at],
+    );
+  }
+  for (const c of data.calendrier) {
+    await db.execute(
+      "INSERT INTO calendrier_entries (id, projet_id, titre, date, type, created_at) VALUES ($1, $2, $3, $4, $5, $6)",
+      [c.id, c.projet_id, c.titre, c.date, c.type, c.created_at],
+    );
+  }
+  for (const po of data.projetObjectifs) {
+    await db.execute("INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES ($1, $2)", [
+      po.projet_id,
+      po.objectif_id,
+    ]);
+  }
+  for (const i of data.idees) {
+    await db.execute(
+      "INSERT INTO idees (id, titre, description, categorie_id, interet, effort_estime, objectif_id, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      [i.id, i.titre, i.description, i.categorie_id, i.interet, i.effort_estime, i.objectif_id, i.created_at],
+    );
+  }
 }

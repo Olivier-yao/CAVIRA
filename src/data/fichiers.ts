@@ -1,6 +1,6 @@
 import { appDataDir, join } from "@tauri-apps/api/path";
-import { stat, writeTextFile } from "@tauri-apps/plugin-fs";
-import { save } from "@tauri-apps/plugin-dialog";
+import { readTextFile, stat, writeTextFile } from "@tauri-apps/plugin-fs";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import type { AppData } from "../types";
 
 export function isTauriRuntime(): boolean {
@@ -38,6 +38,48 @@ export function getDernierExport(): string | null {
   } catch {
     return null;
   }
+}
+
+const CLES_APPDATA: (keyof AppData)[] = [
+  "categories",
+  "objectifs",
+  "projets",
+  "etapes",
+  "journal",
+  "notes",
+  "calendrier",
+  "projetObjectifs",
+  "idees",
+];
+
+export function estAppDataValide(valeur: unknown): valeur is AppData {
+  if (!valeur || typeof valeur !== "object") return false;
+  return CLES_APPDATA.every((cle) => Array.isArray((valeur as Record<string, unknown>)[cle]));
+}
+
+export interface ImportResultat {
+  data: AppData;
+  compteurs: Record<string, number>;
+}
+
+export async function choisirEtLireImport(): Promise<ImportResultat | null> {
+  const chemin = await open({
+    multiple: false,
+    filters: [{ name: "JSON", extensions: ["json"] }],
+  });
+  if (!chemin || Array.isArray(chemin)) return null;
+  const texte = await readTextFile(chemin);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(texte);
+  } catch {
+    throw new Error("Ce fichier n'est pas un JSON valide.");
+  }
+  if (!estAppDataValide(parsed)) {
+    throw new Error("Ce fichier ne correspond pas à un export CAVIRA (structure inattendue).");
+  }
+  const compteurs = Object.fromEntries(CLES_APPDATA.map((cle) => [cle, parsed[cle].length]));
+  return { data: parsed, compteurs };
 }
 
 export async function exporterDonnees(data: AppData): Promise<boolean> {

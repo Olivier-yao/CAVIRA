@@ -3,8 +3,16 @@ import "./Parametres.css";
 import type { AppData } from "../types";
 import { THEMES, applyTheme, getStoredTheme, type ThemeId } from "../lib/theme";
 import { DEVISES, getStoredDevise, setStoredDevise, type DeviseCode } from "../lib/devise";
-import { addCategorie, modifierCategorie, supprimerCategorie } from "../data/db";
-import { exporterDonnees, getDbPath, getDbSizeLabel, getDernierExport, isTauriRuntime } from "../data/fichiers";
+import { addCategorie, modifierCategorie, restaurerDonnees, supprimerCategorie } from "../data/db";
+import {
+  choisirEtLireImport,
+  exporterDonnees,
+  getDbPath,
+  getDbSizeLabel,
+  getDernierExport,
+  isTauriRuntime,
+  type ImportResultat,
+} from "../data/fichiers";
 import { formatDateMedium } from "../lib/format";
 
 interface ParametresProps {
@@ -29,6 +37,9 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [taille, setTaille] = useState("—");
   const [dernierExport, setDernierExport] = useState<string | null>(getDernierExport());
   const [exportEnCours, setExportEnCours] = useState(false);
+  const [importEnAttente, setImportEnAttente] = useState<ImportResultat | null>(null);
+  const [importErreur, setImportErreur] = useState<string | null>(null);
+  const [importEnCours, setImportEnCours] = useState(false);
 
   useEffect(() => {
     if (!isTauriRuntime()) return;
@@ -88,6 +99,31 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
       if (ok) setDernierExport(getDernierExport());
     } finally {
       setExportEnCours(false);
+    }
+  }
+
+  async function handleChoisirFichierImport() {
+    if (!isTauriRuntime()) return;
+    setImportErreur(null);
+    try {
+      const resultat = await choisirEtLireImport();
+      if (resultat) setImportEnAttente(resultat);
+    } catch (e) {
+      setImportErreur(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  async function handleConfirmerImport() {
+    if (!importEnAttente) return;
+    setImportEnCours(true);
+    try {
+      await restaurerDonnees(importEnAttente.data);
+      setImportEnAttente(null);
+      onDataChanged();
+    } catch (e) {
+      setImportErreur(e instanceof Error ? e.message : String(e));
+    } finally {
+      setImportEnCours(false);
     }
   }
 
@@ -267,10 +303,38 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
             >
               {exportEnCours ? "Export…" : "Exporter maintenant"}
             </button>
-            <button className="btn btn--ghost" disabled title="Bientôt disponible">
+            <button
+              className="btn btn--ghost"
+              onClick={handleChoisirFichierImport}
+              disabled={!isTauriRuntime()}
+              title={isTauriRuntime() ? undefined : "Disponible uniquement dans l'application native"}
+            >
               Importer un fichier
             </button>
           </div>
+
+          {importErreur && <p className="parametres-import-erreur">{importErreur}</p>}
+
+          {importEnAttente && (
+            <div className="parametres-import-confirm">
+              <div className="parametres-import-confirm__label">Remplacer toutes les données actuelles ?</div>
+              <p>
+                Ce fichier contient {importEnAttente.compteurs.projets} projet(s),{" "}
+                {importEnAttente.compteurs.etapes} étape(s), {importEnAttente.compteurs.journal} entrée(s) de
+                journal, {importEnAttente.compteurs.notes} note(s), {importEnAttente.compteurs.idees} idée(s).
+                Cette action remplace définitivement les données présentes sur cette machine — assure-toi d'avoir
+                exporté une sauvegarde récente si besoin.
+              </p>
+              <div className="parametres-import-confirm__actions">
+                <button className="btn btn--ghost" onClick={() => setImportEnAttente(null)}>
+                  Annuler
+                </button>
+                <button className="btn btn--danger" onClick={handleConfirmerImport} disabled={importEnCours}>
+                  {importEnCours ? "Remplacement…" : "Remplacer mes données"}
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="card parametres-section">
