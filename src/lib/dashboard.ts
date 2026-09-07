@@ -1,0 +1,207 @@
+import type { DashboardData, JournalEntry, Objectif, PlanEtape, Projet } from "../types";
+import { dateKey, daysUntil, toLocalDateKey } from "./format";
+
+export interface ProchaineEcheance {
+  titre: string;
+  projetTitre: string;
+  sousTitre: string;
+  dateCible: string;
+  joursRestants: number;
+}
+
+export interface ObjectifProgress {
+  objectif: Objectif;
+  progression: number;
+  nbProjets: number;
+}
+
+export interface JourActivite {
+  jour: string;
+  count: number;
+}
+
+export interface MoisBilan {
+  label: string;
+  depenses: number;
+  economies: number;
+  benefices: number;
+}
+
+export interface DashboardStats {
+  projetsActifs: number;
+  projetsPause: number;
+  projetsArchives: number;
+  actionsCeMois: number;
+  actionsMoisDernier: number;
+  actionsDeltaPct: number | null;
+  bilanNetCeMois: number;
+  depensesCeMois: number;
+  gagneCeMois: number;
+  bilanDeltaPct: number | null;
+  echeancesProches: number;
+  echeancesEnRetard: number;
+  echeancesProjetsTitres: string[];
+  regularite28j: JourActivite[];
+  bilanFinancier6mois: MoisBilan[];
+  prochaineEcheance: ProchaineEcheance | null;
+  progressionParObjectif: ObjectifProgress[];
+  derniereActivite: (JournalEntry & { projetTitre: string })[];
+  streakJours: number;
+}
+
+export function progressionProjet(projetId: string, etapes: PlanEtape[]): number {
+  const les = etapes.filter((e) => e.projet_id === projetId);
+  if (les.length === 0) return 0;
+  const faites = les.filter((e) => e.statut === "fait").length;
+  return Math.round((faites / les.length) * 100);
+}
+
+function isSameMonth(iso: string, ref: Date): boolean {
+  const d = new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z"));
+  return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
+}
+
+function pctDelta(current: number, previous: number): number | null {
+  if (previous === 0) return null;
+  return Math.round(((current - previous) / Math.abs(previous)) * 100);
+}
+
+export function computeDashboardStats(data: DashboardData): DashboardStats {
+  const { projets, etapes, journal } = data;
+  const now = new Date();
+  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const projetById = new Map(projets.map((p) => [p.id, p]));
+
+  const projetsActifs = projets.filter((p) => p.statut === "en_cours").length;
+  const projetsPause = projets.filter((p) => p.statut === "pause").length;
+  const projetsArchives = projets.filter((p) => p.statut === "termine" || p.statut === "abandonne").length;
+
+  const actionsThisMonth = journal.filter((j) => j.type === "action" && isSameMonth(j.created_at, now));
+  const actionsLastMonth = journal.filter((j) => j.type === "action" && isSameMonth(j.created_at, prevMonth));
+  const actionsCeMois = actionsThisMonth.length;
+  const actionsMoisDernier = actionsLastMonth.length;
+  const actionsDeltaPct = pctDelta(actionsThisMonth.length, actionsLastMonth.length);
+
+  const sumMontant = (entries: JournalEntry[], type: JournalEntry["type"]) =>
+    entries.filter((j) => j.type === type).reduce((s, j) => s + (j.montant ?? 0), 0);
+
+  const journalThisMonth = journal.filter((j) => isSameMonth(j.created_at, now));
+  const journalLastMonth = journal.filter((j) => isSameMonth(j.created_at, prevMonth));
+
+  const depensesCeMois = Math.abs(sumMontant(journalThisMonth, "depense"));
+  const gagneCeMois = sumMontant(journalThisMonth, "economie") + sumMontant(journalThisMonth, "benefice_estime");
+  const bilanNetCeMois = gagneCeMois - depensesCeMois;
+  const bilanNetMoisDernier =
+    sumMontant(journalLastMonth, "economie") +
+    sumMontant(journalLastMonth, "benefice_estime") +
+    sumMontant(journalLastMonth, "depense");
+  const bilanDeltaPct = pctDelta(bilanNetCeMois, bilanNetMoisDernier);
+
+  const echeancesProchesList = etapes.filter((e) => {
+    if (e.statut === "fait" || !e.date_cible) return false;
+    const j = daysUntil(e.date_cible);
+    return j <= 7;
+  });
+  const echeancesProches = echeancesProchesList.length;
+  const echeancesEnRetard = echeancesProchesList.filter((e) => daysUntil(e.date_cible as string) < 0).length;
+  const echeancesProjetsTitres = [
+    ...new Set(echeancesProchesList.map((e) => projetById.get(e.projet_id)?.titre).filter((t): t is string => !!t)),
+  ];
+
+  const regularite28j: JourActivite[] = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = dateKey(d);
+    const count = journal.filter((j) => j.type === "action" && toLocalDateKey(j.created_at) === key).length;
+    regularite28j.push({ jour: key, count });
+  }
+
+  const bilanFinancier6mois: MoisBilan[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const ref = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const inMonth = journal.filter((j) => isSameMonth(j.created_at, ref));
+    bilanFinancier6mois.push({
+      label: ref.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "").toUpperCase(),
+      depenses: Math.abs(sumMontant(inMonth, "depense")),
+      economies: sumMontant(inMonth, "economie"),
+      benefices: sumMontant(inMonth, "benefice_estime"),
+    });
+  }
+
+  const etapeById = new Map(etapes.map((e) => [e.id, e]));
+  const etapeCode = (e: PlanEtape): string =>
+    e.parent_id && etapeById.has(e.parent_id)
+      ? `${(etapeById.get(e.parent_id) as PlanEtape).sort_order}.${e.sort_order}`
+      : String(e.sort_order);
+
+  let prochaineEcheance: ProchaineEcheance | null = null;
+  const candidates: { titre: string; projet: Projet; sousTitre: string; date: string }[] = [];
+  for (const e of etapes) {
+    if (e.statut === "fait" || !e.date_cible) continue;
+    const p = projetById.get(e.projet_id);
+    if (!p) continue;
+    candidates.push({ titre: e.titre, projet: p, sousTitre: `étape ${etapeCode(e)}`, date: e.date_cible });
+  }
+  for (const p of projets) {
+    if (!p.echeance_date) continue;
+    candidates.push({ titre: p.titre, projet: p, sousTitre: "échéance projet", date: p.echeance_date });
+  }
+  candidates.sort((a, b) => daysUntil(a.date) - daysUntil(b.date));
+  const soonest = candidates.find((c) => daysUntil(c.date) >= -30);
+  if (soonest) {
+    prochaineEcheance = {
+      titre: soonest.titre,
+      projetTitre: soonest.projet.titre,
+      sousTitre: soonest.sousTitre,
+      dateCible: soonest.date,
+      joursRestants: daysUntil(soonest.date),
+    };
+  }
+
+  const progressionParObjectif: ObjectifProgress[] = data.objectifs.map((o) => {
+    const lies = projets.filter((p) => p.objectif_id === o.id);
+    const progression = lies.length
+      ? Math.round(lies.reduce((s, p) => s + progressionProjet(p.id, etapes), 0) / lies.length)
+      : 0;
+    return { objectif: o, progression, nbProjets: lies.length };
+  });
+
+  const derniereActivite = journal.slice(0, 5).map((j) => ({
+    ...j,
+    projetTitre: projetById.get(j.projet_id)?.titre ?? "",
+  }));
+
+  const jours = new Set(
+    journal.filter((j) => j.type === "action").map((j) => toLocalDateKey(j.created_at)),
+  );
+  let cursor = new Date(now);
+  if (!jours.has(dateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let streakJours = 0;
+  while (jours.has(dateKey(cursor))) {
+    streakJours++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return {
+    projetsActifs,
+    projetsPause,
+    projetsArchives,
+    actionsCeMois,
+    actionsMoisDernier,
+    actionsDeltaPct,
+    bilanNetCeMois,
+    depensesCeMois,
+    gagneCeMois,
+    bilanDeltaPct,
+    echeancesProches,
+    echeancesEnRetard,
+    echeancesProjetsTitres,
+    regularite28j,
+    bilanFinancier6mois,
+    prochaineEcheance,
+    progressionParObjectif,
+    derniereActivite,
+    streakJours,
+  };
+}
