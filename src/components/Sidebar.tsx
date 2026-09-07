@@ -47,7 +47,7 @@ export function Sidebar({ screen, onNavigate, counts, streakJours }: SidebarProp
 
   const renderItem = (item: NavItem) => {
     const active = item.screen === screen;
-    const disabled = item.screen !== "dashboard";
+    const disabled = item.screen !== "dashboard" && item.screen !== "projets";
     return (
       <button
         key={item.screen}

@@ -3,6 +3,7 @@ import "./App.css";
 import { Sidebar, type Screen } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
 import { Dashboard } from "./screens/Dashboard";
+import { Projets } from "./screens/Projets";
 import { FicheProjet } from "./screens/FicheProjet";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
@@ -38,9 +39,9 @@ function App() {
     setOpenProjetId(id);
   }
 
-  function backToDashboard() {
+  function backToProjets() {
     setOpenProjetId(null);
-    setScreen("dashboard");
+    setScreen("projets");
   }
 
   function handleSidebarNavigate(next: Screen) {
@@ -59,8 +60,9 @@ function App() {
           {data && stats && !openProjetId && screen === "dashboard" && (
             <Dashboard data={data} stats={stats} onOpenProjet={openProjet} />
           )}
+          {data && !openProjetId && screen === "projets" && <Projets data={data} onOpenProjet={openProjet} />}
           {data && openProjetId && (
-            <FicheProjet data={data} projetId={openProjetId} onBack={backToDashboard} onDataChanged={refreshData} />
+            <FicheProjet data={data} projetId={openProjetId} onBack={backToProjets} onDataChanged={refreshData} />
           )}
         </div>
       </div>
