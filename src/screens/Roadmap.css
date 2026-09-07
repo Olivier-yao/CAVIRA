@@ -1,0 +1,127 @@
+.roadmap-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1400px;
+}
+
+.roadmap-screen__header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.roadmap-screen__subtitle {
+  margin: 4px 0 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+
+.roadmap-screen__vide {
+  color: var(--text-2);
+  font-size: 13px;
+  padding: 30px 0;
+}
+
+.roadmap-table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.roadmap-row {
+  display: grid;
+  align-items: center;
+  min-height: 56px;
+  border-bottom: 1px solid var(--border);
+}
+
+.roadmap-row:last-child {
+  border-bottom: none;
+}
+
+.roadmap-row--entete {
+  min-height: 38px;
+  background: var(--surface-2);
+}
+
+.roadmap-cell-entete {
+  padding: 0 14px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.roadmap-cell-entete--trimestre {
+  text-align: center;
+  border-left: 1px solid var(--border);
+}
+
+.roadmap-cell-label {
+  padding: 8px 14px;
+  min-width: 0;
+}
+
+.roadmap-cell-label__titre {
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roadmap-cell-label__objectif {
+  font-size: 10.5px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roadmap-cell-piste {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: center;
+  height: 100%;
+}
+
+.roadmap-cell-piste__colonne {
+  height: 100%;
+  border-left: 1px solid var(--border);
+}
+
+.roadmap-barre {
+  grid-row: 1;
+  height: 22px;
+  margin: 0 3px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-family: var(--font);
+  font-size: 10.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: left center;
+  animation: barre-grow 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.roadmap-barre:hover {
+  filter: brightness(1.2);
+}
+
+.roadmap-barre--continu {
+  border-style: dashed;
+  border-right: none;
+  border-radius: 999px 4px 4px 999px;
+}
+
+@keyframes barre-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
