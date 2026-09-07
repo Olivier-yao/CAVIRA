@@ -106,6 +106,36 @@
   color: var(--text);
 }
 
+/* ---------- devise ---------- */
+
+.devise-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.devise-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12.5px;
+}
+
+.devise-chip:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.devise-chip--active {
+  border-color: var(--accent-line);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
 /* ---------- categories ---------- */
 
 .categorie-add-btn {

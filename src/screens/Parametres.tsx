@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "./Parametres.css";
 import type { AppData } from "../types";
 import { THEMES, applyTheme, getStoredTheme, type ThemeId } from "../lib/theme";
+import { DEVISES, getStoredDevise, setStoredDevise, type DeviseCode } from "../lib/devise";
 import { addCategorie } from "../data/db";
 import { exporterDonnees, getDbPath, getDbSizeLabel, getDernierExport, isTauriRuntime } from "../data/fichiers";
 import { formatDateMedium } from "../lib/format";
@@ -15,6 +16,7 @@ const COULEURS_SUGGEREES = ["#4FD1E8", "#F472A8", "#B6E24A", "#8A90A6", "#8B7BF7
 
 export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [theme, setTheme] = useState<ThemeId>(getStoredTheme());
+  const [devise, setDevise] = useState<DeviseCode>(getStoredDevise());
   const [showAddCategorie, setShowAddCategorie] = useState(false);
   const [nomCategorie, setNomCategorie] = useState("");
   const [couleurCategorie, setCouleurCategorie] = useState(COULEURS_SUGGEREES[0]);
@@ -33,6 +35,11 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
   function handleChoisirTheme(id: ThemeId) {
     setTheme(id);
     applyTheme(id);
+  }
+
+  function handleChoisirDevise(code: DeviseCode) {
+    setDevise(code);
+    setStoredDevise(code);
   }
 
   async function handleAjouterCategorie() {
@@ -137,6 +144,25 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section className="card parametres-section">
+        <h2>Devise</h2>
+        <p className="parametres-section__desc">
+          S'applique à tous les montants (journal de suivi, seuils d'alerte). Change uniquement l'affichage, pas les
+          montants déjà saisis.
+        </p>
+        <div className="devise-liste">
+          {DEVISES.map((d) => (
+            <button
+              key={d.code}
+              className={`devise-chip${devise === d.code ? " devise-chip--active" : ""}`}
+              onClick={() => handleChoisirDevise(d.code)}
+            >
+              {d.label}
+            </button>
+          ))}
         </div>
       </section>
 

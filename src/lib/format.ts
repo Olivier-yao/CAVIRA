@@ -1,16 +1,24 @@
-const currencyFormatter = new Intl.NumberFormat("fr-FR", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
+import { getStoredDevise } from "./devise";
+
+const formatteursParDevise = new Map<string, Intl.NumberFormat>();
+
+function currencyFormatter(): Intl.NumberFormat {
+  const devise = getStoredDevise();
+  let f = formatteursParDevise.get(devise);
+  if (!f) {
+    f = new Intl.NumberFormat("fr-FR", { style: "currency", currency: devise, maximumFractionDigits: 0 });
+    formatteursParDevise.set(devise, f);
+  }
+  return f;
+}
 
 export function formatMontant(value: number): string {
   const sign = value > 0 ? "+" : "";
-  return `${sign}${currencyFormatter.format(value)}`;
+  return `${sign}${currencyFormatter().format(value)}`;
 }
 
 export function formatMontantAbs(value: number): string {
-  return currencyFormatter.format(Math.abs(value));
+  return currencyFormatter().format(Math.abs(value));
 }
 
 export function dateKey(d: Date): string {
