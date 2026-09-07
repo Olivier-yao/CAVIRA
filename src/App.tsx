@@ -9,6 +9,7 @@ import { Roadmap } from "./screens/Roadmap";
 import { Objectifs } from "./screens/Objectifs";
 import { Backlog } from "./screens/Backlog";
 import { RechercheNotes } from "./screens/RechercheNotes";
+import { Parametres } from "./screens/Parametres";
 import { FicheProjet } from "./screens/FicheProjet";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
@@ -74,6 +75,9 @@ function App() {
             <Backlog data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}
           {data && !openProjetId && screen === "recherche" && <RechercheNotes data={data} onOpenProjet={openProjet} />}
+          {data && !openProjetId && screen === "parametres" && (
+            <Parametres data={data} onDataChanged={refreshData} />
+          )}
           {data && openProjetId && (
             <FicheProjet data={data} projetId={openProjetId} onBack={backToProjets} onDataChanged={refreshData} />
           )}

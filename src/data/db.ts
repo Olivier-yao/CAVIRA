@@ -16,6 +16,7 @@ import type {
 } from "../types";
 import {
   mockData,
+  mockAddCategorie,
   mockAddEtape,
   mockAddIdee,
   mockAddJournalEntry,
@@ -140,6 +141,21 @@ export async function promouvoirIdee(idee: Idee): Promise<string> {
   }
   await db.execute("DELETE FROM idees WHERE id = $1", [idee.id]);
   return nouveauId;
+}
+
+export async function addCategorie(label: string, color: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockAddCategorie(label, color);
+    return;
+  }
+  const db = await getDb();
+  const [{ n }] = await db.select<{ n: number }[]>("SELECT COUNT(*) as n FROM categories");
+  await db.execute("INSERT INTO categories (id, label, color, sort_order) VALUES ($1, $2, $3, $4)", [
+    uuid(),
+    label,
+    color,
+    n + 1,
+  ]);
 }
 
 export async function addNote(projetId: string, titre: string, contenu: string, tags: string): Promise<void> {

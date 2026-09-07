@@ -54,6 +54,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/006_notes_titre.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 7,
+                description: "parametres",
+                sql: include_str!("../migrations/007_parametres.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

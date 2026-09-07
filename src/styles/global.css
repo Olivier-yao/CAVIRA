@@ -2,6 +2,8 @@
 @import "@fontsource/space-grotesk/500.css";
 @import "@fontsource/space-grotesk/600.css";
 @import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/azeret-mono/400.css";
+@import "@fontsource/azeret-mono/500.css";
 @import "./tokens.css";
 @import "./ui.css";
 
@@ -27,6 +29,19 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+/* Bascule de thème : anime les couleurs sur 320 ms, sans flash. */
+body,
+.card,
+.app-shell,
+.sidebar,
+.topbar,
+button,
+input,
+textarea,
+select {
+  transition: background-color 0.32s ease, border-color 0.32s ease, color 0.32s ease;
 }
 
 ::selection {

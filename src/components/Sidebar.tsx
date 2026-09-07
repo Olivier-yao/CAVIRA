@@ -54,7 +54,8 @@ export function Sidebar({ screen, onNavigate, counts, streakJours }: SidebarProp
       item.screen !== "roadmap" &&
       item.screen !== "objectifs" &&
       item.screen !== "backlog" &&
-      item.screen !== "recherche";
+      item.screen !== "recherche" &&
+      item.screen !== "parametres";
     return (
       <button
         key={item.screen}

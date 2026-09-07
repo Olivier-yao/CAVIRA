@@ -32,10 +32,10 @@ function isoInDays(days: number): string {
 }
 
 const categories: Categorie[] = [
-  { id: "cat-dev", label: "Dev app", color: "#8B7BF7", sort_order: 1 },
-  { id: "cat-jeu", label: "Jeu", color: "#F45B8D", sort_order: 2 },
-  { id: "cat-reel", label: "Réel", color: "#4FD1E8", sort_order: 3 },
-  { id: "cat-autre", label: "Autre", color: "#B4E066", sort_order: 4 },
+  { id: "cat-dev", label: "Dev app", color: "#4FD1E8", sort_order: 1 },
+  { id: "cat-jeu", label: "Jeu", color: "#F472A8", sort_order: 2 },
+  { id: "cat-reel", label: "Réel", color: "#B6E24A", sort_order: 3 },
+  { id: "cat-autre", label: "Autre", color: "#8A90A6", sort_order: 4 },
 ];
 
 const objectifs: Objectif[] = [
@@ -515,6 +515,10 @@ export const mockData: AppData = {
   projetObjectifs,
   idees,
 };
+
+export function mockAddCategorie(label: string, color: string): void {
+  categories.push({ id: uuidLib(), label, color, sort_order: categories.length + 1 });
+}
 
 export function mockToggleEtape(etapeId: string, statut: StatutEtape): void {
   const e = etapes.find((x) => x.id === etapeId);
