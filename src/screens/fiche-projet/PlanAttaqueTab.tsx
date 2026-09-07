@@ -4,6 +4,7 @@ import { PrioriteBadge, StatutEtapeBadge } from "../../components/Badges";
 import { formatDateShort } from "../../lib/format";
 import { buildArbreEtapes, repartitionEtapes, type EtapeNode } from "../../lib/ficheProjet";
 import { addEtape, toggleEtapeStatut } from "../../data/db";
+import { EtapeModal } from "../../components/EtapeModal";
 
 interface PlanAttaqueTabProps {
   data: AppData;
@@ -17,6 +18,8 @@ export function PlanAttaqueTab({ data, projetId, onDataChanged }: PlanAttaqueTab
   const [showAdd, setShowAdd] = useState(false);
   const [titreAdd, setTitreAdd] = useState("");
   const [justCompleted, setJustCompleted] = useState<string | null>(null);
+  const [etapeAEditerId, setEtapeAEditerId] = useState<string | null>(null);
+  const etapeAEditer = data.etapes.find((e) => e.id === etapeAEditerId) ?? null;
 
   async function handleToggle(etape: PlanEtape) {
     const next = etape.statut === "fait" ? "a_faire" : "fait";
@@ -88,7 +91,14 @@ export function PlanAttaqueTab({ data, projetId, onDataChanged }: PlanAttaqueTab
 
         <div className="plan-attaque__list">
           {arbre.map((etape) => (
-            <EtapeRow key={etape.id} etape={etape} depth={0} onToggle={handleToggle} justCompleted={justCompleted} />
+            <EtapeRow
+              key={etape.id}
+              etape={etape}
+              depth={0}
+              onToggle={handleToggle}
+              onOuvrir={setEtapeAEditerId}
+              justCompleted={justCompleted}
+            />
           ))}
         </div>
       </div>
@@ -125,6 +135,17 @@ export function PlanAttaqueTab({ data, projetId, onDataChanged }: PlanAttaqueTab
           </div>
         )}
       </div>
+
+      {etapeAEditer && (
+        <EtapeModal
+          etape={etapeAEditer}
+          onClose={() => setEtapeAEditerId(null)}
+          onSaved={() => {
+            setEtapeAEditerId(null);
+            onDataChanged();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -143,20 +164,28 @@ function EtapeRow({
   etape,
   depth,
   onToggle,
+  onOuvrir,
   justCompleted,
 }: {
   etape: EtapeNode;
   depth: number;
   onToggle: (e: PlanEtape) => void;
+  onOuvrir: (id: string) => void;
   justCompleted: string | null;
 }) {
   const fait = etape.statut === "fait";
   return (
     <>
-      <div className={`etape-row${depth > 0 ? " etape-row--enfant" : ""}${fait ? " etape-row--fait" : ""}`}>
+      <div
+        className={`etape-row${depth > 0 ? " etape-row--enfant" : ""}${fait ? " etape-row--fait" : ""}`}
+        onClick={() => onOuvrir(etape.id)}
+      >
         <button
           className={`etape-row__check${justCompleted === etape.id ? " etape-row__check--pop" : ""}`}
-          onClick={() => onToggle(etape)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle(etape);
+          }}
           aria-label={fait ? "Marquer à faire" : "Marquer fait"}
         >
           {fait ? "✓" : ""}
@@ -168,7 +197,14 @@ function EtapeRow({
         <span className="etape-row__date">{etape.date_cible ? formatDateShort(etape.date_cible) : "—"}</span>
       </div>
       {etape.enfants.map((enfant) => (
-        <EtapeRow key={enfant.id} etape={enfant} depth={depth + 1} onToggle={onToggle} justCompleted={justCompleted} />
+        <EtapeRow
+          key={enfant.id}
+          etape={enfant}
+          depth={depth + 1}
+          onToggle={onToggle}
+          onOuvrir={onOuvrir}
+          justCompleted={justCompleted}
+        />
       ))}
     </>
   );

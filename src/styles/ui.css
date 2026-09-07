@@ -13,6 +13,11 @@
 .btn:active {
   transform: translateY(1px);
 }
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
 
 .btn--ghost {
   background: transparent;

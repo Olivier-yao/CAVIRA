@@ -3,7 +3,7 @@ import "./Parametres.css";
 import type { AppData } from "../types";
 import { THEMES, applyTheme, getStoredTheme, type ThemeId } from "../lib/theme";
 import { DEVISES, getStoredDevise, setStoredDevise, type DeviseCode } from "../lib/devise";
-import { addCategorie } from "../data/db";
+import { addCategorie, modifierCategorie, supprimerCategorie } from "../data/db";
 import { exporterDonnees, getDbPath, getDbSizeLabel, getDernierExport, isTauriRuntime } from "../data/fichiers";
 import { formatDateMedium } from "../lib/format";
 
@@ -20,6 +20,10 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [showAddCategorie, setShowAddCategorie] = useState(false);
   const [nomCategorie, setNomCategorie] = useState("");
   const [couleurCategorie, setCouleurCategorie] = useState(COULEURS_SUGGEREES[0]);
+  const [categorieEnEditionId, setCategorieEnEditionId] = useState<string | null>(null);
+  const [nomEdition, setNomEdition] = useState("");
+  const [couleurEdition, setCouleurEdition] = useState("");
+  const [confirmSuppressionCategorieId, setConfirmSuppressionCategorieId] = useState<string | null>(null);
 
   const [emplacement, setEmplacement] = useState("Aperçu navigateur — indisponible");
   const [taille, setTaille] = useState("—");
@@ -48,6 +52,31 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
     await addCategorie(nom, couleurCategorie);
     setNomCategorie("");
     setShowAddCategorie(false);
+    onDataChanged();
+  }
+
+  function handleOuvrirEditionCategorie(id: string, label: string, color: string) {
+    setCategorieEnEditionId(id);
+    setNomEdition(label);
+    setCouleurEdition(color);
+    setConfirmSuppressionCategorieId(null);
+  }
+
+  async function handleEnregistrerCategorie() {
+    if (!categorieEnEditionId || !nomEdition.trim()) return;
+    await modifierCategorie(categorieEnEditionId, nomEdition.trim(), couleurEdition);
+    setCategorieEnEditionId(null);
+    onDataChanged();
+  }
+
+  async function handleSupprimerCategorie(id: string) {
+    if (confirmSuppressionCategorieId !== id) {
+      setConfirmSuppressionCategorieId(id);
+      return;
+    }
+    await supprimerCategorie(id);
+    setCategorieEnEditionId(null);
+    setConfirmSuppressionCategorieId(null);
     onDataChanged();
   }
 
@@ -133,15 +162,55 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
         <div className="categorie-liste">
           {data.categories.map((cat) => {
             const n = data.projets.filter((p) => p.categorie_id === cat.id).length;
+            if (categorieEnEditionId === cat.id) {
+              return (
+                <div key={cat.id} className="categorie-row categorie-row--edition">
+                  <input
+                    className="categorie-row__nom-input"
+                    value={nomEdition}
+                    onChange={(e) => setNomEdition(e.target.value)}
+                    autoFocus
+                  />
+                  <div className="categorie-add-form__couleurs">
+                    {COULEURS_SUGGEREES.map((c) => (
+                      <button
+                        key={c}
+                        className={`categorie-add-form__couleur${couleurEdition === c ? " categorie-add-form__couleur--active" : ""}`}
+                        style={{ background: c }}
+                        onClick={() => setCouleurEdition(c)}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    className="btn btn--danger categorie-row__supprimer"
+                    onClick={() => handleSupprimerCategorie(cat.id)}
+                    disabled={n > 0}
+                    title={n > 0 ? "Retire d'abord les projets de cette catégorie" : undefined}
+                  >
+                    {confirmSuppressionCategorieId === cat.id ? "Confirmer" : "Supprimer"}
+                  </button>
+                  <button className="btn btn--ghost" onClick={() => setCategorieEnEditionId(null)}>
+                    Annuler
+                  </button>
+                  <button className="btn btn--accent" onClick={handleEnregistrerCategorie}>
+                    Enregistrer
+                  </button>
+                </div>
+              );
+            }
             return (
-              <div key={cat.id} className="categorie-row">
+              <button
+                key={cat.id}
+                className="categorie-row"
+                onClick={() => handleOuvrirEditionCategorie(cat.id, cat.label, cat.color)}
+              >
                 <span className="categorie-row__couleur" style={{ background: cat.color }} />
                 <span className="categorie-row__nom">{cat.label}</span>
                 <span className="categorie-row__count mono">
                   {n} projet{n > 1 ? "s" : ""}
                 </span>
                 <span className="categorie-row__hex mono">{cat.color.toUpperCase()}</span>
-              </div>
+              </button>
             );
           })}
         </div>

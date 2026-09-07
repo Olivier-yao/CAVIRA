@@ -19,11 +19,20 @@ import {
   mockData,
   mockAddCategorie,
   mockAddEtape,
+  mockAddObjectif,
   mockAddIdee,
   mockAddJournalEntry,
   mockAddNote,
   mockCreerProjet,
+  mockModifierCategorie,
+  mockModifierEtape,
+  mockModifierObjectif,
+  mockModifierProjet,
   mockPromouvoirIdee,
+  mockSupprimerCategorie,
+  mockSupprimerEtape,
+  mockSupprimerObjectif,
+  mockSupprimerProjet,
   mockToggleEtape,
 } from "./mock";
 
@@ -171,6 +180,94 @@ export async function creerProjet(input: NewProjetInput): Promise<string> {
   return id;
 }
 
+export async function modifierProjet(id: string, input: NewProjetInput): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockModifierProjet(id, input);
+    return;
+  }
+  const db = await getDb();
+  await db.execute(
+    "UPDATE projets SET titre = $1, categorie_id = $2, statut = $3, description = $4, objectif_final = $5, updated_at = datetime('now') WHERE id = $6",
+    [input.titre, input.categorieId, input.statut, input.description, input.objectifFinal, id],
+  );
+  await db.execute("DELETE FROM projet_objectifs WHERE projet_id = $1", [id]);
+  for (const objectifId of input.objectifIds) {
+    await db.execute("INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES ($1, $2)", [id, objectifId]);
+  }
+}
+
+export async function supprimerProjet(id: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockSupprimerProjet(id);
+    return;
+  }
+  const db = await getDb();
+  // Suppression explicite des tables dépendantes plutôt que de compter sur
+  // ON DELETE CASCADE : plus sûr, indépendant du réglage PRAGMA foreign_keys.
+  await db.execute("DELETE FROM plan_etapes WHERE projet_id = $1", [id]);
+  await db.execute("DELETE FROM journal_entries WHERE projet_id = $1", [id]);
+  await db.execute("DELETE FROM notes WHERE projet_id = $1", [id]);
+  await db.execute("DELETE FROM calendrier_entries WHERE projet_id = $1", [id]);
+  await db.execute("DELETE FROM projet_objectifs WHERE projet_id = $1", [id]);
+  await db.execute("DELETE FROM projets WHERE id = $1", [id]);
+}
+
+export async function modifierEtape(
+  etapeId: string,
+  input: { titre: string; statut: StatutEtape; priorite: PlanEtape["priorite"]; dateCible: string | null; note: string | null },
+): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockModifierEtape(etapeId, input);
+    return;
+  }
+  const db = await getDb();
+  await db.execute(
+    "UPDATE plan_etapes SET titre = $1, statut = $2, priorite = $3, date_cible = $4, note = $5 WHERE id = $6",
+    [input.titre, input.statut, input.priorite, input.dateCible, input.note, etapeId],
+  );
+}
+
+export async function supprimerEtape(etapeId: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockSupprimerEtape(etapeId);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("DELETE FROM plan_etapes WHERE id = $1 OR parent_id = $1", [etapeId]);
+}
+
+export async function addObjectif(titre: string, description: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockAddObjectif(titre, description);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("INSERT INTO objectifs (id, titre, description) VALUES ($1, $2, $3)", [
+    uuid(),
+    titre,
+    description,
+  ]);
+}
+
+export async function modifierObjectif(id: string, titre: string, description: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockModifierObjectif(id, titre, description);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("UPDATE objectifs SET titre = $1, description = $2 WHERE id = $3", [titre, description, id]);
+}
+
+export async function supprimerObjectif(id: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockSupprimerObjectif(id);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("DELETE FROM projet_objectifs WHERE objectif_id = $1", [id]);
+  await db.execute("DELETE FROM objectifs WHERE id = $1", [id]);
+}
+
 export async function addCategorie(label: string, color: string): Promise<void> {
   if (!isTauriRuntime()) {
     mockAddCategorie(label, color);
@@ -184,6 +281,24 @@ export async function addCategorie(label: string, color: string): Promise<void> 
     color,
     n + 1,
   ]);
+}
+
+export async function modifierCategorie(id: string, label: string, color: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockModifierCategorie(id, label, color);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("UPDATE categories SET label = $1, color = $2 WHERE id = $3", [label, color, id]);
+}
+
+export async function supprimerCategorie(id: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockSupprimerCategorie(id);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("DELETE FROM categories WHERE id = $1", [id]);
 }
 
 export async function addNote(projetId: string, titre: string, contenu: string, tags: string): Promise<void> {

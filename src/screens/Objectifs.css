@@ -46,10 +46,30 @@
   min-width: 0;
 }
 
+.objectif-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .objectif-card__titre {
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 3px;
+}
+
+.objectif-card__modifier {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 13px;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.objectif-card__modifier:hover {
+  color: var(--text);
 }
 
 .objectif-card__sous {

@@ -1,27 +1,43 @@
 import { useState } from "react";
-import "./NouveauProjetModal.css";
-import type { AppData, StatutProjet } from "../types";
-import { creerProjet } from "../data/db";
+import "./modal.css";
+import type { AppData, Projet, StatutProjet } from "../types";
+import { creerProjet, modifierProjet, supprimerProjet } from "../data/db";
 
-interface NouveauProjetModalProps {
+interface ProjetModalProps {
   data: AppData;
+  projetExistant?: Projet;
+  objectifIdsExistants?: string[];
   onClose: () => void;
-  onCreated: (projetId: string) => void;
+  onSaved: (projetId: string) => void;
+  onDeleted?: () => void;
 }
 
 const STATUTS: { id: StatutProjet; label: string }[] = [
   { id: "idee", label: "Idée" },
   { id: "preparation", label: "En préparation" },
   { id: "en_cours", label: "En cours" },
+  { id: "pause", label: "Pause" },
+  { id: "termine", label: "Terminé" },
+  { id: "abandonne", label: "Abandonné" },
 ];
 
-export function NouveauProjetModal({ data, onClose, onCreated }: NouveauProjetModalProps) {
-  const [titre, setTitre] = useState("");
-  const [categorieId, setCategorieId] = useState(data.categories[0]?.id ?? "");
-  const [statut, setStatut] = useState<StatutProjet>("preparation");
-  const [description, setDescription] = useState("");
-  const [objectifFinal, setObjectifFinal] = useState("");
-  const [objectifIds, setObjectifIds] = useState<Set<string>>(new Set());
+export function ProjetModal({
+  data,
+  projetExistant,
+  objectifIdsExistants,
+  onClose,
+  onSaved,
+  onDeleted,
+}: ProjetModalProps) {
+  const modeEdition = !!projetExistant;
+  const [confirmSuppression, setConfirmSuppression] = useState(false);
+  const [suppressionEnCours, setSuppressionEnCours] = useState(false);
+  const [titre, setTitre] = useState(projetExistant?.titre ?? "");
+  const [categorieId, setCategorieId] = useState(projetExistant?.categorie_id ?? data.categories[0]?.id ?? "");
+  const [statut, setStatut] = useState<StatutProjet>(projetExistant?.statut ?? "preparation");
+  const [description, setDescription] = useState(projetExistant?.description ?? "");
+  const [objectifFinal, setObjectifFinal] = useState(projetExistant?.objectif_final ?? "");
+  const [objectifIds, setObjectifIds] = useState<Set<string>>(new Set(objectifIdsExistants ?? []));
   const [enCours, setEnCours] = useState(false);
 
   function toggleObjectif(id: string) {
@@ -33,22 +49,43 @@ export function NouveauProjetModal({ data, onClose, onCreated }: NouveauProjetMo
     });
   }
 
-  async function handleCreer() {
+  async function handleValider() {
     const t = titre.trim();
     if (!t || !categorieId) return;
     setEnCours(true);
     try {
-      const id = await creerProjet({
+      const input = {
         titre: t,
         categorieId,
         statut,
         description: description.trim(),
         objectifFinal: objectifFinal.trim(),
         objectifIds: [...objectifIds],
-      });
-      onCreated(id);
+      };
+      if (modeEdition && projetExistant) {
+        await modifierProjet(projetExistant.id, input);
+        onSaved(projetExistant.id);
+      } else {
+        const id = await creerProjet(input);
+        onSaved(id);
+      }
     } finally {
       setEnCours(false);
+    }
+  }
+
+  async function handleSupprimer() {
+    if (!projetExistant) return;
+    if (!confirmSuppression) {
+      setConfirmSuppression(true);
+      return;
+    }
+    setSuppressionEnCours(true);
+    try {
+      await supprimerProjet(projetExistant.id);
+      onDeleted?.();
+    } finally {
+      setSuppressionEnCours(false);
     }
   }
 
@@ -56,7 +93,7 @@ export function NouveauProjetModal({ data, onClose, onCreated }: NouveauProjetMo
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
         <div className="modal-panel__header">
-          <h2>Nouveau projet</h2>
+          <h2>{modeEdition ? "Modifier le projet" : "Nouveau projet"}</h2>
           <button className="modal-panel__close" onClick={onClose} aria-label="Fermer">
             ✕
           </button>
@@ -129,12 +166,19 @@ export function NouveauProjetModal({ data, onClose, onCreated }: NouveauProjetMo
         </div>
 
         <div className="modal-panel__footer">
-          <button className="btn btn--ghost" onClick={onClose}>
-            Annuler
-          </button>
-          <button className="btn btn--accent" onClick={handleCreer} disabled={!titre.trim() || enCours}>
-            {enCours ? "Création…" : "Créer le projet"}
-          </button>
+          {modeEdition && (
+            <button className="btn btn--danger" onClick={handleSupprimer} disabled={suppressionEnCours}>
+              {suppressionEnCours ? "Suppression…" : confirmSuppression ? "Confirmer la suppression" : "Supprimer"}
+            </button>
+          )}
+          <div className="modal-panel__footer-right">
+            <button className="btn btn--ghost" onClick={onClose}>
+              Annuler
+            </button>
+            <button className="btn btn--accent" onClick={handleValider} disabled={!titre.trim() || enCours}>
+              {enCours ? "Enregistrement…" : modeEdition ? "Enregistrer" : "Créer le projet"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

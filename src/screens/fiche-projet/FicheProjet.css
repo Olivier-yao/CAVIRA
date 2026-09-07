@@ -231,6 +231,7 @@
   gap: 10px;
   padding: 8px 10px;
   border-radius: var(--radius-sm);
+  cursor: pointer;
 }
 
 .etape-row:hover {

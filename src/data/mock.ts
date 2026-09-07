@@ -14,6 +14,12 @@ import type {
 } from "../types";
 import type { NewIdeeInput, NewJournalEntryInput, NewProjetInput } from "./db";
 
+function removeWhere<T>(arr: T[], pred: (item: T) => boolean): void {
+  for (let i = arr.length - 1; i >= 0; i--) {
+    if (pred(arr[i])) arr.splice(i, 1);
+  }
+}
+
 // Miroir des migrations src-tauri/migrations/*.sql, utilisé uniquement quand
 // l'app tourne hors runtime Tauri (aperçu navigateur pendant le développement).
 // En build réel, loadAppData() lit toujours SQLite — voir data/db.ts.
@@ -533,6 +539,78 @@ export function mockCreerProjet(id: string, input: NewProjetInput): void {
   for (const objectifId of input.objectifIds) {
     projetObjectifs.push({ projet_id: id, objectif_id: objectifId });
   }
+}
+
+export function mockModifierProjet(id: string, input: NewProjetInput): void {
+  const p = projets.find((x) => x.id === id);
+  if (p) {
+    p.titre = input.titre;
+    p.categorie_id = input.categorieId;
+    p.statut = input.statut;
+    p.description = input.description;
+    p.objectif_final = input.objectifFinal;
+    p.updated_at = new Date().toISOString();
+  }
+  removeWhere(projetObjectifs, (po) => po.projet_id === id);
+  for (const objectifId of input.objectifIds) {
+    projetObjectifs.push({ projet_id: id, objectif_id: objectifId });
+  }
+}
+
+export function mockSupprimerProjet(id: string): void {
+  removeWhere(etapes, (e) => e.projet_id === id);
+  removeWhere(journal, (j) => j.projet_id === id);
+  removeWhere(notes, (n) => n.projet_id === id);
+  removeWhere(calendrier, (c) => c.projet_id === id);
+  removeWhere(projetObjectifs, (po) => po.projet_id === id);
+  removeWhere(projets, (p) => p.id === id);
+}
+
+export function mockModifierEtape(
+  etapeId: string,
+  input: { titre: string; statut: StatutEtape; priorite: PlanEtape["priorite"]; dateCible: string | null; note: string | null },
+): void {
+  const e = etapes.find((x) => x.id === etapeId);
+  if (e) {
+    e.titre = input.titre;
+    e.statut = input.statut;
+    e.priorite = input.priorite;
+    e.date_cible = input.dateCible;
+    e.note = input.note;
+  }
+}
+
+export function mockSupprimerEtape(etapeId: string): void {
+  removeWhere(etapes, (e) => e.id === etapeId || e.parent_id === etapeId);
+}
+
+export function mockAddObjectif(titre: string, description: string): void {
+  objectifs.push({ id: uuidLib(), titre, description, created_at: new Date().toISOString() });
+}
+
+export function mockModifierObjectif(id: string, titre: string, description: string): void {
+  const o = objectifs.find((x) => x.id === id);
+  if (o) {
+    o.titre = titre;
+    o.description = description;
+  }
+}
+
+export function mockSupprimerObjectif(id: string): void {
+  removeWhere(projetObjectifs, (po) => po.objectif_id === id);
+  removeWhere(objectifs, (o) => o.id === id);
+}
+
+export function mockModifierCategorie(id: string, label: string, color: string): void {
+  const c = categories.find((x) => x.id === id);
+  if (c) {
+    c.label = label;
+    c.color = color;
+  }
+}
+
+export function mockSupprimerCategorie(id: string): void {
+  removeWhere(categories, (c) => c.id === id);
 }
 
 export function mockAddCategorie(label: string, color: string): void {

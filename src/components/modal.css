@@ -26,6 +26,10 @@
   animation: modal-pop-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+.modal-panel--small {
+  width: 380px;
+}
+
 @keyframes modal-pop-in {
   from {
     transform: scale(0.96) translateY(6px);
@@ -63,6 +67,13 @@
   flex-direction: column;
   gap: 14px;
   padding: 20px;
+}
+
+.modal-panel__body p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.6;
 }
 
 .modal-field {
@@ -116,13 +127,30 @@
 
 .modal-panel__footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 10px;
   padding: 16px 20px;
   border-top: 1px solid var(--border);
 }
 
+.modal-panel__footer-right {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
 .modal-panel__footer .btn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+.btn--danger {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.btn--danger:hover {
+  background: var(--danger-dim);
 }

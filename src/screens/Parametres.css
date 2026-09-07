@@ -209,6 +209,36 @@
   border: 1px solid var(--border);
   border-radius: 9px;
   background: var(--surface-3);
+  width: 100%;
+  text-align: left;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+.categorie-row:hover {
+  border-color: var(--border-hover);
+}
+
+.categorie-row--edition {
+  cursor: default;
+  flex-wrap: wrap;
+}
+
+.categorie-row__nom-input {
+  flex: 1;
+  min-width: 120px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+}
+
+.categorie-row__supprimer {
+  padding: 6px 12px;
+  font-size: 12px;
 }
 
 .categorie-row__couleur {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { Sidebar, type Screen } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
-import { NouveauProjetModal } from "./components/NouveauProjetModal";
+import { ProjetModal } from "./components/ProjetModal";
 import { Dashboard } from "./screens/Dashboard";
 import { Projets } from "./screens/Projets";
 import { Calendrier } from "./screens/Calendrier";
@@ -24,6 +24,7 @@ function App() {
   const [data, setData] = useState<AppData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [modalOuvert, setModalOuvert] = useState(false);
+  const [projetAEditerId, setProjetAEditerId] = useState<string | null>(null);
 
   const refreshData = useCallback(() => {
     return loadAppData()
@@ -64,14 +65,27 @@ function App() {
     setScreen("backlog");
   }
 
-  async function handleProjetCree(id: string) {
+  async function handleProjetEnregistre(id: string) {
     setModalOuvert(false);
+    setProjetAEditerId(null);
     await refreshData();
     setOpenProjetId(id);
   }
 
+  async function handleProjetSupprime() {
+    setProjetAEditerId(null);
+    setOpenProjetId(null);
+    setScreen("projets");
+    await refreshData();
+  }
+
   const aucunProjet = data ? data.projets.length === 0 : false;
   const montrerPremierLancement = !openProjetId && (screen === "premier-lancement" || (screen === "dashboard" && aucunProjet));
+
+  const projetAEditer = data && projetAEditerId ? data.projets.find((p) => p.id === projetAEditerId) : undefined;
+  const objectifIdsDuProjetAEditer = data && projetAEditerId
+    ? data.projetObjectifs.filter((po) => po.projet_id === projetAEditerId).map((po) => po.objectif_id)
+    : undefined;
 
   return (
     <div className="app-shell">
@@ -90,7 +104,9 @@ function App() {
           {data && !openProjetId && screen === "projets" && <Projets data={data} onOpenProjet={openProjet} />}
           {data && !openProjetId && screen === "calendrier" && <Calendrier data={data} onOpenProjet={openProjet} />}
           {data && !openProjetId && screen === "roadmap" && <Roadmap data={data} onOpenProjet={openProjet} />}
-          {data && !openProjetId && screen === "objectifs" && <Objectifs data={data} onOpenProjet={openProjet} />}
+          {data && !openProjetId && screen === "objectifs" && (
+            <Objectifs data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
+          )}
           {data && !openProjetId && screen === "backlog" && (
             <Backlog data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}
@@ -99,12 +115,28 @@ function App() {
             <Parametres data={data} onDataChanged={refreshData} />
           )}
           {data && openProjetId && (
-            <FicheProjet data={data} projetId={openProjetId} onBack={backToProjets} onDataChanged={refreshData} />
+            <FicheProjet
+              data={data}
+              projetId={openProjetId}
+              onBack={backToProjets}
+              onDataChanged={refreshData}
+              onModifier={() => setProjetAEditerId(openProjetId)}
+            />
           )}
         </div>
       </div>
       {modalOuvert && data && (
-        <NouveauProjetModal data={data} onClose={() => setModalOuvert(false)} onCreated={handleProjetCree} />
+        <ProjetModal data={data} onClose={() => setModalOuvert(false)} onSaved={handleProjetEnregistre} />
+      )}
+      {projetAEditer && data && (
+        <ProjetModal
+          data={data}
+          projetExistant={projetAEditer}
+          objectifIdsExistants={objectifIdsDuProjetAEditer}
+          onClose={() => setProjetAEditerId(null)}
+          onSaved={handleProjetEnregistre}
+          onDeleted={handleProjetSupprime}
+        />
       )}
     </div>
   );

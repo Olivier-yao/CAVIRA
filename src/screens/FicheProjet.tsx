@@ -17,9 +17,10 @@ interface FicheProjetProps {
   projetId: string;
   onBack: () => void;
   onDataChanged: () => void;
+  onModifier: () => void;
 }
 
-export function FicheProjet({ data, projetId, onBack, onDataChanged }: FicheProjetProps) {
+export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier }: FicheProjetProps) {
   const projet = data.projets.find((p) => p.id === projetId);
   const [activeTab, setActiveTab] = useState<TabId>("plan");
 
@@ -101,7 +102,7 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged }: FicheProj
         <div className="fiche-projet__header-side">
           <ProgressRing pct={progression} label="Global" />
           <div className="fiche-projet__header-actions">
-            <button className="btn btn--ghost" title="Bientôt disponible">
+            <button className="btn btn--ghost" onClick={onModifier}>
               Modifier
             </button>
             <button className="btn btn--ghost fiche-projet__more" title="Bientôt disponible">
