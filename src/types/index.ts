@@ -25,7 +25,6 @@ export interface Projet {
   statut: StatutProjet;
   description: string;
   objectif_final: string;
-  objectif_id: string | null;
   echeance_date: string | null;
   seuil_depenses: number | null;
   created_at: string;
@@ -65,6 +64,11 @@ export interface Note {
   created_at: string;
 }
 
+export interface ProjetObjectif {
+  projet_id: string;
+  objectif_id: string;
+}
+
 export interface CalendrierEntry {
   id: string;
   projet_id: string | null;
@@ -82,4 +86,5 @@ export interface AppData {
   journal: JournalEntry[];
   notes: Note[];
   calendrier: CalendrierEntry[];
+  projetObjectifs: ProjetObjectif[];
 }

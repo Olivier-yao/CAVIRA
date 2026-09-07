@@ -9,6 +9,7 @@ import type {
   Objectif,
   PlanEtape,
   Projet,
+  ProjetObjectif,
   StatutEtape,
   TypeJournal,
 } from "../types";
@@ -34,7 +35,7 @@ export async function loadAppData(): Promise<AppData> {
     return mockData;
   }
   const db = await getDb();
-  const [categories, objectifs, projets, etapes, journal, notes, calendrier] = await Promise.all([
+  const [categories, objectifs, projets, etapes, journal, notes, calendrier, projetObjectifs] = await Promise.all([
     db.select<Categorie[]>("SELECT * FROM categories ORDER BY sort_order"),
     db.select<Objectif[]>("SELECT * FROM objectifs ORDER BY created_at"),
     db.select<Projet[]>("SELECT * FROM projets ORDER BY created_at"),
@@ -42,8 +43,9 @@ export async function loadAppData(): Promise<AppData> {
     db.select<JournalEntry[]>("SELECT * FROM journal_entries ORDER BY created_at DESC"),
     db.select<Note[]>("SELECT * FROM notes ORDER BY created_at DESC"),
     db.select<CalendrierEntry[]>("SELECT * FROM calendrier_entries ORDER BY date"),
+    db.select<ProjetObjectif[]>("SELECT * FROM projet_objectifs"),
   ]);
-  return { categories, objectifs, projets, etapes, journal, notes, calendrier };
+  return { categories, objectifs, projets, etapes, journal, notes, calendrier, projetObjectifs };
 }
 
 export async function toggleEtapeStatut(etapeId: string, nextStatut: StatutEtape): Promise<void> {

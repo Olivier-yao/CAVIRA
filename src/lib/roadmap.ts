@@ -8,7 +8,7 @@ export interface Trimestre {
 
 export interface RoadmapRow {
   projet: Projet;
-  objectifTitre: string | null;
+  objectifTitre: string;
   categorieColor: string;
   progression: number;
   startIndex: number;
@@ -42,6 +42,12 @@ export function buildRoadmapRows(data: AppData, depuis: Date, nbTrimestres = 6):
   const baseTrimestre = trimestreDeDate(depuis);
   const categorieColor = new Map(data.categories.map((c) => [c.id, c.color]));
   const objectifById = new Map(data.objectifs.map((o) => [o.id, o]));
+  const objectifIdsByProjet = new Map<string, string[]>();
+  for (const po of data.projetObjectifs) {
+    const list = objectifIdsByProjet.get(po.projet_id) ?? [];
+    list.push(po.objectif_id);
+    objectifIdsByProjet.set(po.projet_id, list);
+  }
 
   const rows: RoadmapRow[] = data.projets
     .filter((p) => p.statut !== "abandonne")
@@ -60,9 +66,13 @@ export function buildRoadmapRows(data: AppData, depuis: Date, nbTrimestres = 6):
       const continu = fin === null;
       const endIndex = continu ? nbTrimestres - 1 : Math.min(nbTrimestres - 1, Math.max(startIndex, indexDepuis(baseTrimestre, trimestreDeDate(fin))));
 
+      const objectifTitres = (objectifIdsByProjet.get(projet.id) ?? [])
+        .map((id) => objectifById.get(id)?.titre)
+        .filter((t): t is string => !!t);
+
       return {
         projet,
-        objectifTitre: projet.objectif_id ? (objectifById.get(projet.objectif_id)?.titre ?? null) : null,
+        objectifTitre: objectifTitres.join(" · "),
         categorieColor: categorieColor.get(projet.categorie_id) ?? "var(--text-3)",
         progression: projetProgressionPct(data.etapes, projet.id),
         startIndex,

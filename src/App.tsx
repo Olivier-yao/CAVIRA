@@ -6,6 +6,7 @@ import { Dashboard } from "./screens/Dashboard";
 import { Projets } from "./screens/Projets";
 import { Calendrier } from "./screens/Calendrier";
 import { Roadmap } from "./screens/Roadmap";
+import { Objectifs } from "./screens/Objectifs";
 import { FicheProjet } from "./screens/FicheProjet";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
@@ -66,6 +67,7 @@ function App() {
           {data && !openProjetId && screen === "projets" && <Projets data={data} onOpenProjet={openProjet} />}
           {data && !openProjetId && screen === "calendrier" && <Calendrier data={data} onOpenProjet={openProjet} />}
           {data && !openProjetId && screen === "roadmap" && <Roadmap data={data} onOpenProjet={openProjet} />}
+          {data && !openProjetId && screen === "objectifs" && <Objectifs data={data} onOpenProjet={openProjet} />}
           {data && openProjetId && (
             <FicheProjet data={data} projetId={openProjetId} onBack={backToProjets} onDataChanged={refreshData} />
           )}

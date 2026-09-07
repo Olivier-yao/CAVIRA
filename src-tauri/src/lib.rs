@@ -36,6 +36,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/003_fiche_projet.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 4,
+                description: "objectifs_multiples",
+                sql: include_str!("../migrations/004_objectifs_multiples.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

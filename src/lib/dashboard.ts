@@ -161,8 +161,17 @@ export function computeDashboardStats(data: AppData): DashboardStats {
     };
   }
 
+  const projetIdsByObjectif = new Map<string, string[]>();
+  for (const po of data.projetObjectifs) {
+    const list = projetIdsByObjectif.get(po.objectif_id) ?? [];
+    list.push(po.projet_id);
+    projetIdsByObjectif.set(po.objectif_id, list);
+  }
+
   const progressionParObjectif: ObjectifProgress[] = data.objectifs.map((o) => {
-    const lies = projets.filter((p) => p.objectif_id === o.id);
+    const lies = (projetIdsByObjectif.get(o.id) ?? [])
+      .map((id) => projets.find((p) => p.id === id))
+      .filter((p): p is Projet => !!p);
     const progression = lies.length
       ? Math.round(lies.reduce((s, p) => s + progressionProjet(p.id, etapes), 0) / lies.length)
       : 0;

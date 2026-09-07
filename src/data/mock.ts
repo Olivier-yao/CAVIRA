@@ -8,6 +8,7 @@ import type {
   Objectif,
   PlanEtape,
   Projet,
+  ProjetObjectif,
   StatutEtape,
 } from "../types";
 import type { NewJournalEntryInput } from "./db";
@@ -41,6 +42,27 @@ const objectifs: Objectif[] = [
   { id: "obj-boite", titre: "Développer ma propre boîte", description: "", created_at: iso(60) },
   { id: "obj-independant", titre: "Être indépendant grâce à mes activités", description: "", created_at: iso(60) },
   { id: "obj-tiktok", titre: "Être connu sur TikTok", description: "", created_at: iso(60) },
+  {
+    id: "obj-routine",
+    titre: "Avoir une routine bien tracée",
+    description: "Tenir un rythme quotidien stable et mesurable.",
+    created_at: iso(60),
+  },
+];
+
+const projetObjectifs: ProjetObjectif[] = [
+  { projet_id: "proj-lacata", objectif_id: "obj-vivre" },
+  { projet_id: "proj-vertax", objectif_id: "obj-vivre" },
+  { projet_id: "proj-discord", objectif_id: "obj-vivre" },
+  { projet_id: "proj-tourneyci", objectif_id: "obj-vivre" },
+  { projet_id: "proj-tourneyci", objectif_id: "obj-boite" },
+  { projet_id: "proj-tourneyci", objectif_id: "obj-independant" },
+  { projet_id: "proj-boite", objectif_id: "obj-boite" },
+  { projet_id: "proj-subvention", objectif_id: "obj-boite" },
+  { projet_id: "proj-progression", objectif_id: "obj-independant" },
+  { projet_id: "proj-tiktok", objectif_id: "obj-tiktok" },
+  { projet_id: "proj-vitrine", objectif_id: "obj-tiktok" },
+  { projet_id: "proj-routine", objectif_id: "obj-routine" },
 ];
 
 function mkProjet(
@@ -50,7 +72,6 @@ function mkProjet(
   statut: Projet["statut"],
   description: string,
   objectif_final: string,
-  objectif_id: string,
   echeance_date: string | null,
   seuil_depenses: number | null = null,
 ): Projet {
@@ -61,7 +82,6 @@ function mkProjet(
     statut,
     description,
     objectif_final,
-    objectif_id,
     echeance_date,
     seuil_depenses,
     created_at: iso(30),
@@ -77,7 +97,6 @@ const projets: Projet[] = [
     "en_cours",
     "Plateforme de gestion de tournois gaming : brackets automatiques, saisie des scores, export des résultats pour les organisateurs.",
     "Sortir une v1 utilisable en tournoi réel.",
-    "obj-boite",
     isoInDays(6),
     250,
   ),
@@ -88,7 +107,6 @@ const projets: Projet[] = [
     "en_cours",
     "Jeu de soirée façon télé-prompteur, une manette pour tout le salon.",
     "Faire tester le prototype à 20 groupes différents.",
-    "obj-vivre",
     null,
   ),
   mkProjet(
@@ -98,7 +116,6 @@ const projets: Projet[] = [
     "en_cours",
     "Suivi d'apprentissage de la programmation, par compétence et par preuve.",
     "Couvrir tous les domaines du programme perso.",
-    "obj-vivre",
     null,
   ),
   mkProjet(
@@ -108,7 +125,6 @@ const projets: Projet[] = [
     "en_cours",
     "Statut, comptabilité, démarches de création d'entreprise.",
     "Avoir une structure juridique active.",
-    "obj-boite",
     null,
     400,
   ),
@@ -119,7 +135,6 @@ const projets: Projet[] = [
     "pause",
     "Prototype de jeu vertical, moteur en cours de test.",
     "Valider si le concept mérite d'être poussé.",
-    "obj-vivre",
     null,
   ),
   mkProjet(
@@ -129,7 +144,6 @@ const projets: Projet[] = [
     "en_cours",
     "Format court sur mes projets en cours, plusieurs publications par semaine.",
     "Construire une audience régulière.",
-    "obj-tiktok",
     null,
   ),
   mkProjet(
@@ -139,7 +153,6 @@ const projets: Projet[] = [
     "en_cours",
     "Blocs de travail fixes, sport, sommeil, revue du jour.",
     "Tenir un rythme stable sur la durée.",
-    "obj-independant",
     null,
   ),
   mkProjet(
@@ -149,7 +162,6 @@ const projets: Projet[] = [
     "en_cours",
     "Portfolio de mes projets et prestations.",
     "Avoir une vitrine présentable à partager.",
-    "obj-boite",
     null,
   ),
   mkProjet(
@@ -159,7 +171,6 @@ const projets: Projet[] = [
     "en_cours",
     "Discord des testeurs de mes projets, modération et annonces.",
     "Avoir un noyau actif de retours réguliers.",
-    "obj-vivre",
     null,
   ),
   mkProjet(
@@ -169,7 +180,6 @@ const projets: Projet[] = [
     "en_cours",
     "Aide à la création d'entreprise : pièces à rassembler, dépôt avant fin octobre.",
     "Déposer un dossier complet dans les temps.",
-    "obj-boite",
     isoInDays(45),
   ),
 ];
@@ -356,7 +366,16 @@ const calendrier: CalendrierEntry[] = [
   { id: "cal-bo-1", projet_id: "proj-boite", titre: "RDV banque", date: isoInDays(8), type: "session", created_at: iso(0) },
 ];
 
-export const mockData: AppData = { categories, objectifs, projets, etapes, journal, notes, calendrier };
+export const mockData: AppData = {
+  categories,
+  objectifs,
+  projets,
+  etapes,
+  journal,
+  notes,
+  calendrier,
+  projetObjectifs,
+};
 
 export function mockToggleEtape(etapeId: string, statut: StatutEtape): void {
   const e = etapes.find((x) => x.id === etapeId);

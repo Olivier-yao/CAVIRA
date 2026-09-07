@@ -50,7 +50,10 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged }: FicheProj
   }
 
   const categorie = data.categories.find((c) => c.id === projet.categorie_id);
-  const objectif = data.objectifs.find((o) => o.id === projet.objectif_id);
+  const objectifIds = new Set(
+    data.projetObjectifs.filter((po) => po.projet_id === projet.id).map((po) => po.objectif_id),
+  );
+  const objectifsTitres = data.objectifs.filter((o) => objectifIds.has(o.id)).map((o) => o.titre);
   const progression = projetProgressionPct(data.etapes, projet.id);
   const nbEtapes = data.etapes.filter((e) => e.projet_id === projet.id).length;
   const nbJournal = data.journal.filter((j) => j.projet_id === projet.id).length;
@@ -83,7 +86,10 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged }: FicheProj
           <h1>{projet.titre}</h1>
           <p className="fiche-projet__description">{projet.description}</p>
           <div className="fiche-projet__meta">
-            <MetaItem label="Objectif rattaché" value={objectif?.titre ?? "—"} />
+            <MetaItem
+              label={objectifsTitres.length > 1 ? "Objectifs rattachés" : "Objectif rattaché"}
+              value={objectifsTitres.length ? objectifsTitres.join(" · ") : "—"}
+            />
             <MetaItem label="Créé le" value={formatDateMedium(projet.created_at)} />
             <MetaItem label="Mis à jour" value={formatRelativeLong(projet.updated_at)} />
             <MetaItem
