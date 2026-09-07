@@ -7,6 +7,7 @@ import { Projets } from "./screens/Projets";
 import { Calendrier } from "./screens/Calendrier";
 import { Roadmap } from "./screens/Roadmap";
 import { Objectifs } from "./screens/Objectifs";
+import { Backlog } from "./screens/Backlog";
 import { FicheProjet } from "./screens/FicheProjet";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
@@ -36,7 +37,7 @@ function App() {
     projets: data?.projets.filter((p) => p.statut !== "termine" && p.statut !== "abandonne").length ?? 0,
     calendrier: data ? buildCalendarEvents(data).length : 0,
     objectifs: data?.objectifs.length ?? 0,
-    backlog: 0,
+    backlog: data?.idees.length ?? 0,
   };
 
   function openProjet(id: string) {
@@ -68,6 +69,9 @@ function App() {
           {data && !openProjetId && screen === "calendrier" && <Calendrier data={data} onOpenProjet={openProjet} />}
           {data && !openProjetId && screen === "roadmap" && <Roadmap data={data} onOpenProjet={openProjet} />}
           {data && !openProjetId && screen === "objectifs" && <Objectifs data={data} onOpenProjet={openProjet} />}
+          {data && !openProjetId && screen === "backlog" && (
+            <Backlog data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
+          )}
           {data && openProjetId && (
             <FicheProjet data={data} projetId={openProjetId} onBack={backToProjets} onDataChanged={refreshData} />
           )}

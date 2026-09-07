@@ -3,6 +3,7 @@ import type {
   AppData,
   CalendrierEntry,
   Categorie,
+  Idee,
   JournalEntry,
   Note,
   Objectif,
@@ -11,7 +12,7 @@ import type {
   ProjetObjectif,
   StatutEtape,
 } from "../types";
-import type { NewJournalEntryInput } from "./db";
+import type { NewIdeeInput, NewJournalEntryInput } from "./db";
 
 // Miroir des migrations src-tauri/migrations/*.sql, utilisé uniquement quand
 // l'app tourne hors runtime Tauri (aperçu navigateur pendant le développement).
@@ -366,6 +367,92 @@ const calendrier: CalendrierEntry[] = [
   { id: "cal-bo-1", projet_id: "proj-boite", titre: "RDV banque", date: isoInDays(8), type: "session", created_at: iso(0) },
 ];
 
+function mkIdee(
+  id: string,
+  titre: string,
+  description: string,
+  categorie_id: string,
+  interet: number,
+  effort_estime: string,
+  objectif_id: string | null,
+  daysAgo: number,
+): Idee {
+  return { id, titre, description, categorie_id, interet, effort_estime, objectif_id, created_at: iso(daysAgo) };
+}
+
+const idees: Idee[] = [
+  mkIdee(
+    "idee-1",
+    "Mode spectateur pour TourneyCI",
+    "Page publique en lecture seule d'un bracket en cours, partageable par lien. Pourrait servir d'entrée gratuite vers l'offre payante organisateur.",
+    "cat-dev",
+    4,
+    "2 semaines",
+    "obj-boite",
+    10,
+  ),
+  mkIdee(
+    "idee-2",
+    "Version mobile de La Cata",
+    "Un téléphone par joueur, l'écran principal reste le prompteur.",
+    "cat-jeu",
+    4,
+    "1 mois",
+    "obj-vivre",
+    16,
+  ),
+  mkIdee(
+    "idee-3",
+    "Formation « premier projet »",
+    "Vendre un parcours court basé sur l'App de progression.",
+    "cat-reel",
+    3,
+    "3 semaines",
+    "obj-independant",
+    23,
+  ),
+  mkIdee(
+    "idee-4",
+    "Générateur de miniatures TikTok",
+    "Petit outil interne pour standardiser les vignettes.",
+    "cat-dev",
+    3,
+    "1 semaine",
+    "obj-tiktok",
+    27,
+  ),
+  mkIdee(
+    "idee-5",
+    "Jeu de cartes physique",
+    "Décliner La Cata en boîte imprimée, print-on-demand.",
+    "cat-jeu",
+    2,
+    "2 mois",
+    "obj-vivre",
+    34,
+  ),
+  mkIdee(
+    "idee-6",
+    "Coworking mensuel local",
+    "Réunir des indépendants du coin une fois par mois.",
+    "cat-reel",
+    2,
+    "Continu",
+    null,
+    40,
+  ),
+  mkIdee(
+    "idee-7",
+    "Newsletter de suivi",
+    "Résumé mensuel de mes projets, généré depuis le journal.",
+    "cat-autre",
+    1,
+    "1 semaine",
+    "obj-vivre",
+    51,
+  ),
+];
+
 export const mockData: AppData = {
   categories,
   objectifs,
@@ -375,6 +462,7 @@ export const mockData: AppData = {
   notes,
   calendrier,
   projetObjectifs,
+  idees,
 };
 
 export function mockToggleEtape(etapeId: string, statut: StatutEtape): void {
@@ -419,4 +507,37 @@ export function mockAddNote(projetId: string, contenu: string, tags: string): vo
     tags,
     created_at: new Date().toISOString(),
   });
+}
+
+export function mockAddIdee(input: NewIdeeInput): void {
+  idees.unshift({
+    id: uuidLib(),
+    titre: input.titre,
+    description: input.description,
+    categorie_id: input.categorieId,
+    interet: input.interet,
+    effort_estime: null,
+    objectif_id: null,
+    created_at: new Date().toISOString(),
+  });
+}
+
+export function mockPromouvoirIdee(idee: Idee, nouveauProjetId: string): void {
+  projets.push({
+    id: nouveauProjetId,
+    titre: idee.titre,
+    categorie_id: idee.categorie_id ?? "cat-autre",
+    statut: "preparation",
+    description: idee.description,
+    objectif_final: "",
+    echeance_date: null,
+    seuil_depenses: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+  if (idee.objectif_id) {
+    projetObjectifs.push({ projet_id: nouveauProjetId, objectif_id: idee.objectif_id });
+  }
+  const idx = idees.findIndex((i) => i.id === idee.id);
+  if (idx !== -1) idees.splice(idx, 1);
 }

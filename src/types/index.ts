@@ -64,6 +64,17 @@ export interface Note {
   created_at: string;
 }
 
+export interface Idee {
+  id: string;
+  titre: string;
+  description: string;
+  categorie_id: string | null;
+  interet: number;
+  effort_estime: string | null;
+  objectif_id: string | null;
+  created_at: string;
+}
+
 export interface ProjetObjectif {
   projet_id: string;
   objectif_id: string;
@@ -87,4 +98,5 @@ export interface AppData {
   notes: Note[];
   calendrier: CalendrierEntry[];
   projetObjectifs: ProjetObjectif[];
+  idees: Idee[];
 }

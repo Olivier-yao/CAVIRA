@@ -1,0 +1,213 @@
+.backlog-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1400px;
+}
+
+.backlog-screen__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.backlog-screen__header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.backlog-screen__subtitle {
+  margin: 4px 0 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+
+.backlog-screen__vide {
+  color: var(--text-2);
+  font-size: 12.5px;
+  padding: 16px 0;
+}
+
+/* ---------- quick add ---------- */
+
+.backlog-add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+}
+
+.backlog-add input,
+.backlog-add textarea,
+.backlog-add select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12.5px;
+}
+
+.backlog-add textarea {
+  resize: vertical;
+}
+
+.backlog-add__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backlog-add__interet {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ---------- layout ---------- */
+
+.backlog-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 14px;
+  align-items: start;
+}
+
+.backlog-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.backlog-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  text-align: left;
+  align-items: flex-start;
+}
+
+.backlog-item:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+}
+
+.backlog-item--active {
+  border-color: var(--accent-line);
+  background: var(--accent-dim);
+}
+
+.backlog-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.backlog-item__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.backlog-item__date {
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+.backlog-item__titre {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.backlog-item__description {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- interest bars ---------- */
+
+.interet-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.interet-bars__bar {
+  width: 4px;
+  border-radius: 2px;
+  background: var(--surface-3);
+}
+
+.interet-bars__bar--on {
+  background: var(--accent);
+}
+
+.interet-bars--interactif .interet-bars__bar {
+  cursor: pointer;
+}
+
+/* ---------- fiche idée ---------- */
+
+.backlog-fiche {
+  padding: 16px;
+  position: sticky;
+  top: 0;
+}
+
+.backlog-fiche__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+
+.backlog-fiche__titre {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.backlog-fiche__badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.backlog-fiche__interet-label {
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+.backlog-fiche__description {
+  font-size: 12.5px;
+  color: var(--text-2);
+  margin: 0 0 16px;
+}
+
+.backlog-fiche__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.backlog-fiche__promouvoir {
+  width: 100%;
+  justify-content: center;
+}

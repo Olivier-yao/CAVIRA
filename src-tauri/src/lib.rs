@@ -42,6 +42,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/004_objectifs_multiples.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 5,
+                description: "backlog_idees",
+                sql: include_str!("../migrations/005_backlog_idees.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }
