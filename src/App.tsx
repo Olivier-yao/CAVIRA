@@ -8,6 +8,7 @@ import { Calendrier } from "./screens/Calendrier";
 import { Roadmap } from "./screens/Roadmap";
 import { Objectifs } from "./screens/Objectifs";
 import { Backlog } from "./screens/Backlog";
+import { RechercheNotes } from "./screens/RechercheNotes";
 import { FicheProjet } from "./screens/FicheProjet";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
@@ -72,6 +73,7 @@ function App() {
           {data && !openProjetId && screen === "backlog" && (
             <Backlog data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}
+          {data && !openProjetId && screen === "recherche" && <RechercheNotes data={data} onOpenProjet={openProjet} />}
           {data && openProjetId && (
             <FicheProjet data={data} projetId={openProjetId} onBack={backToProjets} onDataChanged={refreshData} />
           )}

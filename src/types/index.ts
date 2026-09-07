@@ -59,6 +59,7 @@ export interface Note {
   id: string;
   projet_id: string;
   etape_id: string | null;
+  titre: string;
   contenu: string;
   tags: string;
   created_at: string;

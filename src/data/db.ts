@@ -142,15 +142,16 @@ export async function promouvoirIdee(idee: Idee): Promise<string> {
   return nouveauId;
 }
 
-export async function addNote(projetId: string, contenu: string, tags: string): Promise<void> {
+export async function addNote(projetId: string, titre: string, contenu: string, tags: string): Promise<void> {
   if (!isTauriRuntime()) {
-    mockAddNote(projetId, contenu, tags);
+    mockAddNote(projetId, titre, contenu, tags);
     return;
   }
   const db = await getDb();
-  await db.execute("INSERT INTO notes (id, projet_id, contenu, tags) VALUES ($1, $2, $3, $4)", [
+  await db.execute("INSERT INTO notes (id, projet_id, titre, contenu, tags) VALUES ($1, $2, $3, $4, $5)", [
     uuid(),
     projetId,
+    titre,
     contenu,
     tags,
   ]);

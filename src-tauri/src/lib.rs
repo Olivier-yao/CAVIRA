@@ -48,6 +48,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/005_backlog_idees.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 6,
+                description: "notes_titre",
+                sql: include_str!("../migrations/006_notes_titre.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

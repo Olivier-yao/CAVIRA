@@ -599,6 +599,7 @@
   padding: 12px;
 }
 
+.notes-tab__add > input,
 .notes-tab__add textarea {
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -640,6 +641,12 @@
   font-size: 10.5px;
   color: var(--text-3);
   margin-bottom: 6px;
+}
+
+.note-card__titre {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
 .note-card__contenu {

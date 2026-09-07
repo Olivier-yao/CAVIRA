@@ -322,41 +322,92 @@ const journal: JournalEntry[] = [
 
 journal.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
+function mkNote(
+  id: string,
+  projet_id: string,
+  titre: string,
+  contenu: string,
+  tags: string,
+  daysAgo: number,
+  etape_id: string | null = null,
+): Note {
+  return { id, projet_id, etape_id, titre, contenu, tags, created_at: iso(daysAgo) };
+}
+
 const notes: Note[] = [
-  {
-    id: "note-tci-1",
-    projet_id: "proj-tourneyci",
-    etape_id: "et-2-2",
-    contenu:
-      "Le cas des byes casse l'arbre quand le nombre d'inscrits n'est pas une puissance de deux. Solution retenue : matchs fantômes résolus automatiquement au premier tour.",
-    tags: "algo,brackets",
-    created_at: iso(2),
-  },
-  {
-    id: "note-tci-2",
-    projet_id: "proj-tourneyci",
-    etape_id: null,
-    contenu:
-      "Format d'export retenu pour les résultats : CSV pour les orgas techniques, image récap pour le partage TikTok/Discord.",
-    tags: "export,decision",
-    created_at: iso(6),
-  },
-  {
-    id: "note-tci-3",
-    projet_id: "proj-tourneyci",
-    etape_id: null,
-    contenu: "Idée à creuser : offre marque blanche pour un organisateur qui veut son propre nom de domaine.",
-    tags: "idee,business",
-    created_at: iso(9),
-  },
-  {
-    id: "note-lc-1",
-    projet_id: "proj-lacata",
-    etape_id: null,
-    contenu: "Le minuteur à 45s casse le rythme en fin de manche. Tester 30s pour la dernière manche seulement.",
-    tags: "playtest,equilibrage",
-    created_at: iso(2),
-  },
+  mkNote(
+    "note-tci-1",
+    "proj-tourneyci",
+    "Cas des byes",
+    "Le cas des byes casse l'arbre quand le nombre d'inscrits n'est pas une puissance de deux. Solution retenue : matchs fantômes résolus automatiquement au premier tour.",
+    "algo,brackets",
+    2,
+    "et-2-2",
+  ),
+  mkNote(
+    "note-tci-2",
+    "proj-tourneyci",
+    "Format d'export",
+    "Format d'export retenu pour les résultats : CSV pour les orgas techniques, image récap pour le partage TikTok/Discord.",
+    "export,decision",
+    6,
+  ),
+  mkNote(
+    "note-tci-3",
+    "proj-tourneyci",
+    "Idée marque blanche",
+    "Idée à creuser : offre marque blanche pour un organisateur qui veut son propre nom de domaine.",
+    "idee,business",
+    9,
+  ),
+  mkNote(
+    "note-tci-4",
+    "proj-tourneyci",
+    "Pricing organisateur",
+    "Gratuit jusqu'à 16 joueurs, 9 €/tournoi au-delà. À tester auprès de 5 organisateurs avant la bêta.",
+    "pricing",
+    5,
+  ),
+  mkNote(
+    "note-tci-5",
+    "proj-tourneyci",
+    "Concurrence",
+    "Les outils existants imposent un compte et un abonnement mensuel ; mon pricing à l'usage est plus lisible.",
+    "marché",
+    24,
+  ),
+  mkNote(
+    "note-lc-1",
+    "proj-lacata",
+    "Minuteur en fin de manche",
+    "Le minuteur à 45s casse le rythme en fin de manche. Tester 30s pour la dernière manche seulement.",
+    "playtest,equilibrage",
+    2,
+  ),
+  mkNote(
+    "note-lc-2",
+    "proj-lacata",
+    "Modèle économique soirée",
+    "Prix unique à 7 € plutôt qu'un pricing par pack de questions : moins de friction en soirée.",
+    "pricing",
+    13,
+  ),
+  mkNote(
+    "note-lc-3",
+    "proj-lacata",
+    "Packs additionnels",
+    "Un pack thématique payant tous les deux mois, si la base gratuite retient assez de groupes.",
+    "pricing",
+    19,
+  ),
+  mkNote(
+    "note-bo-1",
+    "proj-boite",
+    "Grille tarifaire prestations",
+    "Journée à 450 €, forfait audit à 900 €. Aligner le pricing produit sur ces repères de temps.",
+    "pricing",
+    8,
+  ),
 ];
 notes.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
@@ -498,11 +549,12 @@ export function mockAddJournalEntry(input: NewJournalEntryInput): void {
   });
 }
 
-export function mockAddNote(projetId: string, contenu: string, tags: string): void {
+export function mockAddNote(projetId: string, titre: string, contenu: string, tags: string): void {
   notes.unshift({
     id: uuidLib(),
     projet_id: projetId,
     etape_id: null,
+    titre,
     contenu,
     tags,
     created_at: new Date().toISOString(),

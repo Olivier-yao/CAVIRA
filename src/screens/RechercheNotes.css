@@ -1,0 +1,137 @@
+.recherche-notes-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 900px;
+}
+
+.recherche-notes-screen__header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.recherche-notes-screen__subtitle {
+  margin: 4px 0 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+
+.recherche-notes-screen__vide {
+  color: var(--text-2);
+  font-size: 13px;
+  padding: 20px 0;
+}
+
+.recherche-notes-toolbar {
+  display: flex;
+  gap: 10px;
+}
+
+.recherche-notes-toolbar__search {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+}
+
+.recherche-notes-toolbar select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12px;
+}
+
+.recherche-notes-groupes {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.recherche-notes-groupe {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recherche-notes-groupe__entete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.recherche-notes-groupe__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.recherche-notes-groupe__titre {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.recherche-notes-groupe__titre:hover {
+  color: var(--accent);
+}
+
+.recherche-notes-groupe__count {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.note-resultat {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+}
+
+.note-resultat:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+}
+
+.note-resultat__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.note-resultat__titre {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.note-resultat__date {
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+.note-resultat__tag {
+  margin-left: auto;
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.note-resultat__extrait {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
