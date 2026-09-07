@@ -10,25 +10,33 @@ interface ProjetsProps {
 }
 
 type Vue = "grille" | "liste";
-type FiltreStatut = "en_cours" | "pause" | "bloque" | "termine";
+type Onglet = "actifs" | "archives";
+type FiltreStatutActif = "en_cours" | "pause" | "bloque";
+type FiltreStatutArchive = "termine" | "abandonne";
+
+const EST_ARCHIVE = (statut: string) => statut === "termine" || statut === "abandonne";
 
 export function Projets({ data, onOpenProjet }: ProjetsProps) {
   const [recherche, setRecherche] = useState("");
   const [categorieId, setCategorieId] = useState<string | null>(null);
-  const [statuts, setStatuts] = useState<Set<FiltreStatut>>(new Set());
+  const [onglet, setOnglet] = useState<Onglet>("actifs");
+  const [statutsActifs, setStatutsActifs] = useState<Set<FiltreStatutActif>>(new Set());
+  const [statutsArchive, setStatutsArchive] = useState<Set<FiltreStatutArchive>>(new Set());
   const [vue, setVue] = useState<Vue>("grille");
 
   const cards = useMemo(() => buildProjetCards(data), [data]);
 
   const actifs = data.projets.filter((p) => p.statut === "en_cours").length;
   const pause = data.projets.filter((p) => p.statut === "pause").length;
-  const archives = data.projets.filter((p) => p.statut === "termine" || p.statut === "abandonne").length;
+  const archivesCount = data.projets.filter((p) => EST_ARCHIVE(p.statut)).length;
+
+  const cardsDeLOnglet = cards.filter((c) => (onglet === "archives" ? EST_ARCHIVE(c.projet.statut) : !EST_ARCHIVE(c.projet.statut)));
 
   const parCategorie = (catId: string | null) =>
-    catId === null ? data.projets.length : data.projets.filter((p) => p.categorie_id === catId).length;
+    catId === null ? cardsDeLOnglet.length : cardsDeLOnglet.filter((c) => c.projet.categorie_id === catId).length;
 
-  function toggleStatut(s: FiltreStatut) {
-    setStatuts((prev) => {
+  function toggleStatutActif(s: FiltreStatutActif) {
+    setStatutsActifs((prev) => {
       const next = new Set(prev);
       if (next.has(s)) next.delete(s);
       else next.add(s);
@@ -36,15 +44,29 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
     });
   }
 
-  const filtered = cards.filter((c) => {
+  function toggleStatutArchive(s: FiltreStatutArchive) {
+    setStatutsArchive((prev) => {
+      const next = new Set(prev);
+      if (next.has(s)) next.delete(s);
+      else next.add(s);
+      return next;
+    });
+  }
+
+  const filtered = cardsDeLOnglet.filter((c) => {
     if (recherche.trim() && !c.projet.titre.toLowerCase().includes(recherche.trim().toLowerCase())) return false;
     if (categorieId && c.projet.categorie_id !== categorieId) return false;
-    if (statuts.size > 0) {
+    if (onglet === "actifs" && statutsActifs.size > 0) {
       const matchStatut =
-        (statuts.has("en_cours") && c.projet.statut === "en_cours") ||
-        (statuts.has("pause") && c.projet.statut === "pause") ||
-        (statuts.has("termine") && (c.projet.statut === "termine" || c.projet.statut === "abandonne")) ||
-        (statuts.has("bloque") && c.aBlocage);
+        (statutsActifs.has("en_cours") && c.projet.statut === "en_cours") ||
+        (statutsActifs.has("pause") && c.projet.statut === "pause") ||
+        (statutsActifs.has("bloque") && c.aBlocage);
+      if (!matchStatut) return false;
+    }
+    if (onglet === "archives" && statutsArchive.size > 0) {
+      const matchStatut =
+        (statutsArchive.has("termine") && c.projet.statut === "termine") ||
+        (statutsArchive.has("abandonne") && c.projet.statut === "abandonne");
       if (!matchStatut) return false;
     }
     return true;
@@ -55,11 +77,20 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
       <header className="projets-screen__header">
         <h1>Projets</h1>
         <p className="projets-screen__subtitle">
-          {actifs} actif{actifs > 1 ? "s" : ""} · {pause} en pause · {archives} archivé{archives > 1 ? "s" : ""}
+          {actifs} actif{actifs > 1 ? "s" : ""} · {pause} en pause · {archivesCount} archivé
+          {archivesCount > 1 ? "s" : ""}
         </p>
       </header>
 
       <div className="projets-toolbar">
+        <div className="projets-toolbar__onglets">
+          <button className={onglet === "actifs" ? "active" : ""} onClick={() => setOnglet("actifs")}>
+            Actifs
+          </button>
+          <button className={onglet === "archives" ? "active" : ""} onClick={() => setOnglet("archives")}>
+            Archives {archivesCount > 0 && <span>{archivesCount}</span>}
+          </button>
+        </div>
         <input
           className="projets-toolbar__search"
           value={recherche}
@@ -93,26 +124,38 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
       </div>
 
       <div className="projets-filtres projets-filtres--statut">
-        {(
-          [
-            { id: "en_cours", label: "En cours" },
-            { id: "pause", label: "Pause" },
-            { id: "bloque", label: "Bloqué" },
-            { id: "termine", label: "Terminé" },
-          ] as { id: FiltreStatut; label: string }[]
-        ).map((s) => (
-          <button
-            key={s.id}
-            className={`filtre-chip${statuts.has(s.id) ? " filtre-chip--active" : ""}`}
-            onClick={() => toggleStatut(s.id)}
-          >
-            {s.label}
-          </button>
-        ))}
+        {onglet === "actifs"
+          ? ([
+              { id: "en_cours", label: "En cours" },
+              { id: "pause", label: "Pause" },
+              { id: "bloque", label: "Bloqué" },
+            ] as { id: FiltreStatutActif; label: string }[]).map((s) => (
+              <button
+                key={s.id}
+                className={`filtre-chip${statutsActifs.has(s.id) ? " filtre-chip--active" : ""}`}
+                onClick={() => toggleStatutActif(s.id)}
+              >
+                {s.label}
+              </button>
+            ))
+          : ([
+              { id: "termine", label: "Terminé" },
+              { id: "abandonne", label: "Abandonné" },
+            ] as { id: FiltreStatutArchive; label: string }[]).map((s) => (
+              <button
+                key={s.id}
+                className={`filtre-chip${statutsArchive.has(s.id) ? " filtre-chip--active" : ""}`}
+                onClick={() => toggleStatutArchive(s.id)}
+              >
+                {s.label}
+              </button>
+            ))}
       </div>
 
       {filtered.length === 0 ? (
-        <p className="projets-screen__vide">Aucun projet ne correspond à ces filtres.</p>
+        <p className="projets-screen__vide">
+          {onglet === "archives" ? "Aucun projet archivé pour l'instant." : "Aucun projet ne correspond à ces filtres."}
+        </p>
       ) : vue === "grille" ? (
         <div className="projets-grille">
           {filtered.map((c) => (

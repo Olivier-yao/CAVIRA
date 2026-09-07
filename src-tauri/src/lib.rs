@@ -60,6 +60,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/007_parametres.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 8,
+                description: "archives",
+                sql: include_str!("../migrations/008_archives.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

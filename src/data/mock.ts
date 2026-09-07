@@ -70,6 +70,7 @@ const projetObjectifs: ProjetObjectif[] = [
   { projet_id: "proj-tiktok", objectif_id: "obj-tiktok" },
   { projet_id: "proj-vitrine", objectif_id: "obj-tiktok" },
   { projet_id: "proj-routine", objectif_id: "obj-routine" },
+  { projet_id: "proj-vieux-site", objectif_id: "obj-boite" },
 ];
 
 function mkProjet(
@@ -189,6 +190,24 @@ const projets: Projet[] = [
     "Déposer un dossier complet dans les temps.",
     isoInDays(45),
   ),
+  mkProjet(
+    "proj-vieux-site",
+    "Ancien site vitrine v1",
+    "cat-dev",
+    "termine",
+    "Première version du portfolio, remplacée par la refonte actuelle.",
+    "Avoir une vitrine en ligne rapidement.",
+    null,
+  ),
+  mkProjet(
+    "proj-appli-meteo",
+    "Appli météo locale",
+    "cat-dev",
+    "abandonne",
+    "Idée testée puis abandonnée faute de valeur ajoutée claire face aux apps existantes.",
+    "Voir si une version simplifiée trouvait son public.",
+    null,
+  ),
 ];
 
 function mkEtape(
@@ -264,6 +283,11 @@ const etapes: PlanEtape[] = [
   mkEtape("et-sub-1", "proj-subvention", "Rassembler les pièces", "en_cours", "haute", 5, 1),
   mkEtape("et-sub-2", "proj-subvention", "Rédiger le dossier", "a_faire", "haute", 30, 2),
   mkEtape("et-sub-3", "proj-subvention", "Déposer avant fin octobre", "a_faire", "haute", 45, 3),
+
+  mkEtape("et-vs-1", "proj-vieux-site", "Maquette et intégration", "fait", "moyenne", null, 1),
+  mkEtape("et-vs-2", "proj-vieux-site", "Mise en ligne", "fait", "moyenne", null, 2),
+  mkEtape("et-am-1", "proj-appli-meteo", "Prototype avec une API météo", "fait", "basse", null, 1),
+  mkEtape("et-am-2", "proj-appli-meteo", "Étude de la concurrence", "fait", "basse", null, 2),
 ];
 
 function mkJournal(
