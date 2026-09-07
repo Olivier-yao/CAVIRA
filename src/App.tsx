@@ -4,9 +4,11 @@ import { Sidebar, type Screen } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
 import { Dashboard } from "./screens/Dashboard";
 import { Projets } from "./screens/Projets";
+import { Calendrier } from "./screens/Calendrier";
 import { FicheProjet } from "./screens/FicheProjet";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
+import { buildCalendarEvents } from "./lib/calendrier";
 import type { AppData } from "./types";
 
 function App() {
@@ -30,7 +32,7 @@ function App() {
 
   const counts = {
     projets: data?.projets.filter((p) => p.statut !== "termine" && p.statut !== "abandonne").length ?? 0,
-    calendrier: data?.etapes.filter((e) => e.date_cible).length ?? 0,
+    calendrier: data ? buildCalendarEvents(data).length : 0,
     objectifs: data?.objectifs.length ?? 0,
     backlog: 0,
   };
@@ -61,6 +63,7 @@ function App() {
             <Dashboard data={data} stats={stats} onOpenProjet={openProjet} />
           )}
           {data && !openProjetId && screen === "projets" && <Projets data={data} onOpenProjet={openProjet} />}
+          {data && !openProjetId && screen === "calendrier" && <Calendrier data={data} onOpenProjet={openProjet} />}
           {data && openProjetId && (
             <FicheProjet data={data} projetId={openProjetId} onBack={backToProjets} onDataChanged={refreshData} />
           )}

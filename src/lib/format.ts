@@ -86,6 +86,13 @@ export function formatDateFull(d: Date): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+const MOIS_ANNEE_FMT = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
+
+export function formatMoisAnnee(d: Date): string {
+  const s = MOIS_ANNEE_FMT.format(d);
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export function formatMonthShort(d: Date): string {
   return MONTH_FMT.format(d).replace(".", "").toUpperCase();
 }

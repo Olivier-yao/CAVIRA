@@ -1,0 +1,192 @@
+.calendrier-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 1400px;
+}
+
+.calendrier-screen__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.calendrier-screen__header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.calendrier-screen__subtitle {
+  margin: 4px 0 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+}
+
+.calendrier-screen__nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendrier-screen__nav .btn--ghost {
+  padding: 6px 11px;
+}
+
+.calendrier-screen__vue {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  margin-left: 8px;
+}
+
+.calendrier-screen__vue button {
+  background: none;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  color: var(--text-3);
+  font-family: var(--font);
+  font-size: 12px;
+}
+
+.calendrier-screen__vue button.active {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+/* ---------- legend ---------- */
+
+.calendrier-legende {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--text-2);
+}
+
+.calendrier-legende__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendrier-legende__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.calendrier-legende__item--retard .calendrier-legende__dot {
+  background: var(--danger);
+}
+
+/* ---------- grid ---------- */
+
+.calendrier-grille {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.calendrier-grille__entete {
+  background: var(--surface);
+  padding: 8px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.calendrier-grille--mois .jour-cell {
+  min-height: 96px;
+}
+
+.calendrier-grille--semaine {
+  grid-template-rows: 1fr;
+}
+
+.calendrier-grille--semaine .jour-cell {
+  min-height: 420px;
+}
+
+.jour-cell {
+  background: var(--surface);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jour-cell--hors-mois {
+  background: var(--bg);
+}
+
+.jour-cell--hors-mois .jour-cell__numero {
+  color: var(--text-3);
+}
+
+.jour-cell--aujourdhui {
+  background: var(--accent-dim);
+}
+
+.jour-cell__jour-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.jour-cell__numero {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.jour-cell--aujourdhui .jour-cell__numero {
+  color: var(--accent);
+}
+
+.jour-cell__evenements {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.event-chip {
+  text-align: left;
+  background: var(--surface-3);
+  border: none;
+  border-left: 2px solid var(--accent);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 10.5px;
+  font-family: var(--font);
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-chip:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.event-chip--retard {
+  color: var(--danger);
+}
+
+.jour-cell__reste {
+  font-size: 10px;
+  color: var(--text-3);
+  padding: 0 6px;
+}
