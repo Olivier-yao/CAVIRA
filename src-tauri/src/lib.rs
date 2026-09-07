@@ -30,6 +30,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/002_seed.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 3,
+                description: "fiche_projet",
+                sql: include_str!("../migrations/003_fiche_projet.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

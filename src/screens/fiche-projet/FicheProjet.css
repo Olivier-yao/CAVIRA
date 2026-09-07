@@ -1,0 +1,649 @@
+.fiche-projet {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1400px;
+}
+
+.fiche-projet__vide {
+  color: var(--text-2);
+  padding: 40px;
+}
+
+.fiche-projet__breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.fiche-projet__breadcrumb button {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-family: var(--font);
+  font-size: 12px;
+}
+.fiche-projet__breadcrumb button:hover {
+  color: var(--text-2);
+}
+
+/* ---------- header ---------- */
+
+.fiche-projet__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.fiche-projet__header-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.fiche-projet__badges {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.fiche-projet__header-main h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.fiche-projet__description {
+  margin: 0 0 16px;
+  color: var(--text-2);
+  font-size: 13px;
+  max-width: 60ch;
+}
+
+.fiche-projet__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.meta-item__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+.meta-item__value {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.fiche-projet__header-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.fiche-projet__header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.fiche-projet__more {
+  padding: 7px 10px;
+}
+
+/* ---------- tabs ---------- */
+
+.fiche-projet__tabs {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.fiche-projet__tab {
+  background: none;
+  border: none;
+  padding: 10px 4px;
+  margin-right: 20px;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fiche-projet__tab--active {
+  color: var(--text);
+}
+
+.fiche-projet__tab-count {
+  font-size: 10.5px;
+  color: var(--text-3);
+  background: var(--surface-3);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+
+.fiche-projet__tab-underline {
+  position: absolute;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+  transition: left 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fiche-projet__tab-content {
+  animation: tab-fade-in 0.12s ease both;
+}
+
+@keyframes tab-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- shared two-column tab layout ---------- */
+
+.plan-attaque,
+.calendrier-tab,
+.journal-tab {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.plan-attaque__main,
+.calendrier-tab__main,
+.journal-tab__main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.plan-attaque__side,
+.calendrier-tab__side,
+.journal-tab__side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.plan-attaque__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.plan-attaque__toolbar h2,
+.calendrier-tab__main h2,
+.journal-tab__side h3,
+.calendrier-tab__side h3,
+.repartition-card h3,
+.note-attachee-card h3,
+.synthese-card h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.plan-attaque__sub {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.plan-attaque__add-form {
+  display: flex;
+  gap: 6px;
+}
+
+.plan-attaque__add-form input {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12.5px;
+  min-width: 220px;
+}
+
+/* ---------- plan d'attaque list ---------- */
+
+.plan-attaque__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.etape-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.etape-row:hover {
+  background: var(--surface-hover);
+}
+
+.etape-row--enfant {
+  padding-left: 34px;
+}
+
+.etape-row--fait .etape-row__titre {
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+
+.etape-row__check {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid var(--border-hover);
+  background: transparent;
+  color: var(--accent-ink);
+  font-size: 11px;
+  line-height: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.etape-row--fait .etape-row__check {
+  background: var(--lime);
+  border-color: var(--lime);
+}
+
+.etape-row__check--pop {
+  animation: check-pop 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes check-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.etape-row__code {
+  font-size: 11px;
+  color: var(--text-3);
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.etape-row__titre {
+  flex: 1;
+  font-size: 13px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.etape-row__date {
+  font-size: 11px;
+  color: var(--text-3);
+  width: 60px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ---------- répartition / notes / bloqué side cards ---------- */
+
+.repartition-card,
+.note-attachee-card,
+.seuil-card,
+.synthese-card,
+.bloque-banner {
+  padding: 14px;
+}
+
+.repartition-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 12.5px;
+}
+
+.repartition-row__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.repartition-row__label {
+  flex: 1;
+  color: var(--text-2);
+}
+
+.repartition-row__value {
+  font-weight: 600;
+}
+
+.note-attachee-card p {
+  font-size: 12.5px;
+  color: var(--text-2);
+  margin: 0 0 8px;
+}
+
+.note-attachee-card__tags,
+.note-card__tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.note-attachee-card__tags span,
+.note-card__tags span {
+  font-size: 10.5px;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.bloque-banner {
+  border-left: 3px solid var(--danger);
+}
+
+.bloque-banner__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--danger);
+  margin-bottom: 6px;
+}
+
+.bloque-banner__texte {
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+
+/* ---------- calendrier tab ---------- */
+
+.calendrier-tab__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calendrier-tab__vide,
+.journal-tab__vide,
+.notes-tab__vide {
+  color: var(--text-2);
+  font-size: 12.5px;
+  padding: 12px 0;
+}
+
+.calendrier-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+}
+
+.calendrier-item:hover {
+  background: var(--surface-hover);
+}
+
+.calendrier-item__date {
+  width: 40px;
+  flex-shrink: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendrier-item__day {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.calendrier-item__month {
+  font-size: 9px;
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+}
+
+.calendrier-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.calendrier-item__titre {
+  font-size: 13px;
+}
+
+.calendrier-item__sous {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.calendrier-item__badge {
+  color: var(--danger);
+  background: var(--danger-dim);
+  flex-shrink: 0;
+}
+
+.calendrier-item__badge--jalon {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.calendrier-tab__charge-texte {
+  font-size: 12.5px;
+  color: var(--text-2);
+  margin: 0;
+}
+
+/* ---------- journal tab ---------- */
+
+.journal-tab__chips {
+  display: flex;
+  gap: 6px;
+}
+
+.journal-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12px;
+}
+
+.journal-chip--active {
+  background: var(--surface-3);
+}
+
+.journal-tab__add {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+}
+
+.journal-tab__add input {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12.5px;
+}
+
+.journal-tab__add-montant {
+  flex: 0 0 90px !important;
+}
+
+.journal-tab__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.journal-entry-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.journal-entry-row:hover {
+  background: var(--surface-hover);
+}
+
+.journal-entry-row__date {
+  font-size: 11px;
+  color: var(--text-3);
+  width: 40px;
+  flex-shrink: 0;
+}
+
+.journal-entry-row__type {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+.journal-entry-row__titre {
+  flex: 1;
+  font-size: 12.5px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.journal-entry-row__valeur {
+  font-size: 12.5px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.synthese-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 12.5px;
+}
+
+.synthese-row__label {
+  color: var(--text-2);
+}
+
+.synthese-row__value {
+  font-weight: 600;
+}
+
+.synthese-row__value--accent {
+  color: var(--lime);
+}
+
+.seuil-card {
+  border-left: 3px solid #e0c34a;
+}
+
+.seuil-card__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #e0c34a;
+  margin-bottom: 6px;
+}
+
+.seuil-card p {
+  font-size: 12.5px;
+  color: var(--text-2);
+  margin: 0;
+}
+
+/* ---------- notes tab ---------- */
+
+.notes-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 760px;
+}
+
+.notes-tab__add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.notes-tab__add textarea {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12.5px;
+  resize: vertical;
+}
+
+.notes-tab__add-footer {
+  display: flex;
+  gap: 8px;
+}
+
+.notes-tab__add-footer input {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 12px;
+}
+
+.notes-tab__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-card {
+  padding: 12px 14px;
+}
+
+.note-card__meta {
+  font-size: 10.5px;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+
+.note-card__contenu {
+  font-size: 12.5px;
+  color: var(--text);
+  margin: 0 0 8px;
+}

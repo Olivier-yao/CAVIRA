@@ -364,8 +364,18 @@
 }
 
 .activite-row {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
   border-left: 2px solid var(--border);
-  padding-left: 10px;
+  padding: 2px 0 2px 10px;
+  text-align: left;
+  border-radius: 0 4px 4px 0;
+}
+
+.activite-row:hover {
+  background: var(--surface-hover);
 }
 
 .activite-row__titre {

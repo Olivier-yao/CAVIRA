@@ -1,11 +1,12 @@
 import "./Dashboard.css";
-import type { DashboardData } from "../types";
+import type { AppData } from "../types";
 import type { DashboardStats } from "../lib/dashboard";
 import { formatDateFull, formatDateShort, formatMontant, formatMontantAbs, formatRelative } from "../lib/format";
 
 interface DashboardProps {
-  data: DashboardData;
+  data: AppData;
   stats: DashboardStats;
+  onOpenProjet: (projetId: string) => void;
 }
 
 const JOURNAL_COLORS: Record<string, string> = {
@@ -17,7 +18,7 @@ const JOURNAL_COLORS: Record<string, string> = {
 
 const OBJECTIF_PALETTE = ["var(--pink)", "var(--lime)", "var(--cyan)", "var(--accent)"];
 
-export function Dashboard({ data, stats }: DashboardProps) {
+export function Dashboard({ data, stats, onOpenProjet }: DashboardProps) {
   const projetsActifs = data.projets.filter((p) => p.statut === "en_cours").length;
 
   return (
@@ -78,9 +79,9 @@ export function Dashboard({ data, stats }: DashboardProps) {
       </section>
 
       <section className="row3">
-        <ProchaineEcheanceCard stats={stats} />
+        <ProchaineEcheanceCard stats={stats} onOpenProjet={onOpenProjet} />
         <ProgressionObjectifsCard stats={stats} />
-        <DerniereActiviteCard stats={stats} />
+        <DerniereActiviteCard stats={stats} onOpenProjet={onOpenProjet} />
       </section>
     </div>
   );
@@ -176,7 +177,7 @@ function BilanChart({ data }: { data: { label: string; depenses: number; economi
   );
 }
 
-function ProchaineEcheanceCard({ stats }: { stats: DashboardStats }) {
+function ProchaineEcheanceCard({ stats, onOpenProjet }: { stats: DashboardStats; onOpenProjet: (id: string) => void }) {
   const e = stats.prochaineEcheance;
   return (
     <div className={`card echeance-card${e && e.joursRestants <= 3 ? " echeance-card--urgent" : ""}`}>
@@ -195,7 +196,7 @@ function ProchaineEcheanceCard({ stats }: { stats: DashboardStats }) {
             </span>
             <span className="echeance-card__date">{formatDateShort(e.dateCible)}</span>
           </div>
-          <button className="btn btn--ghost echeance-card__btn" title="Bientôt disponible">
+          <button className="btn btn--ghost echeance-card__btn" onClick={() => onOpenProjet(e.projetId)}>
             Ouvrir l'étape
           </button>
         </>
@@ -230,7 +231,7 @@ function ProgressionObjectifsCard({ stats }: { stats: DashboardStats }) {
   );
 }
 
-function DerniereActiviteCard({ stats }: { stats: DashboardStats }) {
+function DerniereActiviteCard({ stats, onOpenProjet }: { stats: DashboardStats; onOpenProjet: (id: string) => void }) {
   return (
     <div className="card activite-card">
       <div className="activite-card__header">
@@ -239,13 +240,18 @@ function DerniereActiviteCard({ stats }: { stats: DashboardStats }) {
       </div>
       <div className="activite-card__list">
         {stats.derniereActivite.map((entry) => (
-          <div key={entry.id} className="activite-row" style={{ borderLeftColor: JOURNAL_COLORS[entry.type] }}>
+          <button
+            key={entry.id}
+            className="activite-row"
+            style={{ borderLeftColor: JOURNAL_COLORS[entry.type] }}
+            onClick={() => onOpenProjet(entry.projet_id)}
+          >
             <div className="activite-row__titre">{entry.titre}</div>
             <div className="activite-row__meta">
               <span>{entry.projetTitre}</span>
               <span>{formatRelative(entry.created_at)}</span>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>

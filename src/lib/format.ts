@@ -20,18 +20,52 @@ export function dateKey(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+function parseSqlDate(iso: string): Date {
+  return new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z"));
+}
+
 export function toLocalDateKey(iso: string): string {
-  return dateKey(new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z")));
+  return dateKey(parseSqlDate(iso));
 }
 
 export function formatRelative(iso: string): string {
-  const then = new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z"));
+  const then = parseSqlDate(iso);
   const diffMs = Date.now() - then.getTime();
   const diffH = Math.floor(diffMs / (1000 * 60 * 60));
   if (diffH < 1) return "à l'instant";
   if (diffH < 24) return `${diffH} h`;
   const diffJ = Math.floor(diffH / 24);
   return `${diffJ} j`;
+}
+
+export function formatRelativeLong(iso: string): string {
+  const then = parseSqlDate(iso);
+  const diffMs = Date.now() - then.getTime();
+  const diffH = Math.floor(diffMs / (1000 * 60 * 60));
+  if (diffH < 1) return "à l'instant";
+  if (diffH < 24) return `il y a ${diffH} h`;
+  const diffJ = Math.floor(diffH / 24);
+  if (diffJ === 1) return "hier";
+  return `il y a ${diffJ} j`;
+}
+
+export function formatDuree(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h} h`;
+  return `${h} h ${String(m).padStart(2, "0")}`;
+}
+
+const DATE_FMT_MEDIUM = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+const DATE_FMT_DDMM = new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit" });
+
+export function formatDateMedium(iso: string): string {
+  return DATE_FMT_MEDIUM.format(parseSqlDate(iso)).replace(".", "");
+}
+
+export function formatDateDDMM(iso: string): string {
+  return DATE_FMT_DDMM.format(parseSqlDate(iso));
 }
 
 const DATE_FMT = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" });
@@ -44,7 +78,7 @@ const DATE_FMT_FULL = new Intl.DateTimeFormat("fr-FR", {
 const MONTH_FMT = new Intl.DateTimeFormat("fr-FR", { month: "short" });
 
 export function formatDateShort(iso: string): string {
-  return DATE_FMT.format(new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z")));
+  return DATE_FMT.format(parseSqlDate(iso));
 }
 
 export function formatDateFull(d: Date): string {
@@ -57,7 +91,7 @@ export function formatMonthShort(d: Date): string {
 }
 
 export function daysUntil(iso: string): number {
-  const target = new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z"));
+  const target = parseSqlDate(iso);
   const today = new Date();
   const a = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
   const b = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());

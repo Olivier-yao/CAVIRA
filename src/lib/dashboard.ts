@@ -1,8 +1,9 @@
-import type { DashboardData, JournalEntry, Objectif, PlanEtape, Projet } from "../types";
+import type { AppData, JournalEntry, Objectif, PlanEtape, Projet } from "../types";
 import { dateKey, daysUntil, toLocalDateKey } from "./format";
 
 export interface ProchaineEcheance {
   titre: string;
+  projetId: string;
   projetTitre: string;
   sousTitre: string;
   dateCible: string;
@@ -66,7 +67,7 @@ function pctDelta(current: number, previous: number): number | null {
   return Math.round(((current - previous) / Math.abs(previous)) * 100);
 }
 
-export function computeDashboardStats(data: DashboardData): DashboardStats {
+export function computeDashboardStats(data: AppData): DashboardStats {
   const { projets, etapes, journal } = data;
   const now = new Date();
   const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -152,6 +153,7 @@ export function computeDashboardStats(data: DashboardData): DashboardStats {
   if (soonest) {
     prochaineEcheance = {
       titre: soonest.titre,
+      projetId: soonest.projet.id,
       projetTitre: soonest.projet.titre,
       sousTitre: soonest.sousTitre,
       dateCible: soonest.date,

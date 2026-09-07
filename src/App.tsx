@@ -1,23 +1,29 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./App.css";
 import { Sidebar, type Screen } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
 import { Dashboard } from "./screens/Dashboard";
-import { loadDashboardData } from "./data/db";
+import { FicheProjet } from "./screens/FicheProjet";
+import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
-import type { DashboardData } from "./types";
+import type { AppData } from "./types";
 
 function App() {
   const [screen, setScreen] = useState<Screen>("dashboard");
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [openProjetId, setOpenProjetId] = useState<string | null>(null);
+  const [data, setData] = useState<AppData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.title = "CAVIRA";
-    loadDashboardData()
+  const refreshData = useCallback(() => {
+    return loadAppData()
       .then(setData)
       .catch((e) => setError(String(e)));
   }, []);
+
+  useEffect(() => {
+    document.title = "CAVIRA";
+    refreshData();
+  }, [refreshData]);
 
   const stats: DashboardStats | null = data ? computeDashboardStats(data) : null;
 
@@ -28,15 +34,34 @@ function App() {
     backlog: 0,
   };
 
+  function openProjet(id: string) {
+    setOpenProjetId(id);
+  }
+
+  function backToDashboard() {
+    setOpenProjetId(null);
+    setScreen("dashboard");
+  }
+
+  function handleSidebarNavigate(next: Screen) {
+    setOpenProjetId(null);
+    setScreen(next);
+  }
+
   return (
     <div className="app-shell">
-      <Sidebar screen={screen} onNavigate={setScreen} counts={counts} streakJours={stats?.streakJours ?? 0} />
+      <Sidebar screen={screen} onNavigate={handleSidebarNavigate} counts={counts} streakJours={stats?.streakJours ?? 0} />
       <div className="app-main">
         <TopBar />
         <div className="app-content">
           {error && <div className="app-error">Erreur de chargement : {error}</div>}
           {!error && !data && <div className="app-loading">Chargement…</div>}
-          {data && stats && screen === "dashboard" && <Dashboard data={data} stats={stats} />}
+          {data && stats && !openProjetId && screen === "dashboard" && (
+            <Dashboard data={data} stats={stats} onOpenProjet={openProjet} />
+          )}
+          {data && openProjetId && (
+            <FicheProjet data={data} projetId={openProjetId} onBack={backToDashboard} onDataChanged={refreshData} />
+          )}
         </div>
       </div>
     </div>

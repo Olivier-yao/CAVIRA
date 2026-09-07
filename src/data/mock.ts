@@ -1,8 +1,20 @@
-import type { Categorie, DashboardData, JournalEntry, Objectif, PlanEtape, Projet } from "../types";
+import { v4 as uuidLib } from "uuid";
+import type {
+  AppData,
+  CalendrierEntry,
+  Categorie,
+  JournalEntry,
+  Note,
+  Objectif,
+  PlanEtape,
+  Projet,
+  StatutEtape,
+} from "../types";
+import type { NewJournalEntryInput } from "./db";
 
-// Miroir de src-tauri/migrations/002_seed.sql, utilisé uniquement quand l'app
-// tourne hors runtime Tauri (aperçu navigateur pendant le développement).
-// En build réel, loadDashboardData() lit toujours SQLite — voir data/db.ts.
+// Miroir des migrations src-tauri/migrations/*.sql, utilisé uniquement quand
+// l'app tourne hors runtime Tauri (aperçu navigateur pendant le développement).
+// En build réel, loadAppData() lit toujours SQLite — voir data/db.ts.
 
 function iso(daysAgo: number, hours = 0): string {
   const d = new Date();
@@ -31,40 +43,136 @@ const objectifs: Objectif[] = [
   { id: "obj-tiktok", titre: "Être connu sur TikTok", description: "", created_at: iso(60) },
 ];
 
-const projets: Projet[] = [
-  mkProjet("proj-tourneyci", "TourneyCI", "cat-dev", "en_cours", "obj-boite", isoInDays(6)),
-  mkProjet("proj-lacata", "La Cata", "cat-jeu", "en_cours", "obj-vivre", null),
-  mkProjet("proj-progression", "App de progression", "cat-dev", "en_cours", "obj-vivre", null),
-  mkProjet("proj-boite", "Ouvrir ma boîte", "cat-reel", "en_cours", "obj-boite", null),
-  mkProjet("proj-vertax", "VertaX", "cat-jeu", "pause", "obj-vivre", null),
-  mkProjet("proj-tiktok", "Chaîne TikTok", "cat-reel", "en_cours", "obj-tiktok", null),
-  mkProjet("proj-routine", "Routine quotidienne", "cat-reel", "en_cours", "obj-independant", null),
-  mkProjet("proj-vitrine", "Site vitrine", "cat-dev", "en_cours", "obj-boite", null),
-  mkProjet("proj-discord", "Serveur communautaire", "cat-autre", "en_cours", "obj-vivre", null),
-  mkProjet("proj-subvention", "Dossier subvention", "cat-reel", "en_cours", "obj-boite", isoInDays(45)),
-];
-
 function mkProjet(
   id: string,
   titre: string,
   categorie_id: string,
   statut: Projet["statut"],
+  description: string,
+  objectif_final: string,
   objectif_id: string,
   echeance_date: string | null,
+  seuil_depenses: number | null = null,
 ): Projet {
   return {
     id,
     titre,
     categorie_id,
     statut,
-    description: "",
-    objectif_final: "",
+    description,
+    objectif_final,
     objectif_id,
     echeance_date,
+    seuil_depenses,
     created_at: iso(30),
     updated_at: iso(1),
   };
 }
+
+const projets: Projet[] = [
+  mkProjet(
+    "proj-tourneyci",
+    "TourneyCI",
+    "cat-dev",
+    "en_cours",
+    "Plateforme de gestion de tournois gaming : brackets automatiques, saisie des scores, export des résultats pour les organisateurs.",
+    "Sortir une v1 utilisable en tournoi réel.",
+    "obj-boite",
+    isoInDays(6),
+    250,
+  ),
+  mkProjet(
+    "proj-lacata",
+    "La Cata",
+    "cat-jeu",
+    "en_cours",
+    "Jeu de soirée façon télé-prompteur, une manette pour tout le salon.",
+    "Faire tester le prototype à 20 groupes différents.",
+    "obj-vivre",
+    null,
+  ),
+  mkProjet(
+    "proj-progression",
+    "App de progression",
+    "cat-dev",
+    "en_cours",
+    "Suivi d'apprentissage de la programmation, par compétence et par preuve.",
+    "Couvrir tous les domaines du programme perso.",
+    "obj-vivre",
+    null,
+  ),
+  mkProjet(
+    "proj-boite",
+    "Ouvrir ma boîte",
+    "cat-reel",
+    "en_cours",
+    "Statut, comptabilité, démarches de création d'entreprise.",
+    "Avoir une structure juridique active.",
+    "obj-boite",
+    null,
+    400,
+  ),
+  mkProjet(
+    "proj-vertax",
+    "VertaX",
+    "cat-jeu",
+    "pause",
+    "Prototype de jeu vertical, moteur en cours de test.",
+    "Valider si le concept mérite d'être poussé.",
+    "obj-vivre",
+    null,
+  ),
+  mkProjet(
+    "proj-tiktok",
+    "Chaîne TikTok",
+    "cat-reel",
+    "en_cours",
+    "Format court sur mes projets en cours, plusieurs publications par semaine.",
+    "Construire une audience régulière.",
+    "obj-tiktok",
+    null,
+  ),
+  mkProjet(
+    "proj-routine",
+    "Routine quotidienne",
+    "cat-reel",
+    "en_cours",
+    "Blocs de travail fixes, sport, sommeil, revue du jour.",
+    "Tenir un rythme stable sur la durée.",
+    "obj-independant",
+    null,
+  ),
+  mkProjet(
+    "proj-vitrine",
+    "Site vitrine",
+    "cat-dev",
+    "en_cours",
+    "Portfolio de mes projets et prestations.",
+    "Avoir une vitrine présentable à partager.",
+    "obj-boite",
+    null,
+  ),
+  mkProjet(
+    "proj-discord",
+    "Serveur communautaire",
+    "cat-autre",
+    "en_cours",
+    "Discord des testeurs de mes projets, modération et annonces.",
+    "Avoir un noyau actif de retours réguliers.",
+    "obj-vivre",
+    null,
+  ),
+  mkProjet(
+    "proj-subvention",
+    "Dossier subvention",
+    "cat-reel",
+    "en_cours",
+    "Aide à la création d'entreprise : pièces à rassembler, dépôt avant fin octobre.",
+    "Déposer un dossier complet dans les temps.",
+    "obj-boite",
+    isoInDays(45),
+  ),
+];
 
 function mkEtape(
   id: string,
@@ -75,6 +183,7 @@ function mkEtape(
   dateCibleDaysFromNow: number | null,
   sort_order: number,
   parent_id: string | null = null,
+  note: string | null = null,
 ): PlanEtape {
   return {
     id,
@@ -84,7 +193,7 @@ function mkEtape(
     statut,
     priorite,
     date_cible: dateCibleDaysFromNow === null ? null : isoInDays(dateCibleDaysFromNow).slice(0, 10),
-    note: null,
+    note,
     sort_order,
     created_at: iso(20),
   };
@@ -101,7 +210,7 @@ const etapes: PlanEtape[] = [
   mkEtape("et-3", "proj-tourneyci", "Interface admin de tournoi", "a_faire", "haute", 24, 3),
   mkEtape("et-3-1", "proj-tourneyci", "Écran de saisie des scores", "a_faire", "moyenne", 20, 1, "et-3"),
   mkEtape("et-3-2", "proj-tourneyci", "Export des résultats (CSV, image)", "a_faire", "basse", 24, 2, "et-3"),
-  mkEtape("et-4", "proj-tourneyci", "Intégration Discord", "bloque", "moyenne", null, 4),
+  mkEtape("et-4", "proj-tourneyci", "Intégration Discord", "bloque", "moyenne", null, 4, null, "En attente de validation de l'API bot."),
   mkEtape("et-5", "proj-tourneyci", "Bêta fermée — 20 organisateurs", "a_faire", "haute", 70, 5),
 
   mkEtape("et-lc-1", "proj-lacata", "Écrire 50 questions de test", "fait", "haute", -10, 1),
@@ -148,17 +257,27 @@ function mkJournal(
   montant: number | null,
   daysAgo: number,
   hoursAgo = 0,
+  dureeMinutes: number | null = null,
 ): JournalEntry {
-  return { id, projet_id, type, titre, montant, description: "", created_at: iso(daysAgo, hoursAgo) };
+  return {
+    id,
+    projet_id,
+    type,
+    titre,
+    montant,
+    duree_minutes: dureeMinutes,
+    description: "",
+    created_at: iso(daysAgo, hoursAgo),
+  };
 }
 
 const journal: JournalEntry[] = [
-  mkJournal("j-01", "proj-tourneyci", "action", "Double élimination — cas des byes", null, 0, 3),
+  mkJournal("j-01", "proj-tourneyci", "action", "Double élimination — cas des byes", null, 0, 3, 130),
   mkJournal("j-02", "proj-lacata", "action", "Playtest à 6 joueurs, 3 bugs relevés", null, 1),
   mkJournal("j-03", "proj-tiktok", "action", "Publication #14 en ligne", null, 1),
   mkJournal("j-04", "proj-boite", "action", "Note : structure juridique retenue", null, 3),
   mkJournal("j-05", "proj-progression", "action", "Compétence « async » validée", null, 2),
-  mkJournal("j-06", "proj-tourneyci", "action", "Génération d'arbres simple élimination", null, 4),
+  mkJournal("j-06", "proj-tourneyci", "action", "Génération d'arbres simple élimination", null, 4, 0, 100),
   mkJournal("j-07", "proj-routine", "action", "Check-in du matin", null, 5),
   mkJournal("j-08", "proj-vitrine", "action", "Intégration responsive", null, 6),
   mkJournal("j-09", "proj-discord", "action", "Modération + annonce hebdo", null, 7),
@@ -177,6 +296,8 @@ const journal: JournalEntry[] = [
   mkJournal("j-d3", "proj-vitrine", "depense", "Licence photos", -45, 7),
   mkJournal("j-d4", "proj-lacata", "depense", "Impression des prototypes", -37, 16),
   mkJournal("j-d5", "proj-tiktok", "depense", "Micro-cravate", -1800, 24),
+  mkJournal("j-d6", "proj-tourneyci", "depense", "Nom de domaine tourneyci.gg (2 ans)", -24, 2),
+  mkJournal("j-d7", "proj-tourneyci", "depense", "Licence outil de tests de charge", -49, 11),
 
   mkJournal("j-e1", "proj-progression", "economie", "Cours en ligne évité", 90, 10),
   mkJournal("j-e2", "proj-tourneyci", "economie", "Hébergement fait maison", 150, 15),
@@ -185,8 +306,98 @@ const journal: JournalEntry[] = [
   mkJournal("j-b1", "proj-tiktok", "benefice_estime", "Partenariat en discussion", 800, 11),
   mkJournal("j-b2", "proj-boite", "benefice_estime", "Premier client potentiel identifié", 600, 19),
   mkJournal("j-b3", "proj-tourneyci", "benefice_estime", "Offre marque blanche", 500, 24),
+  mkJournal("j-b4", "proj-tourneyci", "benefice_estime", "Premier organisateur intéressé — pré-vente estimée", 150, 6),
 ];
 
 journal.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
-export const mockDashboardData: DashboardData = { categories, objectifs, projets, etapes, journal };
+const notes: Note[] = [
+  {
+    id: "note-tci-1",
+    projet_id: "proj-tourneyci",
+    etape_id: "et-2-2",
+    contenu:
+      "Le cas des byes casse l'arbre quand le nombre d'inscrits n'est pas une puissance de deux. Solution retenue : matchs fantômes résolus automatiquement au premier tour.",
+    tags: "algo,brackets",
+    created_at: iso(2),
+  },
+  {
+    id: "note-tci-2",
+    projet_id: "proj-tourneyci",
+    etape_id: null,
+    contenu:
+      "Format d'export retenu pour les résultats : CSV pour les orgas techniques, image récap pour le partage TikTok/Discord.",
+    tags: "export,decision",
+    created_at: iso(6),
+  },
+  {
+    id: "note-tci-3",
+    projet_id: "proj-tourneyci",
+    etape_id: null,
+    contenu: "Idée à creuser : offre marque blanche pour un organisateur qui veut son propre nom de domaine.",
+    tags: "idee,business",
+    created_at: iso(9),
+  },
+  {
+    id: "note-lc-1",
+    projet_id: "proj-lacata",
+    etape_id: null,
+    contenu: "Le minuteur à 45s casse le rythme en fin de manche. Tester 30s pour la dernière manche seulement.",
+    tags: "playtest,equilibrage",
+    created_at: iso(2),
+  },
+];
+notes.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+
+const calendrier: CalendrierEntry[] = [
+  { id: "cal-tci-1", projet_id: "proj-tourneyci", titre: "Session dev — round robin", date: isoInDays(1), type: "session", created_at: iso(0) },
+  { id: "cal-tci-2", projet_id: "proj-tourneyci", titre: "Session dev — interface admin", date: isoInDays(9), type: "session", created_at: iso(0) },
+  { id: "cal-lc-1", projet_id: "proj-lacata", titre: "Playtest à 10 joueurs", date: isoInDays(12), type: "session", created_at: iso(0) },
+  { id: "cal-bo-1", projet_id: "proj-boite", titre: "RDV banque", date: isoInDays(8), type: "session", created_at: iso(0) },
+];
+
+export const mockData: AppData = { categories, objectifs, projets, etapes, journal, notes, calendrier };
+
+export function mockToggleEtape(etapeId: string, statut: StatutEtape): void {
+  const e = etapes.find((x) => x.id === etapeId);
+  if (e) e.statut = statut;
+}
+
+export function mockAddEtape(projetId: string, titre: string, sortOrder: number): void {
+  etapes.push({
+    id: uuidLib(),
+    projet_id: projetId,
+    parent_id: null,
+    titre,
+    statut: "a_faire",
+    priorite: "moyenne",
+    date_cible: null,
+    note: null,
+    sort_order: sortOrder,
+    created_at: new Date().toISOString(),
+  });
+}
+
+export function mockAddJournalEntry(input: NewJournalEntryInput): void {
+  journal.unshift({
+    id: uuidLib(),
+    projet_id: input.projetId,
+    type: input.type,
+    titre: input.titre,
+    montant: input.montant,
+    duree_minutes: null,
+    description: "",
+    created_at: new Date().toISOString(),
+  });
+}
+
+export function mockAddNote(projetId: string, contenu: string, tags: string): void {
+  notes.unshift({
+    id: uuidLib(),
+    projet_id: projetId,
+    etape_id: null,
+    contenu,
+    tags,
+    created_at: new Date().toISOString(),
+  });
+}
