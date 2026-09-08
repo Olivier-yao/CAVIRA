@@ -27,7 +27,7 @@ export function Verrouillage({ onDeverrouille }: VerrouillageProps) {
   return (
     <div className="verrouillage-screen">
       <div className="verrouillage-card">
-        <div className="verrouillage-logo">C</div>
+        <img className="verrouillage-logo" src="/logo.svg" alt="" width={48} height={48} />
         <h1>CAVIRA</h1>
         <p className="verrouillage-sous-titre">Application verrouillée — entre ton mot de passe pour continuer.</p>
         <input
