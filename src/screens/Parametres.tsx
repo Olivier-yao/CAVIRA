@@ -7,6 +7,7 @@ import { addCategorie, modifierCategorie, restaurerDonnees, supprimerCategorie }
 import {
   choisirEtLireImport,
   exporterDonnees,
+  exporterRapport,
   getDbPath,
   getDbSizeLabel,
   getDernierExport,
@@ -14,6 +15,7 @@ import {
   type ImportResultat,
 } from "../data/fichiers";
 import { formatDateMedium } from "../lib/format";
+import { construireFenetre, genererRapportTexte, type PeriodeRapport } from "../lib/rapport";
 
 interface ParametresProps {
   data: AppData;
@@ -21,6 +23,12 @@ interface ParametresProps {
 }
 
 const COULEURS_SUGGEREES = ["#4FD1E8", "#F472A8", "#B6E24A", "#8A90A6", "#8B7BF7", "#F2A93B"];
+
+const PERIODES_RAPPORT: { id: PeriodeRapport; label: string }[] = [
+  { id: "30j", label: "30 derniers jours" },
+  { id: "mois", label: "Ce mois-ci" },
+  { id: "trimestre", label: "Ce trimestre" },
+];
 
 export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [theme, setTheme] = useState<ThemeId>(getStoredTheme());
@@ -40,6 +48,8 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [importEnAttente, setImportEnAttente] = useState<ImportResultat | null>(null);
   const [importErreur, setImportErreur] = useState<string | null>(null);
   const [importEnCours, setImportEnCours] = useState(false);
+  const [periodeRapport, setPeriodeRapport] = useState<PeriodeRapport>("30j");
+  const [rapportEnCours, setRapportEnCours] = useState(false);
 
   useEffect(() => {
     if (!isTauriRuntime()) return;
@@ -110,6 +120,18 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
       if (resultat) setImportEnAttente(resultat);
     } catch (e) {
       setImportErreur(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  async function handleGenererRapport() {
+    if (!isTauriRuntime()) return;
+    setRapportEnCours(true);
+    try {
+      const fenetre = construireFenetre(periodeRapport);
+      const texte = genererRapportTexte(data, fenetre);
+      await exporterRapport(texte, `cavira-rapport-${periodeRapport}.txt`);
+    } finally {
+      setRapportEnCours(false);
     }
   }
 
@@ -268,6 +290,35 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
               {d.label}
             </button>
           ))}
+        </div>
+      </section>
+
+      <section className="card parametres-section">
+        <h2>Rapport de progression</h2>
+        <p className="parametres-section__desc">
+          Génère un résumé texte de ta progression sur une période donnée — utile pour un bilan personnel ou pour
+          partager un état d'avancement.
+        </p>
+        <div className="devise-liste">
+          {PERIODES_RAPPORT.map((p) => (
+            <button
+              key={p.id}
+              className={`devise-chip${periodeRapport === p.id ? " devise-chip--active" : ""}`}
+              onClick={() => setPeriodeRapport(p.id)}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <div className="parametres-actions">
+          <button
+            className="btn btn--accent"
+            onClick={handleGenererRapport}
+            disabled={!isTauriRuntime() || rapportEnCours}
+            title={isTauriRuntime() ? undefined : "Disponible uniquement dans l'application native"}
+          >
+            {rapportEnCours ? "Génération…" : "Générer le rapport"}
+          </button>
         </div>
       </section>
 

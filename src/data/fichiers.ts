@@ -98,3 +98,13 @@ export async function exporterDonnees(data: AppData): Promise<boolean> {
   }
   return true;
 }
+
+export async function exporterRapport(texte: string, defaultPath: string): Promise<boolean> {
+  const cible = await save({
+    defaultPath,
+    filters: [{ name: "Texte", extensions: ["txt"] }],
+  });
+  if (!cible) return false;
+  await writeTextFile(cible, texte);
+  return true;
+}
