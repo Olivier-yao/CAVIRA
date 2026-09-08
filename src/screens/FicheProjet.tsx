@@ -4,7 +4,7 @@ import type { AppData } from "../types";
 import { CategorieBadge, StatutProjetBadge } from "../components/Badges";
 import { ProgressRing } from "../components/ProgressRing";
 import { formatDateMedium, formatDateShort, formatRelativeLong, daysUntil } from "../lib/format";
-import { projetProgressionPct, syntheseFinanciere } from "../lib/ficheProjet";
+import { projetProgressionPct, streakJoursProjet, syntheseFinanciere } from "../lib/ficheProjet";
 import { formatMontantAbs } from "../lib/format";
 import { PlanAttaqueTab } from "./fiche-projet/PlanAttaqueTab";
 import { CalendrierTab } from "./fiche-projet/CalendrierTab";
@@ -58,6 +58,7 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier 
   const objectifsTitres = data.objectifs.filter((o) => objectifIds.has(o.id)).map((o) => o.titre);
   const progression = projetProgressionPct(data.etapes, projet.id);
   const synthese = syntheseFinanciere(data.journal, projet, 30);
+  const streak = streakJoursProjet(data.journal, projet.id);
   const nbEtapes = data.etapes.filter((e) => e.projet_id === projet.id).length;
   const nbJournal = data.journal.filter((j) => j.projet_id === projet.id).length;
   const nbNotes = data.notes.filter((n) => n.projet_id === projet.id).length;
@@ -100,6 +101,10 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier 
             <MetaItem
               label={objectifsTitres.length > 1 ? "Objectifs rattachés" : "Objectif rattaché"}
               value={objectifsTitres.length ? objectifsTitres.join(" · ") : "—"}
+            />
+            <MetaItem
+              label="Série en cours"
+              value={streak > 0 ? `${streak} jour${streak > 1 ? "s" : ""} d'affilée` : "—"}
             />
             <MetaItem label="Créé le" value={formatDateMedium(projet.created_at)} />
             <MetaItem label="Mis à jour" value={formatRelativeLong(projet.updated_at)} />

@@ -1,5 +1,5 @@
 import type { AppData, JournalEntry, Objectif, PlanEtape, Projet } from "../types";
-import { dateKey, daysUntil, toLocalDateKey } from "./format";
+import { calculerStreakJours, dateKey, daysUntil, toLocalDateKey } from "./format";
 
 export interface ProchaineEcheance {
   titre: string;
@@ -186,13 +186,7 @@ export function computeDashboardStats(data: AppData): DashboardStats {
   const jours = new Set(
     journal.filter((j) => j.type === "action").map((j) => toLocalDateKey(j.created_at)),
   );
-  let cursor = new Date(now);
-  if (!jours.has(dateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
-  let streakJours = 0;
-  while (jours.has(dateKey(cursor))) {
-    streakJours++;
-    cursor.setDate(cursor.getDate() - 1);
-  }
+  const streakJours = calculerStreakJours(jours);
 
   return {
     projetsActifs,

@@ -1,5 +1,5 @@
 import type { AppData, CalendrierEntry, JournalEntry, Note, PlanEtape, Projet } from "../types";
-import { daysUntil } from "./format";
+import { calculerStreakJours, daysUntil, toLocalDateKey } from "./format";
 
 export interface EtapeNode extends PlanEtape {
   enfants: EtapeNode[];
@@ -141,6 +141,13 @@ export function chargeTravail(calendrier: CalendrierEntry[], etapes: PlanEtape[]
 
 export function notesProjet(notes: Note[], projetId: string): Note[] {
   return notes.filter((n) => n.projet_id === projetId);
+}
+
+export function streakJoursProjet(journal: JournalEntry[], projetId: string): number {
+  const jours = new Set(
+    journal.filter((j) => j.projet_id === projetId && j.type === "action").map((j) => toLocalDateKey(j.created_at)),
+  );
+  return calculerStreakJours(jours);
 }
 
 export function projetProgressionPct(etapes: PlanEtape[], projetId: string): number {

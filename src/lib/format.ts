@@ -36,6 +36,17 @@ export function toLocalDateKey(iso: string): string {
   return dateKey(parseSqlDate(iso));
 }
 
+export function calculerStreakJours(joursActifs: Set<string>): number {
+  const cursor = new Date();
+  if (!joursActifs.has(dateKey(cursor))) cursor.setDate(cursor.getDate() - 1);
+  let streak = 0;
+  while (joursActifs.has(dateKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
 export function formatRelative(iso: string): string {
   const then = parseSqlDate(iso);
   const diffMs = Date.now() - then.getTime();
