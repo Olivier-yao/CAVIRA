@@ -1,11 +1,11 @@
+import { useMemo, useState } from "react";
 import "./Dashboard.css";
 import type { AppData } from "../types";
-import type { DashboardStats } from "../lib/dashboard";
+import { computeDashboardStats, type DashboardStats, type PeriodeDashboard } from "../lib/dashboard";
 import { formatDateFull, formatDateShort, formatMontant, formatMontantAbs, formatRelative } from "../lib/format";
 
 interface DashboardProps {
   data: AppData;
-  stats: DashboardStats;
   onOpenProjet: (projetId: string) => void;
 }
 
@@ -18,8 +18,17 @@ const JOURNAL_COLORS: Record<string, string> = {
 
 const OBJECTIF_PALETTE = ["var(--pink)", "var(--lime)", "var(--cyan)", "var(--accent)"];
 
-export function Dashboard({ data, stats, onOpenProjet }: DashboardProps) {
+const PERIODES: { id: PeriodeDashboard; label: string }[] = [
+  { id: "mois", label: "Ce mois-ci" },
+  { id: "30j", label: "30 jours" },
+  { id: "trimestre", label: "Trimestre" },
+];
+
+export function Dashboard({ data, onOpenProjet }: DashboardProps) {
+  const [periode, setPeriode] = useState<PeriodeDashboard>("mois");
+  const stats = useMemo(() => computeDashboardStats(data, periode), [data, periode]);
   const projetsActifs = data.projets.filter((p) => p.statut === "en_cours").length;
+  const labelActions = periode === "mois" ? "Actions ce mois" : `Actions — ${PERIODES.find((p) => p.id === periode)?.label.toLowerCase()}`;
 
   return (
     <div className="dashboard">
@@ -29,9 +38,15 @@ export function Dashboard({ data, stats, onOpenProjet }: DashboardProps) {
           {formatDateFull(new Date())} · {projetsActifs} projets actifs
         </p>
         <div className="dashboard__period">
-          <span className="period-pill period-pill--active">Ce mois-ci</span>
-          <span className="period-pill">30 jours</span>
-          <span className="period-pill">Trimestre</span>
+          {PERIODES.map((p) => (
+            <button
+              key={p.id}
+              className={`period-pill${periode === p.id ? " period-pill--active" : ""}`}
+              onClick={() => setPeriode(p.id)}
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
       </header>
 
@@ -42,10 +57,10 @@ export function Dashboard({ data, stats, onOpenProjet }: DashboardProps) {
           sub={statSubProjets(stats.projetsPause, stats.projetsArchives)}
         />
         <StatCard
-          label="Actions ce mois"
+          label={labelActions}
           value={String(stats.actionsCeMois)}
           trendPct={stats.actionsDeltaPct}
-          sub={`${stats.actionsMoisDernier} le mois dernier`}
+          sub={`${stats.actionsMoisDernier} ${stats.periodeLabelPrecedente}`}
         />
         <StatCard
           label="Bilan net"

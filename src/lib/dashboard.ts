@@ -28,6 +28,8 @@ export interface MoisBilan {
   benefices: number;
 }
 
+export type PeriodeDashboard = "mois" | "30j" | "trimestre";
+
 export interface DashboardStats {
   projetsActifs: number;
   projetsPause: number;
@@ -48,6 +50,7 @@ export interface DashboardStats {
   progressionParObjectif: ObjectifProgress[];
   derniereActivite: (JournalEntry & { projetTitre: string })[];
   streakJours: number;
+  periodeLabelPrecedente: string;
 }
 
 export function progressionProjet(projetId: string, etapes: PlanEtape[]): number {
@@ -57,8 +60,17 @@ export function progressionProjet(projetId: string, etapes: PlanEtape[]): number
   return Math.round((faites / les.length) * 100);
 }
 
+function parseSqlDate(iso: string): Date {
+  return new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z"));
+}
+
+function dansFenetre(iso: string, debut: Date, fin: Date): boolean {
+  const d = parseSqlDate(iso);
+  return d >= debut && d < fin;
+}
+
 function isSameMonth(iso: string, ref: Date): boolean {
-  const d = new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z"));
+  const d = parseSqlDate(iso);
   return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
 }
 
@@ -67,18 +79,46 @@ function pctDelta(current: number, previous: number): number | null {
   return Math.round(((current - previous) / Math.abs(previous)) * 100);
 }
 
-export function computeDashboardStats(data: AppData): DashboardStats {
+interface FenetreComparaison {
+  debut: Date;
+  fin: Date;
+  debutPrecedent: Date;
+  finPrecedent: Date;
+  labelPrecedent: string;
+}
+
+function calculerFenetreComparaison(periode: PeriodeDashboard, maintenant: Date): FenetreComparaison {
+  const finProchaine = new Date(maintenant.getTime() + 1);
+  if (periode === "30j") {
+    const debut = new Date(maintenant.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const debutPrecedent = new Date(debut.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return { debut, fin: finProchaine, debutPrecedent, finPrecedent: debut, labelPrecedent: "sur les 30 jours précédents" };
+  }
+  if (periode === "trimestre") {
+    const debut = new Date(maintenant.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const debutPrecedent = new Date(debut.getTime() - 90 * 24 * 60 * 60 * 1000);
+    return { debut, fin: finProchaine, debutPrecedent, finPrecedent: debut, labelPrecedent: "sur le trimestre précédent" };
+  }
+  const debut = new Date(maintenant.getFullYear(), maintenant.getMonth(), 1);
+  const debutPrecedent = new Date(maintenant.getFullYear(), maintenant.getMonth() - 1, 1);
+  return { debut, fin: finProchaine, debutPrecedent, finPrecedent: debut, labelPrecedent: "le mois dernier" };
+}
+
+export function computeDashboardStats(data: AppData, periode: PeriodeDashboard = "mois"): DashboardStats {
   const { projets, etapes, journal } = data;
   const now = new Date();
-  const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const projetById = new Map(projets.map((p) => [p.id, p]));
 
   const projetsActifs = projets.filter((p) => p.statut === "en_cours").length;
   const projetsPause = projets.filter((p) => p.statut === "pause").length;
   const projetsArchives = projets.filter((p) => p.statut === "termine" || p.statut === "abandonne").length;
 
-  const actionsThisMonth = journal.filter((j) => j.type === "action" && isSameMonth(j.created_at, now));
-  const actionsLastMonth = journal.filter((j) => j.type === "action" && isSameMonth(j.created_at, prevMonth));
+  const fenetre = calculerFenetreComparaison(periode, now);
+
+  const actionsThisMonth = journal.filter((j) => j.type === "action" && dansFenetre(j.created_at, fenetre.debut, fenetre.fin));
+  const actionsLastMonth = journal.filter(
+    (j) => j.type === "action" && dansFenetre(j.created_at, fenetre.debutPrecedent, fenetre.finPrecedent),
+  );
   const actionsCeMois = actionsThisMonth.length;
   const actionsMoisDernier = actionsLastMonth.length;
   const actionsDeltaPct = pctDelta(actionsThisMonth.length, actionsLastMonth.length);
@@ -86,8 +126,8 @@ export function computeDashboardStats(data: AppData): DashboardStats {
   const sumMontant = (entries: JournalEntry[], type: JournalEntry["type"]) =>
     entries.filter((j) => j.type === type).reduce((s, j) => s + (j.montant ?? 0), 0);
 
-  const journalThisMonth = journal.filter((j) => isSameMonth(j.created_at, now));
-  const journalLastMonth = journal.filter((j) => isSameMonth(j.created_at, prevMonth));
+  const journalThisMonth = journal.filter((j) => dansFenetre(j.created_at, fenetre.debut, fenetre.fin));
+  const journalLastMonth = journal.filter((j) => dansFenetre(j.created_at, fenetre.debutPrecedent, fenetre.finPrecedent));
 
   const depensesCeMois = Math.abs(sumMontant(journalThisMonth, "depense"));
   const gagneCeMois = sumMontant(journalThisMonth, "economie") + sumMontant(journalThisMonth, "benefice_estime");
@@ -208,5 +248,6 @@ export function computeDashboardStats(data: AppData): DashboardStats {
     progressionParObjectif,
     derniereActivite,
     streakJours,
+    periodeLabelPrecedente: fenetre.labelPrecedent,
   };
 }

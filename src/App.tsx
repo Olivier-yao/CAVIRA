@@ -111,8 +111,8 @@ function App() {
           {data && montrerPremierLancement && (
             <PremierLancement onCreerProjet={() => setModalOuvert(true)} onNoterIdee={handleNoterIdee} />
           )}
-          {data && stats && !openProjetId && !montrerPremierLancement && screen === "dashboard" && (
-            <Dashboard data={data} stats={stats} onOpenProjet={openProjet} />
+          {data && !openProjetId && !montrerPremierLancement && screen === "dashboard" && (
+            <Dashboard data={data} onOpenProjet={openProjet} />
           )}
           {data && !openProjetId && screen === "projets" && <Projets data={data} onOpenProjet={openProjet} />}
           {data && !openProjetId && screen === "calendrier" && (
