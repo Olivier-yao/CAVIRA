@@ -137,6 +137,12 @@
   background: var(--accent-dim);
 }
 
+.jour-cell--survole {
+  background: var(--accent-dim);
+  outline: 2px dashed var(--accent-line);
+  outline-offset: -2px;
+}
+
 .jour-cell__jour-label {
   font-size: 10px;
   font-weight: 600;
@@ -183,6 +189,14 @@
 
 .event-chip--retard {
   color: var(--danger);
+}
+
+.event-chip--deplacable {
+  cursor: grab;
+}
+
+.event-chip--deplacable:active {
+  cursor: grabbing;
 }
 
 .jour-cell__reste {

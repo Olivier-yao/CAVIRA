@@ -115,7 +115,9 @@ function App() {
             <Dashboard data={data} stats={stats} onOpenProjet={openProjet} />
           )}
           {data && !openProjetId && screen === "projets" && <Projets data={data} onOpenProjet={openProjet} />}
-          {data && !openProjetId && screen === "calendrier" && <Calendrier data={data} onOpenProjet={openProjet} />}
+          {data && !openProjetId && screen === "calendrier" && (
+            <Calendrier data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
+          )}
           {data && !openProjetId && screen === "roadmap" && (
             <Roadmap data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}

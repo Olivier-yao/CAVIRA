@@ -658,6 +658,11 @@ export function mockModifierEtape(
   }
 }
 
+export function mockDeplacerEcheanceEtape(etapeId: string, dateCible: string): void {
+  const e = etapes.find((x) => x.id === etapeId);
+  if (e) e.date_cible = dateCible;
+}
+
 export function mockSupprimerEtape(etapeId: string): void {
   removeWhere(etapes, (e) => e.id === etapeId || e.parent_id === etapeId);
 }

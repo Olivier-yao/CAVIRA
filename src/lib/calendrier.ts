@@ -9,6 +9,7 @@ export interface CalendarEvent {
   projetTitre: string;
   categorieColor: string;
   enRetard: boolean;
+  etapeId: string | null;
 }
 
 export function buildCalendarEvents(data: AppData): CalendarEvent[] {
@@ -28,6 +29,7 @@ export function buildCalendarEvents(data: AppData): CalendarEvent[] {
       projetTitre: p.titre,
       categorieColor: categorieColor.get(p.categorie_id) ?? "var(--text-3)",
       enRetard: daysUntil(e.date_cible) < 0,
+      etapeId: e.id,
     });
   }
 
@@ -41,6 +43,7 @@ export function buildCalendarEvents(data: AppData): CalendarEvent[] {
       projetTitre: p?.titre ?? "",
       categorieColor: p ? (categorieColor.get(p.categorie_id) ?? "var(--text-3)") : "var(--text-3)",
       enRetard: daysUntil(c.date) < 0,
+      etapeId: null,
     });
   }
 
@@ -54,6 +57,7 @@ export function buildCalendarEvents(data: AppData): CalendarEvent[] {
       projetTitre: p.titre,
       categorieColor: categorieColor.get(p.categorie_id) ?? "var(--text-3)",
       enRetard: daysUntil(p.echeance_date) < 0,
+      etapeId: null,
     });
   }
 

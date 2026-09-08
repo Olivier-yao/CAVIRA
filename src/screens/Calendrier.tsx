@@ -3,19 +3,22 @@ import "./Calendrier.css";
 import type { AppData } from "../types";
 import { buildCalendarEvents, buildMonthGrid, buildWeekGrid, type CalendarEvent, type JourGrille } from "../lib/calendrier";
 import { formatMoisAnnee } from "../lib/format";
+import { deplacerEcheanceEtape } from "../data/db";
 
 interface CalendrierProps {
   data: AppData;
   onOpenProjet: (projetId: string) => void;
+  onDataChanged: () => void;
 }
 
 type Vue = "mois" | "semaine";
 const JOUR_MS = 24 * 60 * 60 * 1000;
 const JOURS_SEMAINE = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
 
-export function Calendrier({ data, onOpenProjet }: CalendrierProps) {
+export function Calendrier({ data, onOpenProjet, onDataChanged }: CalendrierProps) {
   const [reference, setReference] = useState(() => new Date());
   const [vue, setVue] = useState<Vue>("mois");
+  const [survole, setSurvole] = useState<string | null>(null);
 
   const events = useMemo(() => buildCalendarEvents(data), [data]);
   const jours = useMemo(
@@ -35,6 +38,12 @@ export function Calendrier({ data, onOpenProjet }: CalendrierProps) {
   }
   function aujourdhui() {
     setReference(new Date());
+  }
+
+  async function handleDeposer(jourKey: string, etapeId: string) {
+    setSurvole(null);
+    await deplacerEcheanceEtape(etapeId, jourKey);
+    onDataChanged();
   }
 
   const categoriesUtilisees = data.categories;
@@ -89,7 +98,15 @@ export function Calendrier({ data, onOpenProjet }: CalendrierProps) {
             </div>
           ))}
         {jours.map((jour) => (
-          <JourCell key={jour.key} jour={jour} vue={vue} onOpenProjet={onOpenProjet} />
+          <JourCell
+            key={jour.key}
+            jour={jour}
+            vue={vue}
+            onOpenProjet={onOpenProjet}
+            survole={survole === jour.key}
+            onSurvole={(actif) => setSurvole(actif ? jour.key : null)}
+            onDeposer={(etapeId) => handleDeposer(jour.key, etapeId)}
+          />
         ))}
       </div>
     </div>
@@ -100,10 +117,16 @@ function JourCell({
   jour,
   vue,
   onOpenProjet,
+  survole,
+  onSurvole,
+  onDeposer,
 }: {
   jour: JourGrille;
   vue: Vue;
   onOpenProjet: (id: string) => void;
+  survole: boolean;
+  onSurvole: (actif: boolean) => void;
+  onDeposer: (etapeId: string) => void;
 }) {
   const maxVisible = vue === "mois" ? 3 : 8;
   const visibles = jour.evenements.slice(0, maxVisible);
@@ -111,7 +134,21 @@ function JourCell({
 
   return (
     <div
-      className={`jour-cell${jour.horsMois ? " jour-cell--hors-mois" : ""}${jour.estAujourdhui ? " jour-cell--aujourdhui" : ""}`}
+      className={`jour-cell${jour.horsMois ? " jour-cell--hors-mois" : ""}${jour.estAujourdhui ? " jour-cell--aujourdhui" : ""}${survole ? " jour-cell--survole" : ""}`}
+      onDragOver={(e) => {
+        if (e.dataTransfer.types.includes("text/cavira-etape-id")) {
+          e.preventDefault();
+          onSurvole(true);
+        }
+      }}
+      onDragLeave={() => onSurvole(false)}
+      onDrop={(e) => {
+        const etapeId = e.dataTransfer.getData("text/cavira-etape-id");
+        if (etapeId) {
+          e.preventDefault();
+          onDeposer(etapeId);
+        }
+      }}
     >
       {vue === "semaine" && <div className="jour-cell__jour-label">{JOURS_SEMAINE[(jour.date.getDay() + 6) % 7]}</div>}
       <div className="jour-cell__numero">{jour.date.getDate()}</div>
@@ -126,12 +163,19 @@ function JourCell({
 }
 
 function EventChip({ event, onOpenProjet }: { event: CalendarEvent; onOpenProjet: (id: string) => void }) {
+  const deplacable = event.etapeId !== null;
   return (
     <button
-      className={`event-chip${event.enRetard ? " event-chip--retard" : ""}`}
+      className={`event-chip${event.enRetard ? " event-chip--retard" : ""}${deplacable ? " event-chip--deplacable" : ""}`}
       style={{ borderLeftColor: event.enRetard ? "var(--danger)" : event.categorieColor }}
       onClick={() => event.projetId && onOpenProjet(event.projetId)}
-      title={`${event.titre} — ${event.projetTitre}`}
+      title={`${event.titre} — ${event.projetTitre}${deplacable ? " (glisser pour changer la date)" : ""}`}
+      draggable={deplacable}
+      onDragStart={(e) => {
+        if (!event.etapeId) return;
+        e.dataTransfer.setData("text/cavira-etape-id", event.etapeId);
+        e.dataTransfer.effectAllowed = "move";
+      }}
     >
       {event.titre}
     </button>

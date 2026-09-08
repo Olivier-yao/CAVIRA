@@ -29,6 +29,7 @@ import {
   mockAddNote,
   mockAddRetrospective,
   mockCreerProjet,
+  mockDeplacerEcheanceEtape,
   mockModifierCategorie,
   mockModifierEtape,
   mockModifierObjectif,
@@ -268,6 +269,15 @@ export async function modifierEtape(
     "UPDATE plan_etapes SET titre = $1, statut = $2, priorite = $3, date_cible = $4, note = $5 WHERE id = $6",
     [input.titre, input.statut, input.priorite, input.dateCible, input.note, etapeId],
   );
+}
+
+export async function deplacerEcheanceEtape(etapeId: string, dateCible: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockDeplacerEcheanceEtape(etapeId, dateCible);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("UPDATE plan_etapes SET date_cible = $1 WHERE id = $2", [dateCible, etapeId]);
 }
 
 export async function supprimerEtape(etapeId: string): Promise<void> {
