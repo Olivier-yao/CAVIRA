@@ -3,6 +3,7 @@ import "./Sidebar.css";
 import {
   IconBacklog,
   IconCalendrier,
+  IconGuide,
   IconObjectifs,
   IconParametres,
   IconPremierLancement,
@@ -22,6 +23,7 @@ export type Screen =
   | "objectifs"
   | "backlog"
   | "recherche"
+  | "guide"
   | "parametres"
   | "premier-lancement";
 
@@ -53,6 +55,7 @@ export function Sidebar({ screen, onNavigate, counts, streakJours }: SidebarProp
   ];
   const ressources: NavItem[] = [
     { screen: "recherche", label: "Recherche notes", icon: <IconRecherche /> },
+    { screen: "guide", label: "Guide de l'application", icon: <IconGuide /> },
     { screen: "parametres", label: "Paramètres", icon: <IconParametres /> },
     { screen: "premier-lancement", label: "Premier lancement", icon: <IconPremierLancement /> },
   ];

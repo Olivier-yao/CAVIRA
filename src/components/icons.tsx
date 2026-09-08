@@ -96,6 +96,15 @@ export function IconRoutine() {
   );
 }
 
+export function IconGuide() {
+  return (
+    <svg {...base}>
+      <path d="M10 5.8c-1.6-1.1-3.7-1.6-6.3-1.3v10.2c2.6-.3 4.7.2 6.3 1.3c1.6-1.1 3.7-1.6 6.3-1.3V4.5c-2.6-.3-4.7.2-6.3 1.3z" />
+      <path d="M10 5.8v10.2" />
+    </svg>
+  );
+}
+
 export function IconPremierLancement() {
   return (
     <svg {...base}>

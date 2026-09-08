@@ -1,7 +1,16 @@
 import { useEffect, useState } from "react";
 import "./Parametres.css";
 import type { AppData } from "../types";
-import { THEMES, applyTheme, getStoredTheme, type ThemeId } from "../lib/theme";
+import {
+  THEMES,
+  applyTheme,
+  deriverThemePersonnalise,
+  getCustomThemeColors,
+  getStoredTheme,
+  setCustomThemeColors,
+  type CustomThemeColors,
+  type ThemeId,
+} from "../lib/theme";
 import { DEVISES, getStoredDevise, setStoredDevise, type DeviseCode } from "../lib/devise";
 import { addCategorie, modifierCategorie, restaurerDonnees, supprimerCategorie } from "../data/db";
 import {
@@ -41,6 +50,7 @@ const PERIODES_RAPPORT: { id: PeriodeRapport; label: string }[] = [
 
 export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [theme, setTheme] = useState<ThemeId>(getStoredTheme());
+  const [couleursPersonnalisees, setCouleursPersonnalisees] = useState<CustomThemeColors>(getCustomThemeColors());
   const [devise, setDevise] = useState<DeviseCode>(getStoredDevise());
   const [showAddCategorie, setShowAddCategorie] = useState(false);
   const [nomCategorie, setNomCategorie] = useState("");
@@ -77,7 +87,14 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
 
   function handleChoisirTheme(id: ThemeId) {
     setTheme(id);
-    applyTheme(id);
+    applyTheme(id, couleursPersonnalisees);
+  }
+
+  function handleChangerCouleurPersonnalisee(patch: Partial<CustomThemeColors>) {
+    const nouveau = { ...couleursPersonnalisees, ...patch };
+    setCouleursPersonnalisees(nouveau);
+    setCustomThemeColors(nouveau);
+    if (theme === "custom") applyTheme("custom", nouveau);
   }
 
   function handleChoisirDevise(code: DeviseCode) {
@@ -254,7 +271,52 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
               </div>
             </button>
           ))}
+          <button
+            className={`theme-option${theme === "custom" ? " theme-option--active" : ""}`}
+            onClick={() => handleChoisirTheme("custom")}
+          >
+            <div className="theme-option__swatches">
+              {[
+                couleursPersonnalisees.bg,
+                deriverThemePersonnalise(couleursPersonnalisees)["--surface"],
+                deriverThemePersonnalise(couleursPersonnalisees)["--border"],
+                couleursPersonnalisees.accent,
+              ].map((c, i) => (
+                <span key={i} style={{ background: c }} />
+              ))}
+            </div>
+            <div className="theme-option__label">
+              <span className={`theme-option__dot${theme === "custom" ? " theme-option__dot--on" : ""}`} />
+              Personnalisé
+            </div>
+          </button>
         </div>
+
+        {theme === "custom" && (
+          <div className="theme-custom-editor">
+            <label className="theme-custom-editor__champ">
+              <span>Fond</span>
+              <input
+                type="color"
+                value={couleursPersonnalisees.bg}
+                onChange={(e) => handleChangerCouleurPersonnalisee({ bg: e.target.value })}
+              />
+              <span className="mono">{couleursPersonnalisees.bg.toUpperCase()}</span>
+            </label>
+            <label className="theme-custom-editor__champ">
+              <span>Accent</span>
+              <input
+                type="color"
+                value={couleursPersonnalisees.accent}
+                onChange={(e) => handleChangerCouleurPersonnalisee({ accent: e.target.value })}
+              />
+              <span className="mono">{couleursPersonnalisees.accent.toUpperCase()}</span>
+            </label>
+            <p className="theme-custom-editor__note">
+              Les surfaces, bordures et textes sont calculés automatiquement à partir de ces deux couleurs.
+            </p>
+          </div>
+        )}
       </section>
 
       <section className="card parametres-section">

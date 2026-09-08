@@ -16,6 +16,7 @@ import { Parametres } from "./screens/Parametres";
 import { PremierLancement } from "./screens/PremierLancement";
 import { FicheProjet } from "./screens/FicheProjet";
 import { FicheRoutine } from "./screens/FicheRoutine";
+import { Guide } from "./screens/Guide";
 import { PanneauRappels } from "./components/PanneauRappels";
 import { Verrouillage } from "./screens/Verrouillage";
 import { verrouillageActif } from "./lib/verrouillage";
@@ -164,6 +165,7 @@ function App() {
             <Backlog data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}
           {data && !openProjetId && screen === "recherche" && <RechercheNotes data={data} onOpenProjet={openProjet} />}
+          {data && !openProjetId && !openRoutineId && screen === "guide" && <Guide />}
           {data && !openProjetId && screen === "parametres" && (
             <Parametres data={data} onDataChanged={refreshData} />
           )}

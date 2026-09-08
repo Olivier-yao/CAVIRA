@@ -1,0 +1,248 @@
+.guide-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+}
+
+.guide-screen__header h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.guide-screen__subtitle {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  max-width: 62ch;
+}
+
+.guide-screen__body {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.guide-sommaire {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.guide-sommaire__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12.5px;
+  text-align: left;
+}
+
+.guide-sommaire__item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.guide-sommaire__icon {
+  display: flex;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.guide-contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.guide-rubrique {
+  padding: 22px 24px;
+  scroll-margin-top: 12px;
+}
+
+.guide-rubrique__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.guide-rubrique__icon {
+  display: grid;
+  place-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.guide-rubrique__header h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.guide-rubrique__resume {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12.5px;
+  max-width: 60ch;
+}
+
+.guide-rubrique__diagram {
+  margin: 16px 0 18px;
+  padding: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.guide-rubrique__diagram--stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.guide-bloc {
+  margin-top: 14px;
+}
+
+.guide-bloc:first-of-type {
+  margin-top: 0;
+}
+
+.guide-bloc h3 {
+  margin: 0 0 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.guide-bloc p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 72ch;
+}
+
+.guide-bloc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.guide-bloc li {
+  position: relative;
+  padding-left: 14px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 72ch;
+}
+
+.guide-bloc li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.guide-bloc strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---------- flow diagrams ---------- */
+
+.flow-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.flow-row__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flow-row__arrow {
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+.flow-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.flow-chip__icon {
+  display: flex;
+  color: var(--accent);
+}
+
+.flow-chip--root {
+  border-color: var(--accent-line);
+  background: var(--accent-dim);
+}
+
+.flow-branch {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.flow-branch__leaves {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 18px;
+  border-left: 2px solid var(--border);
+}
+
+.flow-branch__leaf {
+  position: relative;
+}
+
+.flow-branch__leaf::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  background: var(--border);
+}
