@@ -23,6 +23,22 @@ export interface CustomThemeColors {
 
 const CUSTOM_DEFAUT: CustomThemeColors = { bg: "#0d0e14", accent: "#8b7bf7" };
 
+// Larges palettes de suggestions pour le thème personnalisé — l'utilisateur
+// n'est jamais limité à ces couleurs (le sélecteur natif reste disponible
+// pour n'importe quelle teinte), elles ne font qu'offrir un large choix de
+// départ rapide. Fonds volontairement sombres pour rester cohérents avec le
+// reste du système de tokens (texte clair dérivé automatiquement).
+export const PALETTE_FONDS: string[] = [
+  "#0d0e14", "#07080c", "#0a0f14", "#0b0f0a", "#100c08", "#140a0a",
+  "#0c0810", "#0a0a14", "#08120f", "#12100a", "#0e0e0e", "#10141a",
+];
+
+export const PALETTE_ACCENTS: string[] = [
+  "#8b7bf7", "#4fd1e8", "#f45b8d", "#b6e24a", "#f2a93b", "#f65b5b",
+  "#5b9df6", "#5bf6d3", "#f65bc7", "#c7f65b", "#f68b5b", "#9d5bf6",
+  "#5bf68b", "#f6d35b", "#5b7bf6", "#f65b8b",
+];
+
 function estId(v: unknown): v is ThemeId {
   return v === "nuit" || v === "glacier" || v === "atelier" || v === "mousse" || v === "custom";
 }

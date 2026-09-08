@@ -209,6 +209,17 @@ export function Guide() {
             titre="Vue globale"
             icon={<IconVueGlobale />}
             resume="Le tableau de bord : un instantané de l'activité récente sur tous les projets à la fois."
+            diagram={
+              <FlowBranch
+                root={{ label: "Journal de suivi (tous projets)" }}
+                leaves={[
+                  { label: "4 cartes chiffrées" },
+                  { label: "Régularité d'action" },
+                  { label: "Bilan financier — 6 mois" },
+                  { label: "Cycle actuel (si activé)" },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -250,6 +261,12 @@ export function Guide() {
             titre="Projets"
             icon={<IconProjets />}
             resume="La liste de tous les projets, avec trois façons de les regarder et trois filtres."
+            diagram={
+              <FlowBranch
+                root={{ label: "Projets", icon: <IconProjets /> }}
+                leaves={[{ label: "Vue Grille" }, { label: "Vue Liste" }, { label: "Vue Matrice" }]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -338,6 +355,15 @@ export function Guide() {
             titre="Calendrier"
             icon={<IconCalendrier />}
             resume="Vue semaine/mois de toutes les échéances et sessions, tous projets confondus."
+            diagram={
+              <FlowRow
+                nodes={[
+                  { label: "Étapes de projet" },
+                  { label: "Calendrier", icon: <IconCalendrier /> },
+                  { label: "Fiche projet" },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -364,6 +390,16 @@ export function Guide() {
             titre="Roadmap"
             icon={<IconRoadmap />}
             resume="Vue chronologique des projets et suivi de la progression par objectif de vie."
+            diagram={
+              <FlowBranch
+                root={{ label: "Roadmap", icon: <IconRoadmap /> }}
+                leaves={[
+                  { label: "Frise chronologique des projets" },
+                  { label: "Progression par objectif" },
+                  { label: "Rétrospectives globales" },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -388,6 +424,15 @@ export function Guide() {
             titre="Routine"
             icon={<IconRoutine />}
             resume="Un tableau hebdomadaire d'habitudes à cocher chaque jour, avec série et taux de complétion."
+            diagram={
+              <FlowRow
+                nodes={[
+                  { label: "Routine (tableau)", icon: <IconRoutine /> },
+                  { label: "Clic sur un nom" },
+                  { label: "Fiche routine" },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -415,6 +460,15 @@ export function Guide() {
             titre="Objectifs"
             icon={<IconObjectifs />}
             resume="Les grandes ambitions personnelles, plus larges qu'un seul projet."
+            diagram={
+              <FlowRow
+                nodes={[
+                  { label: "Projets rattachés" },
+                  { label: "Objectif", icon: <IconObjectifs /> },
+                  { label: "Progression sur la Roadmap" },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -439,6 +493,15 @@ export function Guide() {
             titre="Backlog d'idées"
             icon={<IconBacklog />}
             resume="La salle d'attente des projets — tout ce qui mérite d'être noté sans être encore lancé."
+            diagram={
+              <FlowRow
+                nodes={[
+                  { label: "Idée", icon: <IconBacklog /> },
+                  { label: "Promouvoir" },
+                  { label: "Projet", icon: <IconProjets /> },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -462,6 +525,18 @@ export function Guide() {
             titre="Recherche notes & ⌘K"
             icon={<IconRecherche />}
             resume="Retrouver n'importe quelle note, projet, étape, objectif ou idée par mot-clé."
+            diagram={
+              <FlowBranch
+                root={{ label: "Mot-clé", icon: <IconRecherche /> }}
+                leaves={[
+                  { label: "Notes" },
+                  { label: "Projets" },
+                  { label: "Étapes" },
+                  { label: "Objectifs" },
+                  { label: "Idées" },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -486,6 +561,16 @@ export function Guide() {
             titre="Panneau de rappels"
             icon={<IconGuide />}
             resume="Le bouton « Panneau » en haut à droite : un tiroir qui résume ce qui a besoin d'attention maintenant."
+            diagram={
+              <FlowBranch
+                root={{ label: "Panneau" }}
+                leaves={[
+                  { label: "Échéances proches" },
+                  { label: "Seuils de dépenses dépassés" },
+                  { label: "Étapes bloquées" },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>
@@ -507,6 +592,18 @@ export function Guide() {
             titre="Paramètres"
             icon={<IconParametres />}
             resume="Tout ce qui règle le comportement de l'app plutôt que son contenu."
+            diagram={
+              <FlowBranch
+                root={{ label: "Paramètres", icon: <IconParametres /> }}
+                leaves={[
+                  { label: "Thème (incl. personnalisé)" },
+                  { label: "Devise" },
+                  { label: "Cycles de la Vue globale" },
+                  { label: "Verrouillage" },
+                  { label: "Données (export/import)" },
+                ]}
+              />
+            }
           >
             <Bloc titre="Fonctionnement">
               <ul>

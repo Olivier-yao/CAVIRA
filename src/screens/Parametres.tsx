@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import "./Parametres.css";
 import type { AppData } from "../types";
 import {
+  PALETTE_ACCENTS,
+  PALETTE_FONDS,
   THEMES,
   applyTheme,
   deriverThemePersonnalise,
@@ -294,26 +296,61 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
 
         {theme === "custom" && (
           <div className="theme-custom-editor">
-            <label className="theme-custom-editor__champ">
-              <span>Fond</span>
-              <input
-                type="color"
-                value={couleursPersonnalisees.bg}
-                onChange={(e) => handleChangerCouleurPersonnalisee({ bg: e.target.value })}
-              />
-              <span className="mono">{couleursPersonnalisees.bg.toUpperCase()}</span>
-            </label>
-            <label className="theme-custom-editor__champ">
-              <span>Accent</span>
-              <input
-                type="color"
-                value={couleursPersonnalisees.accent}
-                onChange={(e) => handleChangerCouleurPersonnalisee({ accent: e.target.value })}
-              />
-              <span className="mono">{couleursPersonnalisees.accent.toUpperCase()}</span>
-            </label>
+            <div className="theme-custom-editor__groupe">
+              <div className="theme-custom-editor__ligne">
+                <label className="theme-custom-editor__champ">
+                  <span>Fond</span>
+                  <input
+                    type="color"
+                    value={couleursPersonnalisees.bg}
+                    onChange={(e) => handleChangerCouleurPersonnalisee({ bg: e.target.value })}
+                  />
+                  <span className="mono">{couleursPersonnalisees.bg.toUpperCase()}</span>
+                </label>
+                <span className="theme-custom-editor__hint">n'importe quelle couleur — le sélecteur ci-dessus n'impose rien</span>
+              </div>
+              <div className="theme-custom-editor__palette">
+                {PALETTE_FONDS.map((c) => (
+                  <button
+                    key={c}
+                    className={`theme-custom-editor__swatch${couleursPersonnalisees.bg.toLowerCase() === c ? " theme-custom-editor__swatch--active" : ""}`}
+                    style={{ background: c }}
+                    title={c.toUpperCase()}
+                    onClick={() => handleChangerCouleurPersonnalisee({ bg: c })}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="theme-custom-editor__groupe">
+              <div className="theme-custom-editor__ligne">
+                <label className="theme-custom-editor__champ">
+                  <span>Accent</span>
+                  <input
+                    type="color"
+                    value={couleursPersonnalisees.accent}
+                    onChange={(e) => handleChangerCouleurPersonnalisee({ accent: e.target.value })}
+                  />
+                  <span className="mono">{couleursPersonnalisees.accent.toUpperCase()}</span>
+                </label>
+              </div>
+              <div className="theme-custom-editor__palette">
+                {PALETTE_ACCENTS.map((c) => (
+                  <button
+                    key={c}
+                    className={`theme-custom-editor__swatch${couleursPersonnalisees.accent.toLowerCase() === c ? " theme-custom-editor__swatch--active" : ""}`}
+                    style={{ background: c }}
+                    title={c.toUpperCase()}
+                    onClick={() => handleChangerCouleurPersonnalisee({ accent: c })}
+                  />
+                ))}
+              </div>
+            </div>
+
             <p className="theme-custom-editor__note">
-              Les surfaces, bordures et textes sont calculés automatiquement à partir de ces deux couleurs.
+              Les palettes ci-dessus sont des suggestions rapides — le sélecteur de couleur natif à côté de chaque
+              champ permet de choisir absolument n'importe quelle teinte. Les surfaces, bordures et textes sont
+              calculés automatiquement à partir du fond et de l'accent choisis.
             </p>
           </div>
         )}
