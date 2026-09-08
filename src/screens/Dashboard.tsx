@@ -9,6 +9,7 @@ import {
   type PeriodeDashboard,
 } from "../lib/dashboard";
 import { formatDateFull, formatDateShort, formatMontant, formatMontantAbs, formatRelative } from "../lib/format";
+import { avancerCycleSiNecessaire, cycleActuel, cyclesPrecedents, type CycleConfig, type CycleStats } from "../lib/cycles";
 
 interface DashboardProps {
   data: AppData;
@@ -35,6 +36,7 @@ export function Dashboard({ data, onOpenProjet }: DashboardProps) {
   const stats = useMemo(() => computeDashboardStats(data, periode), [data, periode]);
   const projetsActifs = data.projets.filter((p) => p.statut === "en_cours").length;
   const labelActions = periode === "mois" ? "Actions ce mois" : `Actions — ${PERIODES.find((p) => p.id === periode)?.label.toLowerCase()}`;
+  const cycleConfig = useMemo(() => avancerCycleSiNecessaire(), []);
 
   return (
     <div className="dashboard">
@@ -106,6 +108,60 @@ export function Dashboard({ data, onOpenProjet }: DashboardProps) {
         <ProgressionObjectifsCard stats={stats} />
         <DerniereActiviteCard stats={stats} onOpenProjet={onOpenProjet} />
       </section>
+
+      {cycleConfig.actif && <CyclesSection data={data} cycleConfig={cycleConfig} />}
+    </div>
+  );
+}
+
+function CyclesSection({ data, cycleConfig }: { data: AppData; cycleConfig: CycleConfig }) {
+  const actuel = useMemo(() => cycleActuel(data, cycleConfig), [data, cycleConfig]);
+  const precedents = useMemo(() => cyclesPrecedents(data, cycleConfig, 6), [data, cycleConfig]);
+
+  return (
+    <section className="card cycles-section">
+      <div className="cycles-section__header">
+        <h2>Cycle actuel</h2>
+        <span className="chart-card__meta">{actuel.label}</span>
+      </div>
+      <div className="cycles-section__actuel">
+        <CycleStat label="Actions" value={String(actuel.actions)} />
+        <CycleStat label="Bilan net" value={formatMontant(actuel.bilanNet)} />
+        <CycleStat label="Dépenses" value={formatMontantAbs(actuel.depenses)} />
+        <CycleStat label="Gagné" value={formatMontantAbs(actuel.gagne)} />
+      </div>
+
+      <h3 className="cycles-section__sous-titre">Cycles précédents</h3>
+      <div className="cycles-liste">
+        {precedents.every((c) => c.actions === 0) ? (
+          <p className="cycles-liste__vide">Pas encore de cycle précédent avec de l'activité.</p>
+        ) : (
+          precedents
+            .filter((c) => c.actions > 0)
+            .map((c, i) => <CycleRow key={i} cycle={c} />)
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CycleStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="cycles-stat">
+      <span className="cycles-stat__label">{label}</span>
+      <span className="cycles-stat__value">{value}</span>
+    </div>
+  );
+}
+
+function CycleRow({ cycle }: { cycle: CycleStats }) {
+  return (
+    <div className="cycles-row">
+      <span className="cycles-row__periode">{cycle.label}</span>
+      <span className="cycles-row__actions">
+        {cycle.actions} action{cycle.actions > 1 ? "s" : ""}
+      </span>
+      <span className="cycles-row__bilan">{formatMontant(cycle.bilanNet)}</span>
     </div>
   );
 }

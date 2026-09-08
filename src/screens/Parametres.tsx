@@ -16,6 +16,14 @@ import {
 } from "../data/fichiers";
 import { formatDateMedium } from "../lib/format";
 import { construireFenetre, genererRapportTexte, type PeriodeRapport } from "../lib/rapport";
+import {
+  avancerCycleSiNecessaire,
+  finCycle,
+  reinitialiserCycleMaintenant,
+  setCycleConfig,
+  type CycleConfig,
+  type CycleUnite,
+} from "../lib/cycles";
 
 interface ParametresProps {
   data: AppData;
@@ -50,6 +58,7 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [importEnCours, setImportEnCours] = useState(false);
   const [periodeRapport, setPeriodeRapport] = useState<PeriodeRapport>("30j");
   const [rapportEnCours, setRapportEnCours] = useState(false);
+  const [cycleConfig, setCycleConfigState] = useState<CycleConfig>(() => avancerCycleSiNecessaire());
 
   useEffect(() => {
     if (!isTauriRuntime()) return;
@@ -133,6 +142,28 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
     } finally {
       setRapportEnCours(false);
     }
+  }
+
+  function handleToggleCycle() {
+    const nouveau = { ...cycleConfig, actif: !cycleConfig.actif, debut: cycleConfig.debut || new Date().toISOString() };
+    setCycleConfig(nouveau);
+    setCycleConfigState(nouveau);
+  }
+
+  function handleChangerIntervalle(valeur: number) {
+    const nouveau = { ...cycleConfig, intervalle: Math.max(1, valeur) };
+    setCycleConfig(nouveau);
+    setCycleConfigState(nouveau);
+  }
+
+  function handleChangerUnite(unite: CycleUnite) {
+    const nouveau = { ...cycleConfig, unite };
+    setCycleConfig(nouveau);
+    setCycleConfigState(nouveau);
+  }
+
+  function handleReinitialiserCycle() {
+    setCycleConfigState(reinitialiserCycleMaintenant());
   }
 
   async function handleConfirmerImport() {
@@ -320,6 +351,55 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
             {rapportEnCours ? "Génération…" : "Générer le rapport"}
           </button>
         </div>
+      </section>
+
+      <section className="card parametres-section">
+        <div className="parametres-section__top">
+          <div>
+            <h2>Cycles de la Vue globale</h2>
+            <p className="parametres-section__desc">
+              Réinitialise périodiquement les compteurs de la Vue globale pour repartir sur une base neutre. Rien
+              n'est supprimé : chaque cycle passé reste consultable dans « Cycles précédents ».
+            </p>
+          </div>
+          <button
+            className={`cycle-toggle${cycleConfig.actif ? " cycle-toggle--on" : ""}`}
+            onClick={handleToggleCycle}
+            role="switch"
+            aria-checked={cycleConfig.actif}
+            aria-label="Activer les cycles"
+          >
+            <span className="cycle-toggle__knob" />
+          </button>
+        </div>
+
+        {cycleConfig.actif && (
+          <div className="cycle-config">
+            <div className="cycle-config__intervalle">
+              <span>Réinitialiser tous les</span>
+              <input
+                type="number"
+                min={1}
+                value={cycleConfig.intervalle}
+                onChange={(e) => handleChangerIntervalle(Number(e.target.value))}
+              />
+              <select value={cycleConfig.unite} onChange={(e) => handleChangerUnite(e.target.value as CycleUnite)}>
+                <option value="jours">jour{cycleConfig.intervalle > 1 ? "s" : ""}</option>
+                <option value="mois">mois</option>
+                <option value="annees">année{cycleConfig.intervalle > 1 ? "s" : ""}</option>
+              </select>
+            </div>
+            <div className="cycle-config__info">
+              <span>
+                Cycle actuel depuis le {formatDateMedium(cycleConfig.debut)} · prochaine réinitialisation le{" "}
+                {formatDateMedium(finCycle(cycleConfig).toISOString())}
+              </span>
+              <button className="btn btn--ghost" onClick={handleReinitialiserCycle}>
+                Réinitialiser maintenant
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       <div className="parametres-row2">

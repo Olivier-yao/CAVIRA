@@ -8,6 +8,7 @@ import { Dashboard } from "./screens/Dashboard";
 import { Projets } from "./screens/Projets";
 import { Calendrier } from "./screens/Calendrier";
 import { Roadmap } from "./screens/Roadmap";
+import { Routine } from "./screens/Routine";
 import { Objectifs } from "./screens/Objectifs";
 import { Backlog } from "./screens/Backlog";
 import { RechercheNotes } from "./screens/RechercheNotes";
@@ -130,6 +131,7 @@ function App() {
           {data && !openProjetId && screen === "roadmap" && (
             <Roadmap data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}
+          {data && !openProjetId && screen === "routine" && <Routine data={data} onDataChanged={refreshData} />}
           {data && !openProjetId && screen === "objectifs" && (
             <Objectifs data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}

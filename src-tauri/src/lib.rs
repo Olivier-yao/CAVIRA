@@ -96,6 +96,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/013_personnes_panneau.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 14,
+                description: "routines",
+                sql: include_str!("../migrations/014_routines.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

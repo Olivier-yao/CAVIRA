@@ -117,6 +117,21 @@ export interface CalendrierEntry {
   created_at: string;
 }
 
+export interface Routine {
+  id: string;
+  titre: string;
+  actif: boolean;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface RoutineCheck {
+  id: string;
+  routine_id: string;
+  date: string;
+  created_at: string;
+}
+
 export interface AppData {
   categories: Categorie[];
   objectifs: Objectif[];
@@ -130,4 +145,6 @@ export interface AppData {
   retrospectives: Retrospective[];
   projetPersonnes: ProjetPersonne[];
   idees: Idee[];
+  routines: Routine[];
+  routineChecks: RoutineCheck[];
 }

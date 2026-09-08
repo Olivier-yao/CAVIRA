@@ -86,6 +86,16 @@ export function IconParametres() {
   );
 }
 
+export function IconRoutine() {
+  return (
+    <svg {...base}>
+      <path d="M16 10a6 6 0 1 1-1.8-4.3" />
+      <path d="M16 3v3.2h-3.2" />
+      <path d="M7 10.3l1.8 1.8L13 8" />
+    </svg>
+  );
+}
+
 export function IconPremierLancement() {
   return (
     <svg {...base}>

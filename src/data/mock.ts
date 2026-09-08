@@ -13,6 +13,8 @@ import type {
   ProjetObjectif,
   ProjetPersonne,
   Retrospective,
+  Routine,
+  RoutineCheck,
   StatutEtape,
 } from "../types";
 import type { NewIdeeInput, NewJournalEntryInput, NewProjetInput, NewRetrospectiveInput } from "./db";
@@ -32,6 +34,12 @@ function iso(daysAgo: number, hours = 0): string {
   d.setDate(d.getDate() - daysAgo);
   d.setHours(d.getHours() - hours);
   return d.toISOString();
+}
+
+function dateKeyAgo(daysAgo: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
 }
 
 function isoInDays(days: number): string {
@@ -105,6 +113,24 @@ const retrospectives: Retrospective[] = [
 const projetPersonnes: ProjetPersonne[] = [
   { id: "pers-1", projet_id: "proj-tourneyci", nom: "Karim (dev backend)", created_at: iso(25) },
   { id: "pers-2", projet_id: "proj-lacata", nom: "Aïcha", created_at: iso(18) },
+];
+
+const routines: Routine[] = [
+  { id: "routine-sport", titre: "Sport", actif: true, sort_order: 1, created_at: iso(60) },
+  { id: "routine-lecture", titre: "Lecture", actif: true, sort_order: 2, created_at: iso(60) },
+  { id: "routine-meditation", titre: "Méditation", actif: true, sort_order: 3, created_at: iso(60) },
+  { id: "routine-code-perso", titre: "Code perso (hors travail)", actif: true, sort_order: 4, created_at: iso(60) },
+];
+
+const routineChecks: RoutineCheck[] = [
+  { id: "rc-1", routine_id: "routine-sport", date: dateKeyAgo(1), created_at: iso(1) },
+  { id: "rc-2", routine_id: "routine-sport", date: dateKeyAgo(2), created_at: iso(2) },
+  { id: "rc-3", routine_id: "routine-lecture", date: dateKeyAgo(0), created_at: iso(0) },
+  { id: "rc-4", routine_id: "routine-lecture", date: dateKeyAgo(1), created_at: iso(1) },
+  { id: "rc-5", routine_id: "routine-meditation", date: dateKeyAgo(0), created_at: iso(0) },
+  { id: "rc-6", routine_id: "routine-meditation", date: dateKeyAgo(1), created_at: iso(1) },
+  { id: "rc-7", routine_id: "routine-meditation", date: dateKeyAgo(2), created_at: iso(2) },
+  { id: "rc-8", routine_id: "routine-code-perso", date: dateKeyAgo(2), created_at: iso(2) },
 ];
 
 function mkProjet(
@@ -594,6 +620,8 @@ export const mockData: AppData = {
   retrospectives,
   projetPersonnes,
   idees,
+  routines,
+  routineChecks,
 };
 
 export function mockCreerProjet(id: string, input: NewProjetInput): void {
@@ -660,6 +688,29 @@ export function mockAjouterPersonneProjet(projetId: string, nom: string): void {
 
 export function mockRetirerPersonneProjet(id: string): void {
   removeWhere(projetPersonnes, (p) => p.id === id);
+}
+
+export function mockAjouterRoutine(titre: string): void {
+  routines.push({
+    id: uuidLib(),
+    titre,
+    actif: true,
+    sort_order: routines.length + 1,
+    created_at: new Date().toISOString(),
+  });
+}
+
+export function mockSupprimerRoutine(id: string): void {
+  removeWhere(routineChecks, (c) => c.routine_id === id);
+  removeWhere(routines, (r) => r.id === id);
+}
+
+export function mockToggleRoutineCheck(routineId: string, date: string, actuellementFait: boolean): void {
+  if (actuellementFait) {
+    removeWhere(routineChecks, (c) => c.routine_id === routineId && c.date === date);
+  } else {
+    routineChecks.push({ id: uuidLib(), routine_id: routineId, date, created_at: new Date().toISOString() });
+  }
 }
 
 export function mockMasquerProjet(id: string, masque: boolean): void {
@@ -764,6 +815,8 @@ export function mockRestaurerDonnees(data: AppData): void {
   remplacerContenu(retrospectives, data.retrospectives);
   remplacerContenu(projetPersonnes, data.projetPersonnes);
   remplacerContenu(idees, data.idees);
+  remplacerContenu(routines, data.routines);
+  remplacerContenu(routineChecks, data.routineChecks);
 }
 
 export function mockAddCategorie(label: string, color: string): string {

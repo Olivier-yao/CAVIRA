@@ -9,10 +9,21 @@ import {
   IconProjets,
   IconRecherche,
   IconRoadmap,
+  IconRoutine,
   IconVueGlobale,
 } from "./icons";
 
-export type Screen = "dashboard" | "projets" | "calendrier" | "roadmap" | "objectifs" | "backlog" | "recherche" | "parametres" | "premier-lancement";
+export type Screen =
+  | "dashboard"
+  | "projets"
+  | "calendrier"
+  | "roadmap"
+  | "routine"
+  | "objectifs"
+  | "backlog"
+  | "recherche"
+  | "parametres"
+  | "premier-lancement";
 
 interface NavItem {
   screen: Screen;
@@ -34,6 +45,7 @@ export function Sidebar({ screen, onNavigate, counts, streakJours }: SidebarProp
     { screen: "projets", label: "Projets", icon: <IconProjets />, count: counts.projets },
     { screen: "calendrier", label: "Calendrier", icon: <IconCalendrier />, count: counts.calendrier },
     { screen: "roadmap", label: "Roadmap", icon: <IconRoadmap /> },
+    { screen: "routine", label: "Routine", icon: <IconRoutine /> },
   ];
   const vision: NavItem[] = [
     { screen: "objectifs", label: "Objectifs", icon: <IconObjectifs />, count: counts.objectifs },

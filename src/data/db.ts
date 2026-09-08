@@ -16,6 +16,8 @@ import type {
   ProjetObjectif,
   ProjetPersonne,
   Retrospective,
+  Routine,
+  RoutineCheck,
   StatutEtape,
   StatutProjet,
   TypeJournal,
@@ -30,6 +32,7 @@ import {
   mockAddNote,
   mockAddRetrospective,
   mockAjouterPersonneProjet,
+  mockAjouterRoutine,
   mockArchiverProjetRapide,
   mockCreerProjet,
   mockDeplacerEcheanceEtape,
@@ -46,7 +49,9 @@ import {
   mockSupprimerEtape,
   mockSupprimerObjectif,
   mockSupprimerProjet,
+  mockSupprimerRoutine,
   mockToggleEtape,
+  mockToggleRoutineCheck,
 } from "./mock";
 
 let dbPromise: Promise<Database> | null = null;
@@ -85,6 +90,8 @@ export async function loadAppData(): Promise<AppData> {
     retrospectives,
     projetPersonnes,
     idees,
+    routines,
+    routineChecks,
   ] = await Promise.all([
     db.select<Categorie[]>("SELECT * FROM categories ORDER BY sort_order"),
     db.select<Objectif[]>("SELECT * FROM objectifs ORDER BY created_at"),
@@ -98,6 +105,8 @@ export async function loadAppData(): Promise<AppData> {
     db.select<Retrospective[]>("SELECT * FROM retrospectives ORDER BY created_at DESC"),
     db.select<ProjetPersonne[]>("SELECT * FROM projet_personnes ORDER BY created_at"),
     db.select<Idee[]>("SELECT * FROM idees ORDER BY interet DESC, created_at DESC"),
+    db.select<Routine[]>("SELECT * FROM routines ORDER BY sort_order"),
+    db.select<RoutineCheck[]>("SELECT * FROM routine_checks"),
   ]);
   return {
     categories,
@@ -112,6 +121,8 @@ export async function loadAppData(): Promise<AppData> {
     retrospectives,
     projetPersonnes,
     idees,
+    routines,
+    routineChecks,
   };
 }
 
@@ -289,6 +300,47 @@ export async function retirerPersonneProjet(id: string): Promise<void> {
   }
   const db = await getDb();
   await db.execute("DELETE FROM projet_personnes WHERE id = $1", [id]);
+}
+
+export async function ajouterRoutine(titre: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockAjouterRoutine(titre);
+    return;
+  }
+  const db = await getDb();
+  const [{ n }] = await db.select<{ n: number }[]>("SELECT COUNT(*) as n FROM routines");
+  await db.execute("INSERT INTO routines (id, titre, actif, sort_order) VALUES ($1, $2, 1, $3)", [
+    uuid(),
+    titre,
+    n + 1,
+  ]);
+}
+
+export async function supprimerRoutine(id: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockSupprimerRoutine(id);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("DELETE FROM routine_checks WHERE routine_id = $1", [id]);
+  await db.execute("DELETE FROM routines WHERE id = $1", [id]);
+}
+
+export async function toggleRoutineCheck(routineId: string, date: string, actuellementFait: boolean): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockToggleRoutineCheck(routineId, date, actuellementFait);
+    return;
+  }
+  const db = await getDb();
+  if (actuellementFait) {
+    await db.execute("DELETE FROM routine_checks WHERE routine_id = $1 AND date = $2", [routineId, date]);
+  } else {
+    await db.execute("INSERT INTO routine_checks (id, routine_id, date) VALUES ($1, $2, $3)", [
+      uuid(),
+      routineId,
+      date,
+    ]);
+  }
 }
 
 export async function masquerProjet(id: string, masque: boolean): Promise<void> {
@@ -505,6 +557,8 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
   await db.execute("DELETE FROM projets");
   await db.execute("DELETE FROM categories");
   await db.execute("DELETE FROM objectifs");
+  await db.execute("DELETE FROM routine_checks");
+  await db.execute("DELETE FROM routines");
 
   for (const c of data.categories) {
     await db.execute("INSERT INTO categories (id, label, color, sort_order) VALUES ($1, $2, $3, $4)", [
@@ -596,6 +650,23 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
       p.projet_id,
       p.nom,
       p.created_at,
+    ]);
+  }
+  for (const r of data.routines) {
+    await db.execute("INSERT INTO routines (id, titre, actif, sort_order, created_at) VALUES ($1, $2, $3, $4, $5)", [
+      r.id,
+      r.titre,
+      r.actif ? 1 : 0,
+      r.sort_order,
+      r.created_at,
+    ]);
+  }
+  for (const c of data.routineChecks) {
+    await db.execute("INSERT INTO routine_checks (id, routine_id, date, created_at) VALUES ($1, $2, $3, $4)", [
+      c.id,
+      c.routine_id,
+      c.date,
+      c.created_at,
     ]);
   }
 }
