@@ -9,6 +9,3 @@ CREATE TABLE projet_liens (
   PRIMARY KEY (projet_id, alimente_id),
   CHECK (projet_id != alimente_id)
 );
-
-INSERT INTO projet_liens (projet_id, alimente_id) VALUES
-  ('proj-progression', 'proj-tiktok');

@@ -11,22 +11,3 @@ INSERT INTO projet_objectifs (projet_id, objectif_id)
 SELECT id, objectif_id FROM projets WHERE objectif_id IS NOT NULL;
 
 ALTER TABLE projets DROP COLUMN objectif_id;
-
-INSERT INTO objectifs (id, titre, description) VALUES
-  ('obj-routine', 'Avoir une routine bien tracée', 'Tenir un rythme quotidien stable et mesurable.');
-
-DELETE FROM projet_objectifs;
-
-INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES
-  ('proj-lacata', 'obj-vivre'),
-  ('proj-vertax', 'obj-vivre'),
-  ('proj-discord', 'obj-vivre'),
-  ('proj-tourneyci', 'obj-vivre'),
-  ('proj-tourneyci', 'obj-boite'),
-  ('proj-tourneyci', 'obj-independant'),
-  ('proj-boite', 'obj-boite'),
-  ('proj-subvention', 'obj-boite'),
-  ('proj-progression', 'obj-independant'),
-  ('proj-tiktok', 'obj-tiktok'),
-  ('proj-vitrine', 'obj-tiktok'),
-  ('proj-routine', 'obj-routine');

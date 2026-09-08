@@ -8,8 +8,3 @@ CREATE TABLE routine_notes (
   contenu TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
-
-INSERT INTO routine_notes (id, routine_id, contenu, created_at) VALUES
-  ('rn-1', 'routine-sport', '5 km de course à pied, 20 min. Rythme correct.', datetime('now', '-1 day')),
-  ('rn-2', 'routine-lecture', 'Chapitre 4 de "Deep Work" — 25 pages.', datetime('now')),
-  ('rn-3', 'routine-meditation', '10 minutes de respiration guidée avant de dormir.', datetime('now', '-1 day'));
