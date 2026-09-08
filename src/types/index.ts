@@ -91,6 +91,13 @@ export interface ProjetLien {
   created_at: string;
 }
 
+export interface ProjetPersonne {
+  id: string;
+  projet_id: string;
+  nom: string;
+  created_at: string;
+}
+
 export interface Retrospective {
   id: string;
   projet_id: string | null;
@@ -121,5 +128,6 @@ export interface AppData {
   projetObjectifs: ProjetObjectif[];
   projetLiens: ProjetLien[];
   retrospectives: Retrospective[];
+  projetPersonnes: ProjetPersonne[];
   idees: Idee[];
 }

@@ -14,9 +14,11 @@ import { RechercheNotes } from "./screens/RechercheNotes";
 import { Parametres } from "./screens/Parametres";
 import { PremierLancement } from "./screens/PremierLancement";
 import { FicheProjet } from "./screens/FicheProjet";
+import { PanneauRappels } from "./components/PanneauRappels";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
 import { buildCalendarEvents } from "./lib/calendrier";
+import { construireRappels } from "./lib/rappels";
 import type { AppData } from "./types";
 
 function App() {
@@ -27,6 +29,7 @@ function App() {
   const [modalOuvert, setModalOuvert] = useState(false);
   const [projetAEditerId, setProjetAEditerId] = useState<string | null>(null);
   const [paletteOuverte, setPaletteOuverte] = useState(false);
+  const [panneauOuvert, setPanneauOuvert] = useState(false);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -51,6 +54,7 @@ function App() {
   }, [refreshData]);
 
   const stats: DashboardStats | null = data ? computeDashboardStats(data) : null;
+  const nbRappels = data ? construireRappels(data).total : 0;
 
   const counts = {
     projets: data?.projets.filter((p) => p.statut !== "termine" && p.statut !== "abandonne").length ?? 0,
@@ -104,7 +108,12 @@ function App() {
     <div className="app-shell">
       <Sidebar screen={screen} onNavigate={handleSidebarNavigate} counts={counts} streakJours={stats?.streakJours ?? 0} />
       <div className="app-main">
-        <TopBar onNouveauProjet={() => setModalOuvert(true)} onOpenPalette={() => setPaletteOuverte(true)} />
+        <TopBar
+          onNouveauProjet={() => setModalOuvert(true)}
+          onOpenPalette={() => setPaletteOuverte(true)}
+          onOpenPanneau={() => setPanneauOuvert(true)}
+          nbRappels={nbRappels}
+        />
         <div className="app-content">
           {error && <div className="app-error">Erreur de chargement : {error}</div>}
           {!error && !data && <div className="app-loading">Chargement…</div>}
@@ -153,6 +162,9 @@ function App() {
           }}
           onNavigate={handleSidebarNavigate}
         />
+      )}
+      {panneauOuvert && data && (
+        <PanneauRappels data={data} onClose={() => setPanneauOuvert(false)} onOpenProjet={openProjet} />
       )}
       {modalOuvert && data && (
         <ProjetModal

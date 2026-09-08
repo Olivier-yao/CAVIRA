@@ -11,6 +11,7 @@ import type {
   Projet,
   ProjetLien,
   ProjetObjectif,
+  ProjetPersonne,
   Retrospective,
   StatutEtape,
 } from "../types";
@@ -99,6 +100,11 @@ const retrospectives: Retrospective[] = [
     ajustement: "Me concentrer sur 2-3 projets prioritaires par semaine plutôt que d'avancer un peu partout.",
     created_at: iso(20),
   },
+];
+
+const projetPersonnes: ProjetPersonne[] = [
+  { id: "pers-1", projet_id: "proj-tourneyci", nom: "Karim (dev backend)", created_at: iso(25) },
+  { id: "pers-2", projet_id: "proj-lacata", nom: "Aïcha", created_at: iso(18) },
 ];
 
 function mkProjet(
@@ -586,6 +592,7 @@ export const mockData: AppData = {
   projetObjectifs,
   projetLiens,
   retrospectives,
+  projetPersonnes,
   idees,
 };
 
@@ -643,7 +650,16 @@ export function mockSupprimerProjet(id: string): void {
   removeWhere(projetObjectifs, (po) => po.projet_id === id);
   removeWhere(projetLiens, (pl) => pl.projet_id === id || pl.alimente_id === id);
   removeWhere(retrospectives, (r) => r.projet_id === id);
+  removeWhere(projetPersonnes, (p) => p.projet_id === id);
   removeWhere(projets, (p) => p.id === id);
+}
+
+export function mockAjouterPersonneProjet(projetId: string, nom: string): void {
+  projetPersonnes.push({ id: uuidLib(), projet_id: projetId, nom, created_at: new Date().toISOString() });
+}
+
+export function mockRetirerPersonneProjet(id: string): void {
+  removeWhere(projetPersonnes, (p) => p.id === id);
 }
 
 export function mockMasquerProjet(id: string, masque: boolean): void {
@@ -746,6 +762,7 @@ export function mockRestaurerDonnees(data: AppData): void {
   remplacerContenu(projetObjectifs, data.projetObjectifs);
   remplacerContenu(projetLiens, data.projetLiens);
   remplacerContenu(retrospectives, data.retrospectives);
+  remplacerContenu(projetPersonnes, data.projetPersonnes);
   remplacerContenu(idees, data.idees);
 }
 

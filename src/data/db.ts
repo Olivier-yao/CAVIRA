@@ -14,6 +14,7 @@ import type {
   Projet,
   ProjetLien,
   ProjetObjectif,
+  ProjetPersonne,
   Retrospective,
   StatutEtape,
   StatutProjet,
@@ -28,6 +29,7 @@ import {
   mockAddJournalEntry,
   mockAddNote,
   mockAddRetrospective,
+  mockAjouterPersonneProjet,
   mockArchiverProjetRapide,
   mockCreerProjet,
   mockDeplacerEcheanceEtape,
@@ -39,6 +41,7 @@ import {
   mockModifierProjet,
   mockPromouvoirIdee,
   mockRestaurerDonnees,
+  mockRetirerPersonneProjet,
   mockSupprimerCategorie,
   mockSupprimerEtape,
   mockSupprimerObjectif,
@@ -80,6 +83,7 @@ export async function loadAppData(): Promise<AppData> {
     projetObjectifs,
     projetLiens,
     retrospectives,
+    projetPersonnes,
     idees,
   ] = await Promise.all([
     db.select<Categorie[]>("SELECT * FROM categories ORDER BY sort_order"),
@@ -92,6 +96,7 @@ export async function loadAppData(): Promise<AppData> {
     db.select<ProjetObjectif[]>("SELECT * FROM projet_objectifs"),
     db.select<ProjetLien[]>("SELECT * FROM projet_liens"),
     db.select<Retrospective[]>("SELECT * FROM retrospectives ORDER BY created_at DESC"),
+    db.select<ProjetPersonne[]>("SELECT * FROM projet_personnes ORDER BY created_at"),
     db.select<Idee[]>("SELECT * FROM idees ORDER BY interet DESC, created_at DESC"),
   ]);
   return {
@@ -105,6 +110,7 @@ export async function loadAppData(): Promise<AppData> {
     projetObjectifs,
     projetLiens,
     retrospectives,
+    projetPersonnes,
     idees,
   };
 }
@@ -259,7 +265,30 @@ export async function supprimerProjet(id: string): Promise<void> {
   await db.execute("DELETE FROM projet_objectifs WHERE projet_id = $1", [id]);
   await db.execute("DELETE FROM projet_liens WHERE projet_id = $1 OR alimente_id = $1", [id]);
   await db.execute("DELETE FROM retrospectives WHERE projet_id = $1", [id]);
+  await db.execute("DELETE FROM projet_personnes WHERE projet_id = $1", [id]);
   await db.execute("DELETE FROM projets WHERE id = $1", [id]);
+}
+
+export async function ajouterPersonneProjet(projetId: string, nom: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockAjouterPersonneProjet(projetId, nom);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("INSERT INTO projet_personnes (id, projet_id, nom) VALUES ($1, $2, $3)", [
+    uuid(),
+    projetId,
+    nom,
+  ]);
+}
+
+export async function retirerPersonneProjet(id: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockRetirerPersonneProjet(id);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("DELETE FROM projet_personnes WHERE id = $1", [id]);
 }
 
 export async function masquerProjet(id: string, masque: boolean): Promise<void> {
@@ -467,6 +496,7 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
   await db.execute("DELETE FROM projet_objectifs");
   await db.execute("DELETE FROM projet_liens");
   await db.execute("DELETE FROM retrospectives");
+  await db.execute("DELETE FROM projet_personnes");
   await db.execute("DELETE FROM plan_etapes");
   await db.execute("DELETE FROM journal_entries");
   await db.execute("DELETE FROM notes");
@@ -559,5 +589,13 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
       "INSERT INTO retrospectives (id, projet_id, periode, bien_marche, a_bloque, ajustement, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
       [r.id, r.projet_id, r.periode, r.bien_marche, r.a_bloque, r.ajustement, r.created_at],
     );
+  }
+  for (const p of data.projetPersonnes) {
+    await db.execute("INSERT INTO projet_personnes (id, projet_id, nom, created_at) VALUES ($1, $2, $3, $4)", [
+      p.id,
+      p.projet_id,
+      p.nom,
+      p.created_at,
+    ]);
   }
 }

@@ -51,6 +51,7 @@ const CLES_APPDATA: (keyof AppData)[] = [
   "projetObjectifs",
   "projetLiens",
   "retrospectives",
+  "projetPersonnes",
   "idees",
 ];
 

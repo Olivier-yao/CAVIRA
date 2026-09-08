@@ -1,0 +1,137 @@
+.panneau-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 100;
+  animation: modal-fade-in 0.15s ease both;
+}
+
+.panneau {
+  width: 360px;
+  max-width: 90vw;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  animation: panneau-slide-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes panneau-slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+.panneau__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.panneau__header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.panneau__close {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 14px;
+}
+
+.panneau__close:hover {
+  color: var(--text);
+}
+
+.panneau__body {
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.panneau__vide {
+  color: var(--text-3);
+  font-size: 13px;
+  text-align: center;
+  padding: 30px 0;
+}
+
+.panneau__section h3 {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.panneau-rappel {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: none;
+  border: none;
+  text-align: left;
+  margin-bottom: 2px;
+}
+
+.panneau-rappel:hover {
+  background: var(--surface-2);
+}
+
+.panneau-rappel__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+  background: var(--text-3);
+}
+
+.panneau-rappel--retard .panneau-rappel__dot {
+  background: var(--danger);
+}
+
+.panneau-rappel--proche .panneau-rappel__dot {
+  background: var(--accent);
+}
+
+.panneau-rappel__texte {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.panneau-rappel__titre {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panneau-rappel__sous {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.panneau-rappel--retard .panneau-rappel__sous {
+  color: var(--danger);
+}

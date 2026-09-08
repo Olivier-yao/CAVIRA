@@ -90,6 +90,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/012_masque_projets.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 13,
+                description: "personnes_panneau",
+                sql: include_str!("../migrations/013_personnes_panneau.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

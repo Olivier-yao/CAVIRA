@@ -129,6 +129,67 @@
   color: var(--accent);
 }
 
+.collaborateur-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 11.5px;
+}
+
+.collaborateur-chip__retirer {
+  display: grid;
+  place-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 9px;
+}
+
+.collaborateur-chip__retirer:hover {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.collaborateur-ajout {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.collaborateur-ajout input {
+  width: 110px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--accent-line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 11.5px;
+}
+
+.collaborateur-ajout__valider {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.collaborateur-ajout__valider:disabled {
+  opacity: 0.5;
+}
+
 .fiche-projet__header-side {
   display: flex;
   flex-direction: column;

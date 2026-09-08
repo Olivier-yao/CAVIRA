@@ -72,3 +72,22 @@
   align-items: center;
   gap: 8px;
 }
+
+.topbar__panneau {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.topbar__panneau-badge {
+  display: grid;
+  place-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+}

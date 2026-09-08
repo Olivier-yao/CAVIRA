@@ -15,6 +15,7 @@ import { JournalTab } from "./fiche-projet/JournalTab";
 import { NotesTab } from "./fiche-projet/NotesTab";
 import { RetroTab } from "./fiche-projet/RetroTab";
 import { ActionsMenu } from "./fiche-projet/ActionsMenu";
+import { Collaborateurs } from "./fiche-projet/Collaborateurs";
 
 type TabId = "plan" | "calendrier" | "journal" | "notes" | "retros";
 
@@ -175,30 +176,29 @@ export function FicheProjet({
             />
           </div>
 
-          {(projetsAlimentes.length > 0 || projetsAlimentantCelui.length > 0) && (
-            <div className="fiche-projet__liens">
-              {projetsAlimentes.length > 0 && (
-                <div className="fiche-projet__liens-groupe">
-                  <span className="fiche-projet__liens-label">Alimente</span>
-                  {projetsAlimentes.map((p) => (
-                    <button key={p.id} className="fiche-projet__lien-chip" onClick={() => onOpenProjet(p.id)}>
-                      {p.titre}
-                    </button>
-                  ))}
-                </div>
-              )}
-              {projetsAlimentantCelui.length > 0 && (
-                <div className="fiche-projet__liens-groupe">
-                  <span className="fiche-projet__liens-label">Alimenté par</span>
-                  {projetsAlimentantCelui.map((p) => (
-                    <button key={p.id} className="fiche-projet__lien-chip" onClick={() => onOpenProjet(p.id)}>
-                      {p.titre}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <div className="fiche-projet__liens">
+            <Collaborateurs data={data} projetId={projet.id} onDataChanged={onDataChanged} />
+            {projetsAlimentes.length > 0 && (
+              <div className="fiche-projet__liens-groupe">
+                <span className="fiche-projet__liens-label">Alimente</span>
+                {projetsAlimentes.map((p) => (
+                  <button key={p.id} className="fiche-projet__lien-chip" onClick={() => onOpenProjet(p.id)}>
+                    {p.titre}
+                  </button>
+                ))}
+              </div>
+            )}
+            {projetsAlimentantCelui.length > 0 && (
+              <div className="fiche-projet__liens-groupe">
+                <span className="fiche-projet__liens-label">Alimenté par</span>
+                {projetsAlimentantCelui.map((p) => (
+                  <button key={p.id} className="fiche-projet__lien-chip" onClick={() => onOpenProjet(p.id)}>
+                    {p.titre}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         <div className="fiche-projet__header-side">
           <ProgressRing pct={progression} label="Global" />
