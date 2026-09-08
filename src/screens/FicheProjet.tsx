@@ -19,9 +19,10 @@ interface FicheProjetProps {
   onBack: () => void;
   onDataChanged: () => void;
   onModifier: () => void;
+  onOpenProjet: (projetId: string) => void;
 }
 
-export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier }: FicheProjetProps) {
+export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier, onOpenProjet }: FicheProjetProps) {
   const projet = data.projets.find((p) => p.id === projetId);
   const [activeTab, setActiveTab] = useState<TabId>("plan");
 
@@ -59,6 +60,14 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier 
   const progression = projetProgressionPct(data.etapes, projet.id);
   const synthese = syntheseFinanciere(data.journal, projet, 30);
   const streak = streakJoursProjet(data.journal, projet.id);
+  const projetsAlimentes = data.projetLiens
+    .filter((pl) => pl.projet_id === projet.id)
+    .map((pl) => data.projets.find((p) => p.id === pl.alimente_id))
+    .filter((p): p is NonNullable<typeof p> => !!p);
+  const projetsAlimentantCelui = data.projetLiens
+    .filter((pl) => pl.alimente_id === projet.id)
+    .map((pl) => data.projets.find((p) => p.id === pl.projet_id))
+    .filter((p): p is NonNullable<typeof p> => !!p);
   const nbEtapes = data.etapes.filter((e) => e.projet_id === projet.id).length;
   const nbJournal = data.journal.filter((j) => j.projet_id === projet.id).length;
   const nbNotes = data.notes.filter((n) => n.projet_id === projet.id).length;
@@ -113,6 +122,31 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier 
               value={projet.echeance_date ? `${formatDateShort(projet.echeance_date)} · J-${daysUntil(projet.echeance_date)}` : "—"}
             />
           </div>
+
+          {(projetsAlimentes.length > 0 || projetsAlimentantCelui.length > 0) && (
+            <div className="fiche-projet__liens">
+              {projetsAlimentes.length > 0 && (
+                <div className="fiche-projet__liens-groupe">
+                  <span className="fiche-projet__liens-label">Alimente</span>
+                  {projetsAlimentes.map((p) => (
+                    <button key={p.id} className="fiche-projet__lien-chip" onClick={() => onOpenProjet(p.id)}>
+                      {p.titre}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {projetsAlimentantCelui.length > 0 && (
+                <div className="fiche-projet__liens-groupe">
+                  <span className="fiche-projet__liens-label">Alimenté par</span>
+                  {projetsAlimentantCelui.map((p) => (
+                    <button key={p.id} className="fiche-projet__lien-chip" onClick={() => onOpenProjet(p.id)}>
+                      {p.titre}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <div className="fiche-projet__header-side">
           <ProgressRing pct={progression} label="Global" />

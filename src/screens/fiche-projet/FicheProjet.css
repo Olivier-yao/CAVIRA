@@ -91,6 +91,44 @@
   color: var(--text);
 }
 
+.fiche-projet__liens {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.fiche-projet__liens-groupe {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fiche-projet__liens-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-right: 2px;
+}
+
+.fiche-projet__lien-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 11.5px;
+}
+
+.fiche-projet__lien-chip:hover {
+  border-color: var(--accent-line);
+  color: var(--accent);
+}
+
 .fiche-projet__header-side {
   display: flex;
   flex-direction: column;

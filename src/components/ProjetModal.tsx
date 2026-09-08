@@ -41,10 +41,28 @@ export function ProjetModal({
   const [seuilDepenses, setSeuilDepenses] = useState(
     projetExistant?.seuil_depenses != null ? String(projetExistant.seuil_depenses) : "",
   );
+  const [alimenteIds, setAlimenteIds] = useState<Set<string>>(
+    new Set(
+      projetExistant
+        ? data.projetLiens.filter((pl) => pl.projet_id === projetExistant.id).map((pl) => pl.alimente_id)
+        : [],
+    ),
+  );
   const [enCours, setEnCours] = useState(false);
+
+  const autresProjets = data.projets.filter((p) => p.id !== projetExistant?.id);
 
   function toggleObjectif(id: string) {
     setObjectifIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAlimente(id: string) {
+    setAlimenteIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -66,6 +84,7 @@ export function ProjetModal({
         objectifFinal: objectifFinal.trim(),
         objectifIds: [...objectifIds],
         seuilDepenses: seuilDepenses.trim() && Number.isFinite(seuilParsed) ? Math.abs(seuilParsed) : null,
+        alimenteIds: [...alimenteIds],
       };
       if (modeEdition && projetExistant) {
         await modifierProjet(projetExistant.id, input);
@@ -173,6 +192,23 @@ export function ProjetModal({
                     onClick={() => toggleObjectif(o.id)}
                   >
                     {o.titre}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {autresProjets.length > 0 && (
+            <div className="modal-field">
+              <span>Ce projet alimente (optionnel)</span>
+              <div className="modal-objectifs">
+                {autresProjets.map((p) => (
+                  <button
+                    key={p.id}
+                    className={`modal-objectif-chip${alimenteIds.has(p.id) ? " modal-objectif-chip--active" : ""}`}
+                    onClick={() => toggleAlimente(p.id)}
+                  >
+                    {p.titre}
                   </button>
                 ))}
               </div>

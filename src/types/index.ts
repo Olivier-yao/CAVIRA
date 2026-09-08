@@ -81,6 +81,12 @@ export interface ProjetObjectif {
   objectif_id: string;
 }
 
+export interface ProjetLien {
+  projet_id: string;
+  alimente_id: string;
+  created_at: string;
+}
+
 export interface CalendrierEntry {
   id: string;
   projet_id: string | null;
@@ -99,5 +105,6 @@ export interface AppData {
   notes: Note[];
   calendrier: CalendrierEntry[];
   projetObjectifs: ProjetObjectif[];
+  projetLiens: ProjetLien[];
   idees: Idee[];
 }

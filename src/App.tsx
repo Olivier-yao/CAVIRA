@@ -134,6 +134,7 @@ function App() {
               onBack={backToProjets}
               onDataChanged={refreshData}
               onModifier={() => setProjetAEditerId(openProjetId)}
+              onOpenProjet={openProjet}
             />
           )}
         </div>

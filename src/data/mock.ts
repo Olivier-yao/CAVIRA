@@ -9,6 +9,7 @@ import type {
   Objectif,
   PlanEtape,
   Projet,
+  ProjetLien,
   ProjetObjectif,
   StatutEtape,
 } from "../types";
@@ -71,6 +72,10 @@ const projetObjectifs: ProjetObjectif[] = [
   { projet_id: "proj-vitrine", objectif_id: "obj-tiktok" },
   { projet_id: "proj-routine", objectif_id: "obj-routine" },
   { projet_id: "proj-vieux-site", objectif_id: "obj-boite" },
+];
+
+const projetLiens: ProjetLien[] = [
+  { projet_id: "proj-progression", alimente_id: "proj-tiktok", created_at: iso(20) },
 ];
 
 function mkProjet(
@@ -543,6 +548,7 @@ export const mockData: AppData = {
   notes,
   calendrier,
   projetObjectifs,
+  projetLiens,
   idees,
 };
 
@@ -563,6 +569,9 @@ export function mockCreerProjet(id: string, input: NewProjetInput): void {
   for (const objectifId of input.objectifIds) {
     projetObjectifs.push({ projet_id: id, objectif_id: objectifId });
   }
+  for (const alimenteId of input.alimenteIds) {
+    projetLiens.push({ projet_id: id, alimente_id: alimenteId, created_at: now });
+  }
 }
 
 export function mockModifierProjet(id: string, input: NewProjetInput): void {
@@ -580,6 +589,10 @@ export function mockModifierProjet(id: string, input: NewProjetInput): void {
   for (const objectifId of input.objectifIds) {
     projetObjectifs.push({ projet_id: id, objectif_id: objectifId });
   }
+  removeWhere(projetLiens, (pl) => pl.projet_id === id);
+  for (const alimenteId of input.alimenteIds) {
+    projetLiens.push({ projet_id: id, alimente_id: alimenteId, created_at: new Date().toISOString() });
+  }
 }
 
 export function mockSupprimerProjet(id: string): void {
@@ -588,6 +601,7 @@ export function mockSupprimerProjet(id: string): void {
   removeWhere(notes, (n) => n.projet_id === id);
   removeWhere(calendrier, (c) => c.projet_id === id);
   removeWhere(projetObjectifs, (po) => po.projet_id === id);
+  removeWhere(projetLiens, (pl) => pl.projet_id === id || pl.alimente_id === id);
   removeWhere(projets, (p) => p.id === id);
 }
 
@@ -652,6 +666,7 @@ export function mockRestaurerDonnees(data: AppData): void {
   remplacerContenu(notes, data.notes);
   remplacerContenu(calendrier, data.calendrier);
   remplacerContenu(projetObjectifs, data.projetObjectifs);
+  remplacerContenu(projetLiens, data.projetLiens);
   remplacerContenu(idees, data.idees);
 }
 

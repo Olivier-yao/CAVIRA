@@ -10,6 +10,7 @@ import type {
   Objectif,
   PlanEtape,
   Projet,
+  ProjetLien,
   ProjetObjectif,
   StatutEtape,
   StatutProjet,
@@ -57,7 +58,7 @@ export async function loadAppData(): Promise<AppData> {
     return mockData;
   }
   const db = await getDb();
-  const [categories, objectifs, projets, etapes, journal, notes, calendrier, projetObjectifs, idees] =
+  const [categories, objectifs, projets, etapes, journal, notes, calendrier, projetObjectifs, projetLiens, idees] =
     await Promise.all([
       db.select<Categorie[]>("SELECT * FROM categories ORDER BY sort_order"),
       db.select<Objectif[]>("SELECT * FROM objectifs ORDER BY created_at"),
@@ -67,9 +68,10 @@ export async function loadAppData(): Promise<AppData> {
       db.select<Note[]>("SELECT * FROM notes ORDER BY created_at DESC"),
       db.select<CalendrierEntry[]>("SELECT * FROM calendrier_entries ORDER BY date"),
       db.select<ProjetObjectif[]>("SELECT * FROM projet_objectifs"),
+      db.select<ProjetLien[]>("SELECT * FROM projet_liens"),
       db.select<Idee[]>("SELECT * FROM idees ORDER BY interet DESC, created_at DESC"),
     ]);
-  return { categories, objectifs, projets, etapes, journal, notes, calendrier, projetObjectifs, idees };
+  return { categories, objectifs, projets, etapes, journal, notes, calendrier, projetObjectifs, projetLiens, idees };
 }
 
 export async function toggleEtapeStatut(etapeId: string, nextStatut: StatutEtape): Promise<void> {
@@ -163,6 +165,7 @@ export interface NewProjetInput {
   objectifFinal: string;
   objectifIds: string[];
   seuilDepenses: number | null;
+  alimenteIds: string[];
 }
 
 export async function creerProjet(input: NewProjetInput): Promise<string> {
@@ -178,6 +181,9 @@ export async function creerProjet(input: NewProjetInput): Promise<string> {
   );
   for (const objectifId of input.objectifIds) {
     await db.execute("INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES ($1, $2)", [id, objectifId]);
+  }
+  for (const alimenteId of input.alimenteIds) {
+    await db.execute("INSERT INTO projet_liens (projet_id, alimente_id) VALUES ($1, $2)", [id, alimenteId]);
   }
   return id;
 }
@@ -196,6 +202,10 @@ export async function modifierProjet(id: string, input: NewProjetInput): Promise
   for (const objectifId of input.objectifIds) {
     await db.execute("INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES ($1, $2)", [id, objectifId]);
   }
+  await db.execute("DELETE FROM projet_liens WHERE projet_id = $1", [id]);
+  for (const alimenteId of input.alimenteIds) {
+    await db.execute("INSERT INTO projet_liens (projet_id, alimente_id) VALUES ($1, $2)", [id, alimenteId]);
+  }
 }
 
 export async function supprimerProjet(id: string): Promise<void> {
@@ -211,6 +221,7 @@ export async function supprimerProjet(id: string): Promise<void> {
   await db.execute("DELETE FROM notes WHERE projet_id = $1", [id]);
   await db.execute("DELETE FROM calendrier_entries WHERE projet_id = $1", [id]);
   await db.execute("DELETE FROM projet_objectifs WHERE projet_id = $1", [id]);
+  await db.execute("DELETE FROM projet_liens WHERE projet_id = $1 OR alimente_id = $1", [id]);
   await db.execute("DELETE FROM projets WHERE id = $1", [id]);
 }
 
@@ -334,6 +345,7 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
   const db = await getDb();
 
   await db.execute("DELETE FROM projet_objectifs");
+  await db.execute("DELETE FROM projet_liens");
   await db.execute("DELETE FROM plan_etapes");
   await db.execute("DELETE FROM journal_entries");
   await db.execute("DELETE FROM notes");
@@ -404,6 +416,13 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
     await db.execute("INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES ($1, $2)", [
       po.projet_id,
       po.objectif_id,
+    ]);
+  }
+  for (const pl of data.projetLiens) {
+    await db.execute("INSERT INTO projet_liens (projet_id, alimente_id, created_at) VALUES ($1, $2, $3)", [
+      pl.projet_id,
+      pl.alimente_id,
+      pl.created_at,
     ]);
   }
   for (const i of data.idees) {
