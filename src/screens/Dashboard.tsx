@@ -79,9 +79,11 @@ export function Dashboard({ data, onOpenProjet }: DashboardProps) {
         <div className="card chart-card">
           <div className="chart-card__header">
             <h2>Régularité d'action</h2>
-            <span className="chart-card__meta">28 derniers jours · {stats.regularite28j.reduce((s, j) => s + j.count, 0)} actions</span>
+            <span className="chart-card__meta">
+              {stats.regularite.label} · {stats.regularite.points.reduce((s, j) => s + j.count, 0)} actions
+            </span>
           </div>
-          <RegulariteChart data={stats.regularite28j} />
+          <RegulariteChart data={stats.regularite.points} />
         </div>
         <div className="card chart-card chart-card--narrow">
           <div className="chart-card__header">

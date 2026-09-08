@@ -21,6 +21,11 @@ export interface JourActivite {
   count: number;
 }
 
+export interface Regularite {
+  points: JourActivite[];
+  label: string;
+}
+
 export interface MoisBilan {
   label: string;
   depenses: number;
@@ -44,7 +49,7 @@ export interface DashboardStats {
   echeancesProches: number;
   echeancesEnRetard: number;
   echeancesProjetsTitres: string[];
-  regularite28j: JourActivite[];
+  regularite: Regularite;
   bilanFinancier6mois: MoisBilan[];
   prochaineEcheance: ProchaineEcheance | null;
   progressionParObjectif: ObjectifProgress[];
@@ -104,6 +109,38 @@ function calculerFenetreComparaison(periode: PeriodeDashboard, maintenant: Date)
   return { debut, fin: finProchaine, debutPrecedent, finPrecedent: debut, labelPrecedent: "le mois dernier" };
 }
 
+function calculerRegularite(journal: JournalEntry[], periode: PeriodeDashboard, maintenant: Date): Regularite {
+  const actions = journal.filter((j) => j.type === "action");
+
+  if (periode === "trimestre") {
+    const points: JourActivite[] = [];
+    for (let i = 12; i >= 0; i--) {
+      const finSemaine = new Date(maintenant.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+      const debutSemaine = new Date(finSemaine.getTime() - 6 * 24 * 60 * 60 * 1000);
+      const debutKey = dateKey(debutSemaine);
+      const finKey = dateKey(finSemaine);
+      const count = actions.filter((j) => {
+        const k = toLocalDateKey(j.created_at);
+        return k >= debutKey && k <= finKey;
+      }).length;
+      points.push({ jour: debutKey, count });
+    }
+    return { points, label: "13 dernières semaines" };
+  }
+
+  const nbJours =
+    periode === "30j" ? 30 : Math.max(1, maintenant.getDate());
+  const points: JourActivite[] = [];
+  for (let i = nbJours - 1; i >= 0; i--) {
+    const d = new Date(maintenant);
+    d.setDate(d.getDate() - i);
+    const key = dateKey(d);
+    const count = actions.filter((j) => toLocalDateKey(j.created_at) === key).length;
+    points.push({ jour: key, count });
+  }
+  return { points, label: periode === "30j" ? "30 derniers jours" : "depuis le 1er du mois" };
+}
+
 export function computeDashboardStats(data: AppData, periode: PeriodeDashboard = "mois"): DashboardStats {
   const { projets, etapes, journal } = data;
   const now = new Date();
@@ -149,14 +186,7 @@ export function computeDashboardStats(data: AppData, periode: PeriodeDashboard =
     ...new Set(echeancesProchesList.map((e) => projetById.get(e.projet_id)?.titre).filter((t): t is string => !!t)),
   ];
 
-  const regularite28j: JourActivite[] = [];
-  for (let i = 27; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const key = dateKey(d);
-    const count = journal.filter((j) => j.type === "action" && toLocalDateKey(j.created_at) === key).length;
-    regularite28j.push({ jour: key, count });
-  }
+  const regularite = calculerRegularite(journal, periode, now);
 
   const bilanFinancier6mois: MoisBilan[] = [];
   for (let i = 5; i >= 0; i--) {
@@ -242,7 +272,7 @@ export function computeDashboardStats(data: AppData, periode: PeriodeDashboard =
     echeancesProches,
     echeancesEnRetard,
     echeancesProjetsTitres,
-    regularite28j,
+    regularite,
     bilanFinancier6mois,
     prochaineEcheance,
     progressionParObjectif,
