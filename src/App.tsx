@@ -18,6 +18,7 @@ import { FicheProjet } from "./screens/FicheProjet";
 import { FicheRoutine } from "./screens/FicheRoutine";
 import { Guide } from "./screens/Guide";
 import { PanneauRappels } from "./components/PanneauRappels";
+import { Splash } from "./components/Splash";
 import { Verrouillage } from "./screens/Verrouillage";
 import { verrouillageActif } from "./lib/verrouillage";
 import { loadAppData } from "./data/db";
@@ -37,6 +38,7 @@ function App() {
   const [paletteOuverte, setPaletteOuverte] = useState(false);
   const [panneauOuvert, setPanneauOuvert] = useState(false);
   const [deverrouille, setDeverrouille] = useState(() => !verrouillageActif());
+  const [splashTermine, setSplashTermine] = useState(false);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -124,6 +126,10 @@ function App() {
   const objectifIdsDuProjetAEditer = data && projetAEditerId
     ? data.projetObjectifs.filter((po) => po.projet_id === projetAEditerId).map((po) => po.objectif_id)
     : undefined;
+
+  if (!splashTermine) {
+    return <Splash onTermine={() => setSplashTermine(true)} />;
+  }
 
   if (!deverrouille) {
     return <Verrouillage onDeverrouille={() => setDeverrouille(true)} />;
