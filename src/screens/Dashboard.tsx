@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
 import "./Dashboard.css";
 import type { AppData } from "../types";
-import { computeDashboardStats, type DashboardStats, type PeriodeDashboard } from "../lib/dashboard";
+import {
+  computeDashboardStats,
+  type ActionDetail,
+  type DashboardStats,
+  type EntreeDetail,
+  type PeriodeDashboard,
+} from "../lib/dashboard";
 import { formatDateFull, formatDateShort, formatMontant, formatMontantAbs, formatRelative } from "../lib/format";
 
 interface DashboardProps {
@@ -144,16 +150,32 @@ function StatCard({
   );
 }
 
-function RegulariteChart({ data }: { data: { jour: string; count: number }[] }) {
+function RegulariteChart({ data }: { data: { jour: string; count: number; actions: ActionDetail[] }[] }) {
   const max = Math.max(1, ...data.map((d) => d.count));
   return (
     <div className="bars">
       {data.map((d) => (
-        <div key={d.jour} className="bars__col" title={`${d.jour} · ${d.count} action${d.count > 1 ? "s" : ""}`}>
+        <div key={d.jour} className="bars__col">
           <div
             className={`bars__bar${d.count > 0 ? " bars__bar--filled" : ""}`}
             style={{ height: `${Math.max(4, (d.count / max) * 100)}%` }}
           />
+          {d.count > 0 && (
+            <div className="chart-tooltip">
+              <div className="chart-tooltip__titre">
+                {formatDateShort(d.jour)} · {d.count} action{d.count > 1 ? "s" : ""}
+              </div>
+              <ul className="chart-tooltip__liste">
+                {d.actions.slice(0, 8).map((a, i) => (
+                  <li key={i}>
+                    {a.titre}
+                    {a.projetTitre && <span className="chart-tooltip__projet"> — {a.projetTitre}</span>}
+                  </li>
+                ))}
+                {d.actions.length > 8 && <li className="chart-tooltip__reste">+{d.actions.length - 8} autres</li>}
+              </ul>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -176,20 +198,68 @@ function ChartLegend() {
   );
 }
 
-function BilanChart({ data }: { data: { label: string; depenses: number; economies: number; benefices: number }[] }) {
+interface BilanMois {
+  label: string;
+  depenses: number;
+  economies: number;
+  benefices: number;
+  depensesDetail: EntreeDetail[];
+  economiesDetail: EntreeDetail[];
+  beneficesDetail: EntreeDetail[];
+}
+
+function BilanChart({ data }: { data: BilanMois[] }) {
   const max = Math.max(1, ...data.flatMap((d) => [d.depenses, d.economies, d.benefices]));
   return (
     <div className="bilan-chart">
       {data.map((d) => (
         <div key={d.label} className="bilan-chart__group">
           <div className="bilan-chart__bars">
-            <div className="bilan-chart__bar" style={{ height: `${(d.depenses / max) * 100}%`, background: "var(--danger)" }} />
-            <div className="bilan-chart__bar" style={{ height: `${(d.economies / max) * 100}%`, background: "var(--cyan)" }} />
-            <div className="bilan-chart__bar" style={{ height: `${(d.benefices / max) * 100}%`, background: "var(--lime)" }} />
+            <BilanBarre montant={d.depenses} max={max} couleur="var(--danger)" titre="Dépenses" mois={d.label} detail={d.depensesDetail} />
+            <BilanBarre montant={d.economies} max={max} couleur="var(--cyan)" titre="Économies" mois={d.label} detail={d.economiesDetail} />
+            <BilanBarre montant={d.benefices} max={max} couleur="var(--lime)" titre="Bénéfices" mois={d.label} detail={d.beneficesDetail} />
           </div>
           <span className="bilan-chart__label">{d.label}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+function BilanBarre({
+  montant,
+  max,
+  couleur,
+  titre,
+  mois,
+  detail,
+}: {
+  montant: number;
+  max: number;
+  couleur: string;
+  titre: string;
+  mois: string;
+  detail: EntreeDetail[];
+}) {
+  return (
+    <div className="bilan-chart__bar-wrap">
+      <div className="bilan-chart__bar" style={{ height: `${(montant / max) * 100}%`, background: couleur }} />
+      {montant > 0 && (
+        <div className="chart-tooltip chart-tooltip--bar">
+          <div className="chart-tooltip__titre">
+            {titre} · {mois} · {formatMontantAbs(montant)}
+          </div>
+          <ul className="chart-tooltip__liste">
+            {detail.slice(0, 8).map((e, i) => (
+              <li key={i}>
+                <span>{e.titre}</span>
+                <span className="chart-tooltip__montant">{formatMontantAbs(e.montant)}</span>
+              </li>
+            ))}
+            {detail.length > 8 && <li className="chart-tooltip__reste">+{detail.length - 8} autres</li>}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

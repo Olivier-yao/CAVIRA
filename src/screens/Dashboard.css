@@ -148,6 +148,7 @@
   height: 100%;
   display: flex;
   align-items: flex-end;
+  position: relative;
 }
 
 .bars__bar {
@@ -217,8 +218,16 @@
   width: 100%;
 }
 
-.bilan-chart__bar {
+.bilan-chart__bar-wrap {
   flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+}
+
+.bilan-chart__bar {
+  width: 100%;
   min-height: 2px;
   border-radius: 2px 2px 0 0;
   transform-origin: bottom;
@@ -229,6 +238,78 @@
   font-size: 9.5px;
   color: var(--text-3);
   letter-spacing: 0.04em;
+}
+
+/* ---------- tooltips (régularité + bilan) ---------- */
+
+.chart-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  min-width: 160px;
+  max-width: 220px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  pointer-events: none;
+}
+
+.bars__col:hover .chart-tooltip,
+.bilan-chart__bar-wrap:hover .chart-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.chart-tooltip__titre {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-tooltip__liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.chart-tooltip__liste li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10.5px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
+.chart-tooltip__projet {
+  color: var(--text-3);
+}
+
+.chart-tooltip__montant {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.chart-tooltip__reste {
+  color: var(--text-3) !important;
+  font-style: italic;
 }
 
 /* ---------- row 3 ---------- */

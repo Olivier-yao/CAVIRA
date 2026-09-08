@@ -16,9 +16,15 @@ export interface ObjectifProgress {
   nbProjets: number;
 }
 
+export interface ActionDetail {
+  titre: string;
+  projetTitre: string;
+}
+
 export interface JourActivite {
   jour: string;
   count: number;
+  actions: ActionDetail[];
 }
 
 export interface Regularite {
@@ -26,11 +32,19 @@ export interface Regularite {
   label: string;
 }
 
+export interface EntreeDetail {
+  titre: string;
+  montant: number;
+}
+
 export interface MoisBilan {
   label: string;
   depenses: number;
   economies: number;
   benefices: number;
+  depensesDetail: EntreeDetail[];
+  economiesDetail: EntreeDetail[];
+  beneficesDetail: EntreeDetail[];
 }
 
 export type PeriodeDashboard = "mois" | "30j" | "trimestre";
@@ -109,8 +123,15 @@ function calculerFenetreComparaison(periode: PeriodeDashboard, maintenant: Date)
   return { debut, fin: finProchaine, debutPrecedent, finPrecedent: debut, labelPrecedent: "le mois dernier" };
 }
 
-function calculerRegularite(journal: JournalEntry[], periode: PeriodeDashboard, maintenant: Date): Regularite {
+function calculerRegularite(
+  journal: JournalEntry[],
+  projetById: Map<string, Projet>,
+  periode: PeriodeDashboard,
+  maintenant: Date,
+): Regularite {
   const actions = journal.filter((j) => j.type === "action");
+  const detailsDe = (entries: JournalEntry[]): ActionDetail[] =>
+    entries.map((j) => ({ titre: j.titre, projetTitre: projetById.get(j.projet_id)?.titre ?? "" }));
 
   if (periode === "trimestre") {
     const points: JourActivite[] = [];
@@ -119,11 +140,11 @@ function calculerRegularite(journal: JournalEntry[], periode: PeriodeDashboard, 
       const debutSemaine = new Date(finSemaine.getTime() - 6 * 24 * 60 * 60 * 1000);
       const debutKey = dateKey(debutSemaine);
       const finKey = dateKey(finSemaine);
-      const count = actions.filter((j) => {
+      const semaine = actions.filter((j) => {
         const k = toLocalDateKey(j.created_at);
         return k >= debutKey && k <= finKey;
-      }).length;
-      points.push({ jour: debutKey, count });
+      });
+      points.push({ jour: debutKey, count: semaine.length, actions: detailsDe(semaine) });
     }
     return { points, label: "13 dernières semaines" };
   }
@@ -135,8 +156,8 @@ function calculerRegularite(journal: JournalEntry[], periode: PeriodeDashboard, 
     const d = new Date(maintenant);
     d.setDate(d.getDate() - i);
     const key = dateKey(d);
-    const count = actions.filter((j) => toLocalDateKey(j.created_at) === key).length;
-    points.push({ jour: key, count });
+    const duJour = actions.filter((j) => toLocalDateKey(j.created_at) === key);
+    points.push({ jour: key, count: duJour.length, actions: detailsDe(duJour) });
   }
   return { points, label: periode === "30j" ? "30 derniers jours" : "depuis le 1er du mois" };
 }
@@ -186,7 +207,12 @@ export function computeDashboardStats(data: AppData, periode: PeriodeDashboard =
     ...new Set(echeancesProchesList.map((e) => projetById.get(e.projet_id)?.titre).filter((t): t is string => !!t)),
   ];
 
-  const regularite = calculerRegularite(journal, periode, now);
+  const regularite = calculerRegularite(journal, projetById, periode, now);
+
+  const detailMontant = (entries: JournalEntry[], type: JournalEntry["type"]): EntreeDetail[] =>
+    entries
+      .filter((j) => j.type === type)
+      .map((j) => ({ titre: j.titre, montant: Math.abs(j.montant ?? 0) }));
 
   const bilanFinancier6mois: MoisBilan[] = [];
   for (let i = 5; i >= 0; i--) {
@@ -197,6 +223,9 @@ export function computeDashboardStats(data: AppData, periode: PeriodeDashboard =
       depenses: Math.abs(sumMontant(inMonth, "depense")),
       economies: sumMontant(inMonth, "economie"),
       benefices: sumMontant(inMonth, "benefice_estime"),
+      depensesDetail: detailMontant(inMonth, "depense"),
+      economiesDetail: detailMontant(inMonth, "economie"),
+      beneficesDetail: detailMontant(inMonth, "benefice_estime"),
     });
   }
 
