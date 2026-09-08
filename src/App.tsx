@@ -155,7 +155,12 @@ function App() {
         />
       )}
       {modalOuvert && data && (
-        <ProjetModal data={data} onClose={() => setModalOuvert(false)} onSaved={handleProjetEnregistre} />
+        <ProjetModal
+          data={data}
+          onClose={() => setModalOuvert(false)}
+          onSaved={handleProjetEnregistre}
+          onDataChanged={refreshData}
+        />
       )}
       {projetAEditer && data && (
         <ProjetModal
@@ -164,6 +169,7 @@ function App() {
           objectifIdsExistants={objectifIdsDuProjetAEditer}
           onClose={() => setProjetAEditerId(null)}
           onSaved={handleProjetEnregistre}
+          onDataChanged={refreshData}
         />
       )}
     </div>

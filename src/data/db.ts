@@ -380,19 +380,20 @@ export async function supprimerObjectif(id: string): Promise<void> {
   await db.execute("DELETE FROM objectifs WHERE id = $1", [id]);
 }
 
-export async function addCategorie(label: string, color: string): Promise<void> {
+export async function addCategorie(label: string, color: string): Promise<string> {
   if (!isTauriRuntime()) {
-    mockAddCategorie(label, color);
-    return;
+    return mockAddCategorie(label, color);
   }
   const db = await getDb();
   const [{ n }] = await db.select<{ n: number }[]>("SELECT COUNT(*) as n FROM categories");
+  const id = uuid();
   await db.execute("INSERT INTO categories (id, label, color, sort_order) VALUES ($1, $2, $3, $4)", [
-    uuid(),
+    id,
     label,
     color,
     n + 1,
   ]);
+  return id;
 }
 
 export async function modifierCategorie(id: string, label: string, color: string): Promise<void> {

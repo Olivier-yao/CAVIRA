@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./modal.css";
 import type { AppData, ImportanceProjet, Projet, StatutProjet } from "../types";
-import { creerProjet, modifierProjet } from "../data/db";
+import { addCategorie, creerProjet, modifierProjet } from "../data/db";
 
 interface ProjetModalProps {
   data: AppData;
@@ -9,7 +9,10 @@ interface ProjetModalProps {
   objectifIdsExistants?: string[];
   onClose: () => void;
   onSaved: (projetId: string) => void;
+  onDataChanged: () => void | Promise<void>;
 }
+
+const COULEURS_SUGGEREES = ["#4FD1E8", "#F472A8", "#B6E24A", "#8A90A6", "#8B7BF7", "#F2A93B"];
 
 const STATUTS: { id: StatutProjet; label: string }[] = [
   { id: "idee", label: "Idée" },
@@ -32,10 +35,15 @@ export function ProjetModal({
   objectifIdsExistants,
   onClose,
   onSaved,
+  onDataChanged,
 }: ProjetModalProps) {
   const modeEdition = !!projetExistant;
   const [titre, setTitre] = useState(projetExistant?.titre ?? "");
   const [categorieId, setCategorieId] = useState(projetExistant?.categorie_id ?? data.categories[0]?.id ?? "");
+  const [ajoutCategorieOuvert, setAjoutCategorieOuvert] = useState(false);
+  const [nouvelleCategorieNom, setNouvelleCategorieNom] = useState("");
+  const [nouvelleCategorieCouleur, setNouvelleCategorieCouleur] = useState(COULEURS_SUGGEREES[0]);
+  const [categorieEnCours, setCategorieEnCours] = useState(false);
   const [statut, setStatut] = useState<StatutProjet>(projetExistant?.statut ?? "preparation");
   const [importance, setImportance] = useState<ImportanceProjet>(projetExistant?.importance ?? "moyenne");
   const [description, setDescription] = useState(projetExistant?.description ?? "");
@@ -62,6 +70,22 @@ export function ProjetModal({
       else next.add(id);
       return next;
     });
+  }
+
+  async function handleAjouterCategorie() {
+    const nom = nouvelleCategorieNom.trim();
+    if (!nom) return;
+    setCategorieEnCours(true);
+    try {
+      const id = await addCategorie(nom, nouvelleCategorieCouleur);
+      await onDataChanged();
+      setCategorieId(id);
+      setNouvelleCategorieNom("");
+      setNouvelleCategorieCouleur(COULEURS_SUGGEREES[0]);
+      setAjoutCategorieOuvert(false);
+    } finally {
+      setCategorieEnCours(false);
+    }
   }
 
   function toggleAlimente(id: string) {
@@ -120,7 +144,16 @@ export function ProjetModal({
 
           <div className="modal-field-row">
             <label className="modal-field">
-              <span>Catégorie</span>
+              <span className="modal-field__label-row">
+                Catégorie
+                <button
+                  type="button"
+                  className="modal-field__label-action"
+                  onClick={() => setAjoutCategorieOuvert((v) => !v)}
+                >
+                  {ajoutCategorieOuvert ? "Annuler" : "+ Nouvelle"}
+                </button>
+              </span>
               <select value={categorieId} onChange={(e) => setCategorieId(e.target.value)}>
                 {data.categories.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -140,6 +173,37 @@ export function ProjetModal({
               </select>
             </label>
           </div>
+
+          {ajoutCategorieOuvert && (
+            <div className="modal-field categorie-inline">
+              <input
+                value={nouvelleCategorieNom}
+                onChange={(e) => setNouvelleCategorieNom(e.target.value)}
+                placeholder="Nom de la nouvelle catégorie…"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && handleAjouterCategorie()}
+              />
+              <div className="categorie-inline__couleurs">
+                {COULEURS_SUGGEREES.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`categorie-inline__couleur${nouvelleCategorieCouleur === c ? " categorie-inline__couleur--active" : ""}`}
+                    style={{ background: c }}
+                    onClick={() => setNouvelleCategorieCouleur(c)}
+                  />
+                ))}
+                <button
+                  type="button"
+                  className="btn btn--accent categorie-inline__ajouter"
+                  onClick={handleAjouterCategorie}
+                  disabled={!nouvelleCategorieNom.trim() || categorieEnCours}
+                >
+                  {categorieEnCours ? "Ajout…" : "Ajouter"}
+                </button>
+              </div>
+            </div>
+          )}
 
           <label className="modal-field">
             <span>Description</span>

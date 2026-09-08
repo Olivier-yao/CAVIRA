@@ -749,8 +749,10 @@ export function mockRestaurerDonnees(data: AppData): void {
   remplacerContenu(idees, data.idees);
 }
 
-export function mockAddCategorie(label: string, color: string): void {
-  categories.push({ id: uuidLib(), label, color, sort_order: categories.length + 1 });
+export function mockAddCategorie(label: string, color: string): string {
+  const id = uuidLib();
+  categories.push({ id, label, color, sort_order: categories.length + 1 });
+  return id;
 }
 
 export function mockToggleEtape(etapeId: string, statut: StatutEtape): void {
