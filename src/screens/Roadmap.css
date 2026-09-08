@@ -30,6 +30,21 @@
   overflow: hidden;
 }
 
+.roadmap-retros {
+  margin-top: 8px;
+}
+
+.roadmap-retros h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.roadmap-retros .retro-tab {
+  margin-top: 14px;
+  max-width: none;
+}
+
 .roadmap-row {
   display: grid;
   align-items: center;

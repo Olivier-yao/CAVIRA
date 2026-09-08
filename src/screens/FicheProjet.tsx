@@ -10,8 +10,9 @@ import { PlanAttaqueTab } from "./fiche-projet/PlanAttaqueTab";
 import { CalendrierTab } from "./fiche-projet/CalendrierTab";
 import { JournalTab } from "./fiche-projet/JournalTab";
 import { NotesTab } from "./fiche-projet/NotesTab";
+import { RetroTab } from "./fiche-projet/RetroTab";
 
-type TabId = "plan" | "calendrier" | "journal" | "notes";
+type TabId = "plan" | "calendrier" | "journal" | "notes" | "retros";
 
 interface FicheProjetProps {
   data: AppData;
@@ -31,6 +32,7 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier,
     calendrier: null,
     journal: null,
     notes: null,
+    retros: null,
   });
   const [underline, setUnderline] = useState({ left: 0, width: 0 });
 
@@ -74,12 +76,14 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier,
   const nbCalendrier =
     data.etapes.filter((e) => e.projet_id === projet.id && e.date_cible).length +
     data.calendrier.filter((c) => c.projet_id === projet.id).length;
+  const nbRetros = data.retrospectives.filter((r) => r.projet_id === projet.id).length;
 
   const tabs: { id: TabId; label: string; count: number }[] = [
     { id: "plan", label: "Plan d'attaque", count: nbEtapes },
     { id: "calendrier", label: "Calendrier", count: nbCalendrier },
     { id: "journal", label: "Journal de suivi", count: nbJournal },
     { id: "notes", label: "Notes", count: nbNotes },
+    { id: "retros", label: "Rétros", count: nbRetros },
   ];
 
   return (
@@ -183,6 +187,7 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier,
         {activeTab === "calendrier" && <CalendrierTab data={data} projetId={projet.id} />}
         {activeTab === "journal" && <JournalTab data={data} projet={projet} onDataChanged={onDataChanged} />}
         {activeTab === "notes" && <NotesTab data={data} projetId={projet.id} onDataChanged={onDataChanged} />}
+        {activeTab === "retros" && <RetroTab data={data} projetId={projet.id} onDataChanged={onDataChanged} />}
       </div>
     </div>
   );

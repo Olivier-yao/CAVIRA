@@ -78,6 +78,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/010_importance_projets.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 11,
+                description: "retrospectives",
+                sql: include_str!("../migrations/011_retrospectives.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

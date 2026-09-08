@@ -10,9 +10,11 @@ import type {
   Note,
   Objectif,
   PlanEtape,
+  PeriodeRetro,
   Projet,
   ProjetLien,
   ProjetObjectif,
+  Retrospective,
   StatutEtape,
   StatutProjet,
   TypeJournal,
@@ -25,6 +27,7 @@ import {
   mockAddIdee,
   mockAddJournalEntry,
   mockAddNote,
+  mockAddRetrospective,
   mockCreerProjet,
   mockModifierCategorie,
   mockModifierEtape,
@@ -59,20 +62,44 @@ export async function loadAppData(): Promise<AppData> {
     return mockData;
   }
   const db = await getDb();
-  const [categories, objectifs, projets, etapes, journal, notes, calendrier, projetObjectifs, projetLiens, idees] =
-    await Promise.all([
-      db.select<Categorie[]>("SELECT * FROM categories ORDER BY sort_order"),
-      db.select<Objectif[]>("SELECT * FROM objectifs ORDER BY created_at"),
-      db.select<Projet[]>("SELECT * FROM projets ORDER BY created_at"),
-      db.select<PlanEtape[]>("SELECT * FROM plan_etapes ORDER BY sort_order"),
-      db.select<JournalEntry[]>("SELECT * FROM journal_entries ORDER BY created_at DESC"),
-      db.select<Note[]>("SELECT * FROM notes ORDER BY created_at DESC"),
-      db.select<CalendrierEntry[]>("SELECT * FROM calendrier_entries ORDER BY date"),
-      db.select<ProjetObjectif[]>("SELECT * FROM projet_objectifs"),
-      db.select<ProjetLien[]>("SELECT * FROM projet_liens"),
-      db.select<Idee[]>("SELECT * FROM idees ORDER BY interet DESC, created_at DESC"),
-    ]);
-  return { categories, objectifs, projets, etapes, journal, notes, calendrier, projetObjectifs, projetLiens, idees };
+  const [
+    categories,
+    objectifs,
+    projets,
+    etapes,
+    journal,
+    notes,
+    calendrier,
+    projetObjectifs,
+    projetLiens,
+    retrospectives,
+    idees,
+  ] = await Promise.all([
+    db.select<Categorie[]>("SELECT * FROM categories ORDER BY sort_order"),
+    db.select<Objectif[]>("SELECT * FROM objectifs ORDER BY created_at"),
+    db.select<Projet[]>("SELECT * FROM projets ORDER BY created_at"),
+    db.select<PlanEtape[]>("SELECT * FROM plan_etapes ORDER BY sort_order"),
+    db.select<JournalEntry[]>("SELECT * FROM journal_entries ORDER BY created_at DESC"),
+    db.select<Note[]>("SELECT * FROM notes ORDER BY created_at DESC"),
+    db.select<CalendrierEntry[]>("SELECT * FROM calendrier_entries ORDER BY date"),
+    db.select<ProjetObjectif[]>("SELECT * FROM projet_objectifs"),
+    db.select<ProjetLien[]>("SELECT * FROM projet_liens"),
+    db.select<Retrospective[]>("SELECT * FROM retrospectives ORDER BY created_at DESC"),
+    db.select<Idee[]>("SELECT * FROM idees ORDER BY interet DESC, created_at DESC"),
+  ]);
+  return {
+    categories,
+    objectifs,
+    projets,
+    etapes,
+    journal,
+    notes,
+    calendrier,
+    projetObjectifs,
+    projetLiens,
+    retrospectives,
+    idees,
+  };
 }
 
 export async function toggleEtapeStatut(etapeId: string, nextStatut: StatutEtape): Promise<void> {
@@ -224,6 +251,7 @@ export async function supprimerProjet(id: string): Promise<void> {
   await db.execute("DELETE FROM calendrier_entries WHERE projet_id = $1", [id]);
   await db.execute("DELETE FROM projet_objectifs WHERE projet_id = $1", [id]);
   await db.execute("DELETE FROM projet_liens WHERE projet_id = $1 OR alimente_id = $1", [id]);
+  await db.execute("DELETE FROM retrospectives WHERE projet_id = $1", [id]);
   await db.execute("DELETE FROM projets WHERE id = $1", [id]);
 }
 
@@ -331,6 +359,26 @@ export async function addNote(projetId: string, titre: string, contenu: string, 
   ]);
 }
 
+export interface NewRetrospectiveInput {
+  projetId: string | null;
+  periode: PeriodeRetro;
+  bienMarche: string;
+  aBloque: string;
+  ajustement: string;
+}
+
+export async function addRetrospective(input: NewRetrospectiveInput): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockAddRetrospective(input);
+    return;
+  }
+  const db = await getDb();
+  await db.execute(
+    "INSERT INTO retrospectives (id, projet_id, periode, bien_marche, a_bloque, ajustement) VALUES ($1, $2, $3, $4, $5, $6)",
+    [uuid(), input.projetId, input.periode, input.bienMarche, input.aBloque, input.ajustement],
+  );
+}
+
 /**
  * Remplace toutes les données locales par celles d'un export JSON.
  * Pas de transaction explicite (tauri-plugin-sql ne garantit pas que les
@@ -348,6 +396,7 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
 
   await db.execute("DELETE FROM projet_objectifs");
   await db.execute("DELETE FROM projet_liens");
+  await db.execute("DELETE FROM retrospectives");
   await db.execute("DELETE FROM plan_etapes");
   await db.execute("DELETE FROM journal_entries");
   await db.execute("DELETE FROM notes");
@@ -432,6 +481,12 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
     await db.execute(
       "INSERT INTO idees (id, titre, description, categorie_id, interet, effort_estime, objectif_id, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
       [i.id, i.titre, i.description, i.categorie_id, i.interet, i.effort_estime, i.objectif_id, i.created_at],
+    );
+  }
+  for (const r of data.retrospectives) {
+    await db.execute(
+      "INSERT INTO retrospectives (id, projet_id, periode, bien_marche, a_bloque, ajustement, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [r.id, r.projet_id, r.periode, r.bien_marche, r.a_bloque, r.ajustement, r.created_at],
     );
   }
 }

@@ -1,16 +1,19 @@
 import { useMemo } from "react";
 import "./Roadmap.css";
+import "./fiche-projet/FicheProjet.css";
 import type { AppData } from "../types";
 import { buildRoadmapRows, buildTimelineTrimestres, type RoadmapRow } from "../lib/roadmap";
+import { RetroTab } from "./fiche-projet/RetroTab";
 
 interface RoadmapProps {
   data: AppData;
   onOpenProjet: (projetId: string) => void;
+  onDataChanged: () => void;
 }
 
 const NB_TRIMESTRES = 6;
 
-export function Roadmap({ data, onOpenProjet }: RoadmapProps) {
+export function Roadmap({ data, onOpenProjet, onDataChanged }: RoadmapProps) {
   const maintenant = useMemo(() => new Date(), []);
   const trimestres = useMemo(() => buildTimelineTrimestres(maintenant, NB_TRIMESTRES), [maintenant]);
   const rows = useMemo(() => buildRoadmapRows(data, maintenant, NB_TRIMESTRES), [data, maintenant]);
@@ -54,6 +57,12 @@ export function Roadmap({ data, onOpenProjet }: RoadmapProps) {
           ))}
         </div>
       )}
+
+      <section className="roadmap-retros">
+        <h2>Rétrospectives globales</h2>
+        <p className="roadmap-screen__subtitle">Un bilan périodique à l'échelle de l'ensemble des projets.</p>
+        <RetroTab data={data} projetId={null} onDataChanged={onDataChanged} />
+      </section>
     </div>
   );
 }

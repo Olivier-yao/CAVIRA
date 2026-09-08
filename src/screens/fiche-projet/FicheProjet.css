@@ -703,3 +703,93 @@
   color: var(--text);
   margin: 0 0 8px;
 }
+
+/* ---------- rétrospectives ---------- */
+
+.retro-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 640px;
+}
+
+.retro-tab__ouvrir {
+  align-self: flex-start;
+}
+
+.retro-tab__vide {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.retro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.retro-form__periode {
+  display: flex;
+  gap: 6px;
+}
+
+.retro-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.retro-tab__liste {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.retro-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.retro-card__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.retro-card__periode {
+  font-size: 10.5px;
+  color: var(--text-2);
+  background: var(--surface-3);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.retro-card__periode--mensuelle {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.retro-card__date {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.retro-card__champ-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 3px;
+}
+
+.retro-card__champ-texte {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+}

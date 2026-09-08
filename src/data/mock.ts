@@ -11,9 +11,10 @@ import type {
   Projet,
   ProjetLien,
   ProjetObjectif,
+  Retrospective,
   StatutEtape,
 } from "../types";
-import type { NewIdeeInput, NewJournalEntryInput, NewProjetInput } from "./db";
+import type { NewIdeeInput, NewJournalEntryInput, NewProjetInput, NewRetrospectiveInput } from "./db";
 
 function removeWhere<T>(arr: T[], pred: (item: T) => boolean): void {
   for (let i = arr.length - 1; i >= 0; i--) {
@@ -76,6 +77,28 @@ const projetObjectifs: ProjetObjectif[] = [
 
 const projetLiens: ProjetLien[] = [
   { projet_id: "proj-progression", alimente_id: "proj-tiktok", created_at: iso(20) },
+];
+
+const retrospectives: Retrospective[] = [
+  {
+    id: "retro-tci-1",
+    projet_id: "proj-tourneyci",
+    periode: "hebdo",
+    bien_marche:
+      "La génération d'arbres en simple élimination tourne enfin sans bug sur les effectifs impairs.",
+    a_bloque: "Le cas des byes en double élimination a pris plus de temps que prévu à cadrer.",
+    ajustement: "Prototyper les cas limites (byes, forfaits) sur papier avant de coder la logique.",
+    created_at: iso(6),
+  },
+  {
+    id: "retro-globale-1",
+    projet_id: null,
+    periode: "mensuelle",
+    bien_marche: "Bonne régularité générale : au moins une action sur un projet presque tous les jours ce mois-ci.",
+    a_bloque: "Trop de projets actifs en parallèle, l'attention se disperse sur les semaines chargées.",
+    ajustement: "Me concentrer sur 2-3 projets prioritaires par semaine plutôt que d'avancer un peu partout.",
+    created_at: iso(20),
+  },
 ];
 
 function mkProjet(
@@ -561,6 +584,7 @@ export const mockData: AppData = {
   calendrier,
   projetObjectifs,
   projetLiens,
+  retrospectives,
   idees,
 };
 
@@ -616,6 +640,7 @@ export function mockSupprimerProjet(id: string): void {
   removeWhere(calendrier, (c) => c.projet_id === id);
   removeWhere(projetObjectifs, (po) => po.projet_id === id);
   removeWhere(projetLiens, (pl) => pl.projet_id === id || pl.alimente_id === id);
+  removeWhere(retrospectives, (r) => r.projet_id === id);
   removeWhere(projets, (p) => p.id === id);
 }
 
@@ -681,6 +706,7 @@ export function mockRestaurerDonnees(data: AppData): void {
   remplacerContenu(calendrier, data.calendrier);
   remplacerContenu(projetObjectifs, data.projetObjectifs);
   remplacerContenu(projetLiens, data.projetLiens);
+  remplacerContenu(retrospectives, data.retrospectives);
   remplacerContenu(idees, data.idees);
 }
 
@@ -729,6 +755,18 @@ export function mockAddNote(projetId: string, titre: string, contenu: string, ta
     titre,
     contenu,
     tags,
+    created_at: new Date().toISOString(),
+  });
+}
+
+export function mockAddRetrospective(input: NewRetrospectiveInput): void {
+  retrospectives.unshift({
+    id: uuidLib(),
+    projet_id: input.projetId,
+    periode: input.periode,
+    bien_marche: input.bienMarche,
+    a_bloque: input.aBloque,
+    ajustement: input.ajustement,
     created_at: new Date().toISOString(),
   });
 }

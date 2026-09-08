@@ -2,6 +2,7 @@ export type StatutProjet = "idee" | "preparation" | "en_cours" | "pause" | "term
 export type StatutEtape = "a_faire" | "en_cours" | "fait" | "bloque";
 export type PrioriteEtape = "basse" | "moyenne" | "haute";
 export type ImportanceProjet = "basse" | "moyenne" | "haute";
+export type PeriodeRetro = "hebdo" | "mensuelle";
 export type TypeJournal = "action" | "depense" | "economie" | "benefice_estime";
 export type TypeCalendrier = "session" | "echeance";
 
@@ -89,6 +90,16 @@ export interface ProjetLien {
   created_at: string;
 }
 
+export interface Retrospective {
+  id: string;
+  projet_id: string | null;
+  periode: PeriodeRetro;
+  bien_marche: string;
+  a_bloque: string;
+  ajustement: string;
+  created_at: string;
+}
+
 export interface CalendrierEntry {
   id: string;
   projet_id: string | null;
@@ -108,5 +119,6 @@ export interface AppData {
   calendrier: CalendrierEntry[];
   projetObjectifs: ProjetObjectif[];
   projetLiens: ProjetLien[];
+  retrospectives: Retrospective[];
   idees: Idee[];
 }
