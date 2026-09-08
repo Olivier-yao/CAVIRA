@@ -72,6 +72,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/009_liens_projets.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 10,
+                description: "importance_projets",
+                sql: include_str!("../migrations/010_importance_projets.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

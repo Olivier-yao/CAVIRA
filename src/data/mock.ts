@@ -87,6 +87,7 @@ function mkProjet(
   objectif_final: string,
   echeance_date: string | null,
   seuil_depenses: number | null = null,
+  importance: Projet["importance"] = "moyenne",
 ): Projet {
   return {
     id,
@@ -97,6 +98,7 @@ function mkProjet(
     objectif_final,
     echeance_date,
     seuil_depenses,
+    importance,
     created_at: iso(30),
     updated_at: iso(1),
   };
@@ -112,6 +114,7 @@ const projets: Projet[] = [
     "Sortir une v1 utilisable en tournoi réel.",
     isoInDays(6),
     250,
+    "haute",
   ),
   mkProjet(
     "proj-lacata",
@@ -140,6 +143,7 @@ const projets: Projet[] = [
     "Avoir une structure juridique active.",
     null,
     400,
+    "haute",
   ),
   mkProjet(
     "proj-vertax",
@@ -149,6 +153,8 @@ const projets: Projet[] = [
     "Prototype de jeu vertical, moteur en cours de test.",
     "Valider si le concept mérite d'être poussé.",
     null,
+    null,
+    "basse",
   ),
   mkProjet(
     "proj-tiktok",
@@ -167,6 +173,8 @@ const projets: Projet[] = [
     "Blocs de travail fixes, sport, sommeil, revue du jour.",
     "Tenir un rythme stable sur la durée.",
     null,
+    null,
+    "haute",
   ),
   mkProjet(
     "proj-vitrine",
@@ -176,6 +184,8 @@ const projets: Projet[] = [
     "Portfolio de mes projets et prestations.",
     "Avoir une vitrine présentable à partager.",
     null,
+    null,
+    "basse",
   ),
   mkProjet(
     "proj-discord",
@@ -185,6 +195,8 @@ const projets: Projet[] = [
     "Discord des testeurs de mes projets, modération et annonces.",
     "Avoir un noyau actif de retours réguliers.",
     null,
+    null,
+    "basse",
   ),
   mkProjet(
     "proj-subvention",
@@ -563,6 +575,7 @@ export function mockCreerProjet(id: string, input: NewProjetInput): void {
     objectif_final: input.objectifFinal,
     echeance_date: null,
     seuil_depenses: input.seuilDepenses,
+    importance: input.importance,
     created_at: now,
     updated_at: now,
   });
@@ -583,6 +596,7 @@ export function mockModifierProjet(id: string, input: NewProjetInput): void {
     p.description = input.description;
     p.objectif_final = input.objectifFinal;
     p.seuil_depenses = input.seuilDepenses;
+    p.importance = input.importance;
     p.updated_at = new Date().toISOString();
   }
   removeWhere(projetObjectifs, (po) => po.projet_id === id);
@@ -742,6 +756,7 @@ export function mockPromouvoirIdee(idee: Idee, nouveauProjetId: string): void {
     objectif_final: "",
     echeance_date: null,
     seuil_depenses: null,
+    importance: "moyenne",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });

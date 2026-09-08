@@ -233,6 +233,80 @@
   font-weight: 400;
 }
 
+/* ---------- matrice ---------- */
+
+.matrice-grille {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.matrice-quadrant {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid;
+  border-radius: var(--radius-md);
+  min-height: 160px;
+}
+
+.matrice-quadrant__entete {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.matrice-quadrant__titre {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.matrice-quadrant__sous-titre {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.matrice-quadrant__liste {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.matrice-quadrant__vide {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.matrice-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  text-align: left;
+}
+
+.matrice-item:hover {
+  border-color: var(--border-hover);
+  background: var(--surface-hover);
+}
+
+.matrice-item__titre {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ---------- liste ---------- */
 
 .projets-liste {

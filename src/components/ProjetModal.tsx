@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./modal.css";
-import type { AppData, Projet, StatutProjet } from "../types";
+import type { AppData, ImportanceProjet, Projet, StatutProjet } from "../types";
 import { creerProjet, modifierProjet, supprimerProjet } from "../data/db";
 
 interface ProjetModalProps {
@@ -21,6 +21,12 @@ const STATUTS: { id: StatutProjet; label: string }[] = [
   { id: "abandonne", label: "Abandonné" },
 ];
 
+const IMPORTANCES: { id: ImportanceProjet; label: string }[] = [
+  { id: "basse", label: "Basse" },
+  { id: "moyenne", label: "Moyenne" },
+  { id: "haute", label: "Haute" },
+];
+
 export function ProjetModal({
   data,
   projetExistant,
@@ -35,6 +41,7 @@ export function ProjetModal({
   const [titre, setTitre] = useState(projetExistant?.titre ?? "");
   const [categorieId, setCategorieId] = useState(projetExistant?.categorie_id ?? data.categories[0]?.id ?? "");
   const [statut, setStatut] = useState<StatutProjet>(projetExistant?.statut ?? "preparation");
+  const [importance, setImportance] = useState<ImportanceProjet>(projetExistant?.importance ?? "moyenne");
   const [description, setDescription] = useState(projetExistant?.description ?? "");
   const [objectifFinal, setObjectifFinal] = useState(projetExistant?.objectif_final ?? "");
   const [objectifIds, setObjectifIds] = useState<Set<string>>(new Set(objectifIdsExistants ?? []));
@@ -85,6 +92,7 @@ export function ProjetModal({
         objectifIds: [...objectifIds],
         seuilDepenses: seuilDepenses.trim() && Number.isFinite(seuilParsed) ? Math.abs(seuilParsed) : null,
         alimenteIds: [...alimenteIds],
+        importance,
       };
       if (modeEdition && projetExistant) {
         await modifierProjet(projetExistant.id, input);
@@ -171,15 +179,27 @@ export function ProjetModal({
             />
           </label>
 
-          <label className="modal-field">
-            <span>Seuil de dépenses (optionnel)</span>
-            <input
-              value={seuilDepenses}
-              onChange={(e) => setSeuilDepenses(e.target.value)}
-              placeholder="Aucune alerte si vide"
-              inputMode="decimal"
-            />
-          </label>
+          <div className="modal-field-row">
+            <label className="modal-field">
+              <span>Importance</span>
+              <select value={importance} onChange={(e) => setImportance(e.target.value as ImportanceProjet)}>
+                {IMPORTANCES.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="modal-field">
+              <span>Seuil de dépenses (optionnel)</span>
+              <input
+                value={seuilDepenses}
+                onChange={(e) => setSeuilDepenses(e.target.value)}
+                placeholder="Aucune alerte si vide"
+                inputMode="decimal"
+              />
+            </label>
+          </div>
 
           {data.objectifs.length > 0 && (
             <div className="modal-field">

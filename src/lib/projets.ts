@@ -16,6 +16,14 @@ function labelActivite(texte: string, montant: number | null): string {
   return `${texte} ${formatMontantAbs(montant)}`;
 }
 
+export function estUrgent(card: ProjetCard): boolean {
+  return card.aBlocage || (card.echeanceJours !== null && card.echeanceJours <= 7);
+}
+
+export function estImportant(card: ProjetCard): boolean {
+  return card.projet.importance === "haute";
+}
+
 export function buildProjetCards(data: AppData): ProjetCard[] {
   return data.projets.map((projet) => {
     const journalDuProjet = data.journal

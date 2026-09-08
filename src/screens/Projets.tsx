@@ -2,14 +2,14 @@ import { useMemo, useState } from "react";
 import "./Projets.css";
 import type { AppData } from "../types";
 import { CategorieBadge, StatutProjetBadge } from "../components/Badges";
-import { buildProjetCards, type ProjetCard } from "../lib/projets";
+import { buildProjetCards, estImportant, estUrgent, type ProjetCard } from "../lib/projets";
 
 interface ProjetsProps {
   data: AppData;
   onOpenProjet: (projetId: string) => void;
 }
 
-type Vue = "grille" | "liste";
+type Vue = "grille" | "liste" | "matrice";
 type Onglet = "actifs" | "archives";
 type FiltreStatutActif = "en_cours" | "pause" | "bloque";
 type FiltreStatutArchive = "termine" | "abandonne";
@@ -104,6 +104,9 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
           <button className={vue === "liste" ? "active" : ""} onClick={() => setVue("liste")}>
             Liste
           </button>
+          <button className={vue === "matrice" ? "active" : ""} onClick={() => setVue("matrice")}>
+            Matrice
+          </button>
         </div>
       </div>
 
@@ -162,13 +165,95 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
             <ProjetCardGrille key={c.projet.id} card={c} data={data} onClick={() => onOpenProjet(c.projet.id)} />
           ))}
         </div>
-      ) : (
+      ) : vue === "liste" ? (
         <div className="projets-liste">
           {filtered.map((c) => (
             <ProjetLigne key={c.projet.id} card={c} data={data} onClick={() => onOpenProjet(c.projet.id)} />
           ))}
         </div>
+      ) : (
+        <MatricePriorisation cards={filtered} data={data} onOpenProjet={onOpenProjet} />
       )}
+    </div>
+  );
+}
+
+interface QuadrantDef {
+  id: string;
+  titre: string;
+  sousTitre: string;
+  accent: string;
+  test: (c: ProjetCard) => boolean;
+}
+
+const QUADRANTS: QuadrantDef[] = [
+  {
+    id: "urgent-important",
+    titre: "Urgent & important",
+    sousTitre: "À faire en premier",
+    accent: "var(--danger)",
+    test: (c) => estUrgent(c) && estImportant(c),
+  },
+  {
+    id: "important-non-urgent",
+    titre: "Important, non urgent",
+    sousTitre: "À planifier",
+    accent: "var(--accent)",
+    test: (c) => !estUrgent(c) && estImportant(c),
+  },
+  {
+    id: "urgent-non-important",
+    titre: "Urgent, non important",
+    sousTitre: "À traiter vite ou déléguer",
+    accent: "var(--cyan)",
+    test: (c) => estUrgent(c) && !estImportant(c),
+  },
+  {
+    id: "ni-urgent-ni-important",
+    titre: "Ni urgent ni important",
+    sousTitre: "En veille",
+    accent: "var(--text-3)",
+    test: (c) => !estUrgent(c) && !estImportant(c),
+  },
+];
+
+function MatricePriorisation({
+  cards,
+  data,
+  onOpenProjet,
+}: {
+  cards: ProjetCard[];
+  data: AppData;
+  onOpenProjet: (id: string) => void;
+}) {
+  return (
+    <div className="matrice-grille">
+      {QUADRANTS.map((q) => {
+        const items = cards.filter(q.test);
+        return (
+          <div className="matrice-quadrant" key={q.id} style={{ borderTopColor: q.accent }}>
+            <div className="matrice-quadrant__entete">
+              <span className="matrice-quadrant__titre" style={{ color: q.accent }}>
+                {q.titre}
+              </span>
+              <span className="matrice-quadrant__sous-titre">{q.sousTitre}</span>
+            </div>
+            <div className="matrice-quadrant__liste">
+              {items.length === 0 && <p className="matrice-quadrant__vide">Aucun projet ici.</p>}
+              {items.map((c) => {
+                const categorie = data.categories.find((cat) => cat.id === c.projet.categorie_id);
+                return (
+                  <button key={c.projet.id} className="matrice-item" onClick={() => onOpenProjet(c.projet.id)}>
+                    <span className="matrice-item__titre">{c.projet.titre}</span>
+                    <CategorieBadge categorie={categorie} />
+                    <EcheanceTag jours={c.echeanceJours} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

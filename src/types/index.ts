@@ -1,6 +1,7 @@
 export type StatutProjet = "idee" | "preparation" | "en_cours" | "pause" | "termine" | "abandonne";
 export type StatutEtape = "a_faire" | "en_cours" | "fait" | "bloque";
 export type PrioriteEtape = "basse" | "moyenne" | "haute";
+export type ImportanceProjet = "basse" | "moyenne" | "haute";
 export type TypeJournal = "action" | "depense" | "economie" | "benefice_estime";
 export type TypeCalendrier = "session" | "echeance";
 
@@ -27,6 +28,7 @@ export interface Projet {
   objectif_final: string;
   echeance_date: string | null;
   seuil_depenses: number | null;
+  importance: ImportanceProjet;
   created_at: string;
   updated_at: string;
 }
