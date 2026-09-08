@@ -9,6 +9,7 @@ import { Projets } from "./screens/Projets";
 import { Calendrier } from "./screens/Calendrier";
 import { Roadmap } from "./screens/Roadmap";
 import { Routine } from "./screens/Routine";
+import { FinancesPerso } from "./screens/FinancesPerso";
 import { Objectifs } from "./screens/Objectifs";
 import { Backlog } from "./screens/Backlog";
 import { RechercheNotes } from "./screens/RechercheNotes";
@@ -176,6 +177,9 @@ function App() {
           )}
           {data && !openProjetId && !openRoutineId && screen === "routine" && (
             <Routine data={data} onDataChanged={refreshData} onOpenRoutine={openRoutine} />
+          )}
+          {data && !openProjetId && screen === "finances" && (
+            <FinancesPerso data={data} onDataChanged={refreshData} />
           )}
           {data && !openProjetId && screen === "objectifs" && (
             <Objectifs data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />

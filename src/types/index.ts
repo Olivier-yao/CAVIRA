@@ -139,6 +139,17 @@ export interface RoutineNote {
   created_at: string;
 }
 
+export type TypeFinancePerso = "entree" | "depense" | "economie";
+
+export interface FinancePerso {
+  id: string;
+  type: TypeFinancePerso;
+  montant: number;
+  note: string;
+  date: string;
+  created_at: string;
+}
+
 export interface AppData {
   categories: Categorie[];
   objectifs: Objectif[];
@@ -155,4 +166,5 @@ export interface AppData {
   routines: Routine[];
   routineChecks: RoutineCheck[];
   routineNotes: RoutineNote[];
+  financesPerso: FinancePerso[];
 }

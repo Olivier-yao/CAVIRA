@@ -4,6 +4,7 @@ import type {
   AppData,
   CalendrierEntry,
   Categorie,
+  FinancePerso,
   Idee,
   ImportanceProjet,
   JournalEntry,
@@ -21,6 +22,7 @@ import type {
   RoutineNote,
   StatutEtape,
   StatutProjet,
+  TypeFinancePerso,
   TypeJournal,
 } from "../types";
 import {
@@ -32,6 +34,7 @@ import {
   mockAddJournalEntry,
   mockAddNote,
   mockAddRetrospective,
+  mockAjouterFinancePerso,
   mockAjouterNoteRoutine,
   mockAjouterPersonneProjet,
   mockAjouterRoutine,
@@ -49,6 +52,7 @@ import {
   mockRetirerPersonneProjet,
   mockSupprimerCategorie,
   mockSupprimerEtape,
+  mockSupprimerFinancePerso,
   mockSupprimerObjectif,
   mockSupprimerProjet,
   mockSupprimerRoutine,
@@ -95,6 +99,7 @@ export async function loadAppData(): Promise<AppData> {
     routines,
     routineChecks,
     routineNotes,
+    financesPerso,
   ] = await Promise.all([
     db.select<Categorie[]>("SELECT * FROM categories ORDER BY sort_order"),
     db.select<Objectif[]>("SELECT * FROM objectifs ORDER BY created_at"),
@@ -111,6 +116,7 @@ export async function loadAppData(): Promise<AppData> {
     db.select<Routine[]>("SELECT * FROM routines ORDER BY sort_order"),
     db.select<RoutineCheck[]>("SELECT * FROM routine_checks"),
     db.select<RoutineNote[]>("SELECT * FROM routine_notes ORDER BY created_at DESC"),
+    db.select<FinancePerso[]>("SELECT * FROM finances_perso ORDER BY date DESC, created_at DESC"),
   ]);
   return {
     categories,
@@ -128,6 +134,7 @@ export async function loadAppData(): Promise<AppData> {
     routines,
     routineChecks,
     routineNotes,
+    financesPerso,
   };
 }
 
@@ -343,6 +350,37 @@ export async function ajouterNoteRoutine(routineId: string, contenu: string): Pr
     routineId,
     contenu,
   ]);
+}
+
+export interface NewFinancePersoInput {
+  type: TypeFinancePerso;
+  montant: number;
+  note: string;
+  date: string;
+}
+
+export async function ajouterFinancePerso(input: NewFinancePersoInput): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockAjouterFinancePerso(input);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("INSERT INTO finances_perso (id, type, montant, note, date) VALUES ($1, $2, $3, $4, $5)", [
+    uuid(),
+    input.type,
+    input.montant,
+    input.note,
+    input.date,
+  ]);
+}
+
+export async function supprimerFinancePerso(id: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockSupprimerFinancePerso(id);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("DELETE FROM finances_perso WHERE id = $1", [id]);
 }
 
 export async function toggleRoutineCheck(routineId: string, date: string, actuellementFait: boolean): Promise<void> {
@@ -579,6 +617,7 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
   await db.execute("DELETE FROM routine_checks");
   await db.execute("DELETE FROM routine_notes");
   await db.execute("DELETE FROM routines");
+  await db.execute("DELETE FROM finances_perso");
 
   for (const c of data.categories) {
     await db.execute("INSERT INTO categories (id, label, color, sort_order) VALUES ($1, $2, $3, $4)", [
@@ -696,5 +735,11 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
       n.contenu,
       n.created_at,
     ]);
+  }
+  for (const f of data.financesPerso) {
+    await db.execute(
+      "INSERT INTO finances_perso (id, type, montant, note, date, created_at) VALUES ($1, $2, $3, $4, $5, $6)",
+      [f.id, f.type, f.montant, f.note, f.date, f.created_at],
+    );
   }
 }

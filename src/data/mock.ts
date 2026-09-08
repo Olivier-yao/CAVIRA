@@ -3,6 +3,7 @@ import type {
   AppData,
   CalendrierEntry,
   Categorie,
+  FinancePerso,
   Idee,
   JournalEntry,
   Note,
@@ -18,7 +19,7 @@ import type {
   RoutineNote,
   StatutEtape,
 } from "../types";
-import type { NewIdeeInput, NewJournalEntryInput, NewProjetInput, NewRetrospectiveInput } from "./db";
+import type { NewFinancePersoInput, NewIdeeInput, NewJournalEntryInput, NewProjetInput, NewRetrospectiveInput } from "./db";
 
 function removeWhere<T>(arr: T[], pred: (item: T) => boolean): void {
   for (let i = arr.length - 1; i >= 0; i--) {
@@ -138,6 +139,16 @@ const routineNotes: RoutineNote[] = [
   { id: "rn-1", routine_id: "routine-sport", contenu: "5 km de course à pied, 20 min. Rythme correct.", created_at: iso(1) },
   { id: "rn-2", routine_id: "routine-lecture", contenu: 'Chapitre 4 de "Deep Work" — 25 pages.', created_at: iso(0) },
   { id: "rn-3", routine_id: "routine-meditation", contenu: "10 minutes de respiration guidée avant de dormir.", created_at: iso(1) },
+];
+
+const financesPerso: FinancePerso[] = [
+  { id: "fp-1", type: "entree", montant: 1450, note: "Salaire freelance — virement client TourneyCI", date: dateKeyAgo(2), created_at: iso(2) },
+  { id: "fp-2", type: "depense", montant: 780, note: "Loyer du mois", date: dateKeyAgo(7), created_at: iso(7) },
+  { id: "fp-3", type: "depense", montant: 34, note: "Courses de la semaine", date: dateKeyAgo(9), created_at: iso(9) },
+  { id: "fp-4", type: "entree", montant: 180, note: "Vente d'un vieil ordinateur sur Leboncoin", date: dateKeyAgo(11), created_at: iso(11) },
+  { id: "fp-5", type: "depense", montant: 118, note: "Facture électricité", date: dateKeyAgo(13), created_at: iso(13) },
+  { id: "fp-6", type: "economie", montant: 150, note: "Mis de côté sur le livret", date: dateKeyAgo(15), created_at: iso(15) },
+  { id: "fp-7", type: "entree", montant: 240, note: "Remboursement d'un ami", date: dateKeyAgo(20), created_at: iso(20) },
 ];
 
 function mkProjet(
@@ -630,6 +641,7 @@ export const mockData: AppData = {
   routines,
   routineChecks,
   routineNotes,
+  financesPerso,
 };
 
 export function mockCreerProjet(id: string, input: NewProjetInput): void {
@@ -716,6 +728,22 @@ export function mockSupprimerRoutine(id: string): void {
 
 export function mockAjouterNoteRoutine(routineId: string, contenu: string): void {
   routineNotes.unshift({ id: uuidLib(), routine_id: routineId, contenu, created_at: new Date().toISOString() });
+}
+
+export function mockAjouterFinancePerso(input: NewFinancePersoInput): void {
+  financesPerso.unshift({
+    id: uuidLib(),
+    type: input.type,
+    montant: input.montant,
+    note: input.note,
+    date: input.date,
+    created_at: new Date().toISOString(),
+  });
+  financesPerso.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+}
+
+export function mockSupprimerFinancePerso(id: string): void {
+  removeWhere(financesPerso, (f) => f.id === id);
 }
 
 export function mockToggleRoutineCheck(routineId: string, date: string, actuellementFait: boolean): void {
@@ -831,6 +859,7 @@ export function mockRestaurerDonnees(data: AppData): void {
   remplacerContenu(routines, data.routines);
   remplacerContenu(routineChecks, data.routineChecks);
   remplacerContenu(routineNotes, data.routineNotes);
+  remplacerContenu(financesPerso, data.financesPerso);
 }
 
 export function mockAddCategorie(label: string, color: string): string {

@@ -3,6 +3,7 @@ import "./Sidebar.css";
 import {
   IconBacklog,
   IconCalendrier,
+  IconFinances,
   IconGuide,
   IconObjectifs,
   IconParametres,
@@ -20,6 +21,7 @@ export type Screen =
   | "calendrier"
   | "roadmap"
   | "routine"
+  | "finances"
   | "objectifs"
   | "backlog"
   | "recherche"
@@ -48,6 +50,7 @@ export function Sidebar({ screen, onNavigate, counts, streakJours }: SidebarProp
     { screen: "calendrier", label: "Calendrier", icon: <IconCalendrier />, count: counts.calendrier },
     { screen: "roadmap", label: "Roadmap", icon: <IconRoadmap /> },
     { screen: "routine", label: "Routine", icon: <IconRoutine /> },
+    { screen: "finances", label: "Finances personnelles", icon: <IconFinances /> },
   ];
   const vision: NavItem[] = [
     { screen: "objectifs", label: "Objectifs", icon: <IconObjectifs />, count: counts.objectifs },

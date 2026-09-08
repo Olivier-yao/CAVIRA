@@ -96,6 +96,16 @@ export function IconRoutine() {
   );
 }
 
+export function IconFinances() {
+  return (
+    <svg {...base}>
+      <rect x="2.5" y="6" width="15" height="10.5" rx="2" />
+      <path d="M2.5 9.2h15" />
+      <circle cx="13.5" cy="12.8" r="1.6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconGuide() {
   return (
     <svg {...base}>

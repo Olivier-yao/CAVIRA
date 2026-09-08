@@ -158,6 +158,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/015_routine_notes.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 16,
+                description: "finances_personnelles",
+                sql: include_str!("../migrations/016_finances_personnelles.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }
