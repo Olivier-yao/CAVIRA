@@ -15,6 +15,7 @@ import type {
   Retrospective,
   Routine,
   RoutineCheck,
+  RoutineNote,
   StatutEtape,
 } from "../types";
 import type { NewIdeeInput, NewJournalEntryInput, NewProjetInput, NewRetrospectiveInput } from "./db";
@@ -131,6 +132,12 @@ const routineChecks: RoutineCheck[] = [
   { id: "rc-6", routine_id: "routine-meditation", date: dateKeyAgo(1), created_at: iso(1) },
   { id: "rc-7", routine_id: "routine-meditation", date: dateKeyAgo(2), created_at: iso(2) },
   { id: "rc-8", routine_id: "routine-code-perso", date: dateKeyAgo(2), created_at: iso(2) },
+];
+
+const routineNotes: RoutineNote[] = [
+  { id: "rn-1", routine_id: "routine-sport", contenu: "5 km de course à pied, 20 min. Rythme correct.", created_at: iso(1) },
+  { id: "rn-2", routine_id: "routine-lecture", contenu: 'Chapitre 4 de "Deep Work" — 25 pages.', created_at: iso(0) },
+  { id: "rn-3", routine_id: "routine-meditation", contenu: "10 minutes de respiration guidée avant de dormir.", created_at: iso(1) },
 ];
 
 function mkProjet(
@@ -622,6 +629,7 @@ export const mockData: AppData = {
   idees,
   routines,
   routineChecks,
+  routineNotes,
 };
 
 export function mockCreerProjet(id: string, input: NewProjetInput): void {
@@ -702,7 +710,12 @@ export function mockAjouterRoutine(titre: string): void {
 
 export function mockSupprimerRoutine(id: string): void {
   removeWhere(routineChecks, (c) => c.routine_id === id);
+  removeWhere(routineNotes, (n) => n.routine_id === id);
   removeWhere(routines, (r) => r.id === id);
+}
+
+export function mockAjouterNoteRoutine(routineId: string, contenu: string): void {
+  routineNotes.unshift({ id: uuidLib(), routine_id: routineId, contenu, created_at: new Date().toISOString() });
 }
 
 export function mockToggleRoutineCheck(routineId: string, date: string, actuellementFait: boolean): void {
@@ -817,6 +830,7 @@ export function mockRestaurerDonnees(data: AppData): void {
   remplacerContenu(idees, data.idees);
   remplacerContenu(routines, data.routines);
   remplacerContenu(routineChecks, data.routineChecks);
+  remplacerContenu(routineNotes, data.routineNotes);
 }
 
 export function mockAddCategorie(label: string, color: string): string {

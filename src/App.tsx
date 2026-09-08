@@ -15,7 +15,10 @@ import { RechercheNotes } from "./screens/RechercheNotes";
 import { Parametres } from "./screens/Parametres";
 import { PremierLancement } from "./screens/PremierLancement";
 import { FicheProjet } from "./screens/FicheProjet";
+import { FicheRoutine } from "./screens/FicheRoutine";
 import { PanneauRappels } from "./components/PanneauRappels";
+import { Verrouillage } from "./screens/Verrouillage";
+import { verrouillageActif } from "./lib/verrouillage";
 import { loadAppData } from "./data/db";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
 import { buildCalendarEvents } from "./lib/calendrier";
@@ -25,12 +28,14 @@ import type { AppData } from "./types";
 function App() {
   const [screen, setScreen] = useState<Screen>("dashboard");
   const [openProjetId, setOpenProjetId] = useState<string | null>(null);
+  const [openRoutineId, setOpenRoutineId] = useState<string | null>(null);
   const [data, setData] = useState<AppData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [modalOuvert, setModalOuvert] = useState(false);
   const [projetAEditerId, setProjetAEditerId] = useState<string | null>(null);
   const [paletteOuverte, setPaletteOuverte] = useState(false);
   const [panneauOuvert, setPanneauOuvert] = useState(false);
+  const [deverrouille, setDeverrouille] = useState(() => !verrouillageActif());
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -65,6 +70,7 @@ function App() {
   };
 
   function openProjet(id: string) {
+    setOpenRoutineId(null);
     setOpenProjetId(id);
   }
 
@@ -73,13 +79,25 @@ function App() {
     setScreen("projets");
   }
 
+  function openRoutine(id: string) {
+    setOpenProjetId(null);
+    setOpenRoutineId(id);
+  }
+
+  function backToRoutine() {
+    setOpenRoutineId(null);
+    setScreen("routine");
+  }
+
   function handleSidebarNavigate(next: Screen) {
     setOpenProjetId(null);
+    setOpenRoutineId(null);
     setScreen(next);
   }
 
   function handleNoterIdee() {
     setOpenProjetId(null);
+    setOpenRoutineId(null);
     setScreen("backlog");
   }
 
@@ -98,12 +116,17 @@ function App() {
   }
 
   const aucunProjet = data ? data.projets.length === 0 : false;
-  const montrerPremierLancement = !openProjetId && (screen === "premier-lancement" || (screen === "dashboard" && aucunProjet));
+  const montrerPremierLancement =
+    !openProjetId && !openRoutineId && (screen === "premier-lancement" || (screen === "dashboard" && aucunProjet));
 
   const projetAEditer = data && projetAEditerId ? data.projets.find((p) => p.id === projetAEditerId) : undefined;
   const objectifIdsDuProjetAEditer = data && projetAEditerId
     ? data.projetObjectifs.filter((po) => po.projet_id === projetAEditerId).map((po) => po.objectif_id)
     : undefined;
+
+  if (!deverrouille) {
+    return <Verrouillage onDeverrouille={() => setDeverrouille(true)} />;
+  }
 
   return (
     <div className="app-shell">
@@ -131,7 +154,9 @@ function App() {
           {data && !openProjetId && screen === "roadmap" && (
             <Roadmap data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}
-          {data && !openProjetId && screen === "routine" && <Routine data={data} onDataChanged={refreshData} />}
+          {data && !openProjetId && !openRoutineId && screen === "routine" && (
+            <Routine data={data} onDataChanged={refreshData} onOpenRoutine={openRoutine} />
+          )}
           {data && !openProjetId && screen === "objectifs" && (
             <Objectifs data={data} onOpenProjet={openProjet} onDataChanged={refreshData} />
           )}
@@ -151,6 +176,15 @@ function App() {
               onModifier={() => setProjetAEditerId(openProjetId)}
               onOpenProjet={openProjet}
               onProjetSupprime={handleProjetSupprime}
+            />
+          )}
+          {data && openRoutineId && (
+            <FicheRoutine
+              data={data}
+              routineId={openRoutineId}
+              onBack={backToRoutine}
+              onDataChanged={refreshData}
+              onRoutineSupprimee={backToRoutine}
             />
           )}
         </div>

@@ -18,6 +18,7 @@ import type {
   Retrospective,
   Routine,
   RoutineCheck,
+  RoutineNote,
   StatutEtape,
   StatutProjet,
   TypeJournal,
@@ -31,6 +32,7 @@ import {
   mockAddJournalEntry,
   mockAddNote,
   mockAddRetrospective,
+  mockAjouterNoteRoutine,
   mockAjouterPersonneProjet,
   mockAjouterRoutine,
   mockArchiverProjetRapide,
@@ -92,6 +94,7 @@ export async function loadAppData(): Promise<AppData> {
     idees,
     routines,
     routineChecks,
+    routineNotes,
   ] = await Promise.all([
     db.select<Categorie[]>("SELECT * FROM categories ORDER BY sort_order"),
     db.select<Objectif[]>("SELECT * FROM objectifs ORDER BY created_at"),
@@ -107,6 +110,7 @@ export async function loadAppData(): Promise<AppData> {
     db.select<Idee[]>("SELECT * FROM idees ORDER BY interet DESC, created_at DESC"),
     db.select<Routine[]>("SELECT * FROM routines ORDER BY sort_order"),
     db.select<RoutineCheck[]>("SELECT * FROM routine_checks"),
+    db.select<RoutineNote[]>("SELECT * FROM routine_notes ORDER BY created_at DESC"),
   ]);
   return {
     categories,
@@ -123,6 +127,7 @@ export async function loadAppData(): Promise<AppData> {
     idees,
     routines,
     routineChecks,
+    routineNotes,
   };
 }
 
@@ -323,7 +328,21 @@ export async function supprimerRoutine(id: string): Promise<void> {
   }
   const db = await getDb();
   await db.execute("DELETE FROM routine_checks WHERE routine_id = $1", [id]);
+  await db.execute("DELETE FROM routine_notes WHERE routine_id = $1", [id]);
   await db.execute("DELETE FROM routines WHERE id = $1", [id]);
+}
+
+export async function ajouterNoteRoutine(routineId: string, contenu: string): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockAjouterNoteRoutine(routineId, contenu);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("INSERT INTO routine_notes (id, routine_id, contenu) VALUES ($1, $2, $3)", [
+    uuid(),
+    routineId,
+    contenu,
+  ]);
 }
 
 export async function toggleRoutineCheck(routineId: string, date: string, actuellementFait: boolean): Promise<void> {
@@ -558,6 +577,7 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
   await db.execute("DELETE FROM categories");
   await db.execute("DELETE FROM objectifs");
   await db.execute("DELETE FROM routine_checks");
+  await db.execute("DELETE FROM routine_notes");
   await db.execute("DELETE FROM routines");
 
   for (const c of data.categories) {
@@ -667,6 +687,14 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
       c.routine_id,
       c.date,
       c.created_at,
+    ]);
+  }
+  for (const n of data.routineNotes) {
+    await db.execute("INSERT INTO routine_notes (id, routine_id, contenu, created_at) VALUES ($1, $2, $3, $4)", [
+      n.id,
+      n.routine_id,
+      n.contenu,
+      n.created_at,
     ]);
   }
 }

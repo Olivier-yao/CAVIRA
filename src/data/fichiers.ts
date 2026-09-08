@@ -55,6 +55,7 @@ const CLES_APPDATA: (keyof AppData)[] = [
   "idees",
   "routines",
   "routineChecks",
+  "routineNotes",
 ];
 
 export function estAppDataValide(valeur: unknown): valeur is AppData {

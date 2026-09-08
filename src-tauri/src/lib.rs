@@ -102,6 +102,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/014_routines.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 15,
+                description: "routine_notes",
+                sql: include_str!("../migrations/015_routine_notes.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

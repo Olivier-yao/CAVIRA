@@ -24,6 +24,7 @@ import {
   type CycleConfig,
   type CycleUnite,
 } from "../lib/cycles";
+import { definirMotDePasse, desactiverVerrouillage, verrouillageActif } from "../lib/verrouillage";
 
 interface ParametresProps {
   data: AppData;
@@ -59,6 +60,13 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [periodeRapport, setPeriodeRapport] = useState<PeriodeRapport>("30j");
   const [rapportEnCours, setRapportEnCours] = useState(false);
   const [cycleConfig, setCycleConfigState] = useState<CycleConfig>(() => avancerCycleSiNecessaire());
+
+  const [verrouille, setVerrouille] = useState(verrouillageActif());
+  const [formMdpOuvert, setFormMdpOuvert] = useState(false);
+  const [nouveauMdp, setNouveauMdp] = useState("");
+  const [confirmationMdp, setConfirmationMdp] = useState("");
+  const [erreurMdp, setErreurMdp] = useState<string | null>(null);
+  const [confirmDesactivation, setConfirmDesactivation] = useState(false);
 
   useEffect(() => {
     if (!isTauriRuntime()) return;
@@ -164,6 +172,41 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
 
   function handleReinitialiserCycle() {
     setCycleConfigState(reinitialiserCycleMaintenant());
+  }
+
+  function handleOuvrirFormMdp() {
+    setNouveauMdp("");
+    setConfirmationMdp("");
+    setErreurMdp(null);
+    setFormMdpOuvert(true);
+  }
+
+  async function handleDefinirMdp() {
+    if (nouveauMdp.length < 4) {
+      setErreurMdp("Le mot de passe doit contenir au moins 4 caractères.");
+      return;
+    }
+    if (nouveauMdp !== confirmationMdp) {
+      setErreurMdp("Les deux mots de passe ne correspondent pas.");
+      return;
+    }
+    await definirMotDePasse(nouveauMdp);
+    setVerrouille(true);
+    setFormMdpOuvert(false);
+    setNouveauMdp("");
+    setConfirmationMdp("");
+    setErreurMdp(null);
+  }
+
+  function handleDesactiverVerrouillage() {
+    if (!confirmDesactivation) {
+      setConfirmDesactivation(true);
+      return;
+    }
+    desactiverVerrouillage();
+    setVerrouille(false);
+    setConfirmDesactivation(false);
+    setFormMdpOuvert(false);
   }
 
   async function handleConfirmerImport() {
@@ -396,6 +439,70 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
               </span>
               <button className="btn btn--ghost" onClick={handleReinitialiserCycle}>
                 Réinitialiser maintenant
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <section className="card parametres-section">
+        <div className="parametres-section__top">
+          <div>
+            <h2>Verrouillage de l'application</h2>
+            <p className="parametres-section__desc">
+              Demande un mot de passe à chaque ouverture de CAVIRA. Protège l'accès à l'application sur cette
+              machine — les données restent stockées en clair sur le disque.
+            </p>
+          </div>
+          <button
+            className={`cycle-toggle${verrouille ? " cycle-toggle--on" : ""}`}
+            onClick={() => (verrouille ? handleDesactiverVerrouillage() : handleOuvrirFormMdp())}
+            role="switch"
+            aria-checked={verrouille}
+            aria-label="Activer le verrouillage"
+          >
+            <span className="cycle-toggle__knob" />
+          </button>
+        </div>
+
+        {verrouille && !formMdpOuvert && (
+          <div className="parametres-actions">
+            <button className="btn btn--ghost" onClick={handleOuvrirFormMdp}>
+              Changer le mot de passe
+            </button>
+            {confirmDesactivation && (
+              <button className="btn btn--danger" onClick={handleDesactiverVerrouillage}>
+                Confirmer la désactivation
+              </button>
+            )}
+          </div>
+        )}
+
+        {formMdpOuvert && (
+          <div className="cycle-config">
+            <div className="verrouillage-mdp-form">
+              <input
+                type="password"
+                value={nouveauMdp}
+                onChange={(e) => setNouveauMdp(e.target.value)}
+                placeholder="Nouveau mot de passe"
+                autoFocus
+              />
+              <input
+                type="password"
+                value={confirmationMdp}
+                onChange={(e) => setConfirmationMdp(e.target.value)}
+                placeholder="Confirmer le mot de passe"
+                onKeyDown={(e) => e.key === "Enter" && handleDefinirMdp()}
+              />
+            </div>
+            {erreurMdp && <p className="parametres-import-erreur">{erreurMdp}</p>}
+            <div className="parametres-actions">
+              <button className="btn btn--ghost" onClick={() => setFormMdpOuvert(false)}>
+                Annuler
+              </button>
+              <button className="btn btn--accent" onClick={handleDefinirMdp}>
+                Enregistrer
               </button>
             </div>
           </div>

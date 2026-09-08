@@ -132,6 +132,13 @@ export interface RoutineCheck {
   created_at: string;
 }
 
+export interface RoutineNote {
+  id: string;
+  routine_id: string;
+  contenu: string;
+  created_at: string;
+}
+
 export interface AppData {
   categories: Categorie[];
   objectifs: Objectif[];
@@ -147,4 +154,5 @@ export interface AppData {
   idees: Idee[];
   routines: Routine[];
   routineChecks: RoutineCheck[];
+  routineNotes: RoutineNote[];
 }

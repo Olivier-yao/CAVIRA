@@ -8,9 +8,10 @@ import { formatDateShort } from "../lib/format";
 interface RoutineProps {
   data: AppData;
   onDataChanged: () => void;
+  onOpenRoutine: (routineId: string) => void;
 }
 
-export function Routine({ data, onDataChanged }: RoutineProps) {
+export function Routine({ data, onDataChanged, onOpenRoutine }: RoutineProps) {
   const jours = useMemo(() => joursSemaineCourante(), []);
   const routinesActives = data.routines.filter((r) => r.actif).sort((a, b) => a.sort_order - b.sort_order);
 
@@ -103,7 +104,10 @@ export function Routine({ data, onDataChanged }: RoutineProps) {
             return (
               <div className="routine-table__row" key={r.id}>
                 <div className="routine-table__nom">
-                  {r.titre}
+                  <span className="routine-table__accent" />
+                  <button className="routine-table__titre" onClick={() => onOpenRoutine(r.id)}>
+                    {r.titre}
+                  </button>
                   <button
                     className="routine-table__supprimer"
                     onClick={() => handleSupprimer(r.id)}

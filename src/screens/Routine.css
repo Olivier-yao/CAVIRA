@@ -88,6 +88,30 @@
   color: var(--text-3);
 }
 
+.routine-table__accent {
+  width: 2px;
+  height: 14px;
+  border-radius: 1px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.routine-table__titre {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.routine-table__titre:hover {
+  color: var(--accent);
+}
+
 .routine-table__supprimer {
   background: none;
   border: none;

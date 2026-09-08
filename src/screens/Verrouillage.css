@@ -1,0 +1,78 @@
+.verrouillage-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 1000;
+}
+
+.verrouillage-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 320px;
+  padding: 36px 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.verrouillage-logo {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-content: center;
+  border-radius: 14px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.verrouillage-card h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.verrouillage-sous-titre {
+  margin: 0 0 6px;
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.verrouillage-card input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  text-align: center;
+}
+
+.verrouillage-card input:focus {
+  outline: none;
+  border-color: var(--accent-line);
+}
+
+.verrouillage-card .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.verrouillage-erreur {
+  margin: -6px 0 0;
+  color: var(--danger);
+  font-size: 12px;
+}
