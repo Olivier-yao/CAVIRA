@@ -3,6 +3,7 @@ import "./App.css";
 import { Sidebar, type Screen } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
 import { ProjetModal } from "./components/ProjetModal";
+import { CommandPalette } from "./components/CommandPalette";
 import { Dashboard } from "./screens/Dashboard";
 import { Projets } from "./screens/Projets";
 import { Calendrier } from "./screens/Calendrier";
@@ -25,6 +26,18 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [modalOuvert, setModalOuvert] = useState(false);
   const [projetAEditerId, setProjetAEditerId] = useState<string | null>(null);
+  const [paletteOuverte, setPaletteOuverte] = useState(false);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOuverte(true);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const refreshData = useCallback(() => {
     return loadAppData()
@@ -91,7 +104,7 @@ function App() {
     <div className="app-shell">
       <Sidebar screen={screen} onNavigate={handleSidebarNavigate} counts={counts} streakJours={stats?.streakJours ?? 0} />
       <div className="app-main">
-        <TopBar onNouveauProjet={() => setModalOuvert(true)} />
+        <TopBar onNouveauProjet={() => setModalOuvert(true)} onOpenPalette={() => setPaletteOuverte(true)} />
         <div className="app-content">
           {error && <div className="app-error">Erreur de chargement : {error}</div>}
           {!error && !data && <div className="app-loading">Chargement…</div>}
@@ -125,6 +138,16 @@ function App() {
           )}
         </div>
       </div>
+      {paletteOuverte && data && (
+        <CommandPalette
+          data={data}
+          onClose={() => setPaletteOuverte(false)}
+          onOpenProjet={(id) => {
+            setOpenProjetId(id);
+          }}
+          onNavigate={handleSidebarNavigate}
+        />
+      )}
       {modalOuvert && data && (
         <ProjetModal data={data} onClose={() => setModalOuvert(false)} onSaved={handleProjetEnregistre} />
       )}

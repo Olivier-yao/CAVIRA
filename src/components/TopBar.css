@@ -20,24 +20,28 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-3);
+  font-family: var(--font);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.topbar__search:hover {
+  border-color: var(--border-hover);
 }
 
 .topbar__search-icon {
   font-size: 13px;
+  flex-shrink: 0;
 }
 
-.topbar__search input {
+.topbar__search-placeholder {
   flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 12.5px;
-}
-
-.topbar__search input::placeholder {
   color: var(--text-3);
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .topbar__search kbd {

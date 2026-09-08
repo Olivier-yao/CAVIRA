@@ -2,16 +2,17 @@ import "./TopBar.css";
 
 interface TopBarProps {
   onNouveauProjet: () => void;
+  onOpenPalette: () => void;
 }
 
-export function TopBar({ onNouveauProjet }: TopBarProps) {
+export function TopBar({ onNouveauProjet, onOpenPalette }: TopBarProps) {
   return (
     <header className="topbar">
-      <div className="topbar__search">
+      <button className="topbar__search" onClick={onOpenPalette}>
         <span className="topbar__search-icon">⌕</span>
-        <input placeholder="Rechercher un projet, une note, une étape…" />
+        <span className="topbar__search-placeholder">Rechercher un projet, une note, une étape…</span>
         <kbd>⌘K</kbd>
-      </div>
+      </button>
       <div className="topbar__title">CENTRE DE COMMANDE</div>
       <div className="topbar__actions">
         <button className="btn btn--ghost" title="Bientôt disponible">
