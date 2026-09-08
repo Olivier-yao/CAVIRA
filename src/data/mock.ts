@@ -556,7 +556,7 @@ export function mockCreerProjet(id: string, input: NewProjetInput): void {
     description: input.description,
     objectif_final: input.objectifFinal,
     echeance_date: null,
-    seuil_depenses: null,
+    seuil_depenses: input.seuilDepenses,
     created_at: now,
     updated_at: now,
   });
@@ -573,6 +573,7 @@ export function mockModifierProjet(id: string, input: NewProjetInput): void {
     p.statut = input.statut;
     p.description = input.description;
     p.objectif_final = input.objectifFinal;
+    p.seuil_depenses = input.seuilDepenses;
     p.updated_at = new Date().toISOString();
   }
   removeWhere(projetObjectifs, (po) => po.projet_id === id);

@@ -38,6 +38,9 @@ export function ProjetModal({
   const [description, setDescription] = useState(projetExistant?.description ?? "");
   const [objectifFinal, setObjectifFinal] = useState(projetExistant?.objectif_final ?? "");
   const [objectifIds, setObjectifIds] = useState<Set<string>>(new Set(objectifIdsExistants ?? []));
+  const [seuilDepenses, setSeuilDepenses] = useState(
+    projetExistant?.seuil_depenses != null ? String(projetExistant.seuil_depenses) : "",
+  );
   const [enCours, setEnCours] = useState(false);
 
   function toggleObjectif(id: string) {
@@ -54,6 +57,7 @@ export function ProjetModal({
     if (!t || !categorieId) return;
     setEnCours(true);
     try {
+      const seuilParsed = Number(seuilDepenses.replace(",", "."));
       const input = {
         titre: t,
         categorieId,
@@ -61,6 +65,7 @@ export function ProjetModal({
         description: description.trim(),
         objectifFinal: objectifFinal.trim(),
         objectifIds: [...objectifIds],
+        seuilDepenses: seuilDepenses.trim() && Number.isFinite(seuilParsed) ? Math.abs(seuilParsed) : null,
       };
       if (modeEdition && projetExistant) {
         await modifierProjet(projetExistant.id, input);
@@ -144,6 +149,16 @@ export function ProjetModal({
               value={objectifFinal}
               onChange={(e) => setObjectifFinal(e.target.value)}
               placeholder="Que veux-tu obtenir avec ce projet ?"
+            />
+          </label>
+
+          <label className="modal-field">
+            <span>Seuil de dépenses (optionnel)</span>
+            <input
+              value={seuilDepenses}
+              onChange={(e) => setSeuilDepenses(e.target.value)}
+              placeholder="Aucune alerte si vide"
+              inputMode="decimal"
             />
           </label>
 

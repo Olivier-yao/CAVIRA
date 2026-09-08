@@ -4,7 +4,8 @@ import type { AppData } from "../types";
 import { CategorieBadge, StatutProjetBadge } from "../components/Badges";
 import { ProgressRing } from "../components/ProgressRing";
 import { formatDateMedium, formatDateShort, formatRelativeLong, daysUntil } from "../lib/format";
-import { projetProgressionPct } from "../lib/ficheProjet";
+import { projetProgressionPct, syntheseFinanciere } from "../lib/ficheProjet";
+import { formatMontantAbs } from "../lib/format";
 import { PlanAttaqueTab } from "./fiche-projet/PlanAttaqueTab";
 import { CalendrierTab } from "./fiche-projet/CalendrierTab";
 import { JournalTab } from "./fiche-projet/JournalTab";
@@ -56,6 +57,7 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier 
   );
   const objectifsTitres = data.objectifs.filter((o) => objectifIds.has(o.id)).map((o) => o.titre);
   const progression = projetProgressionPct(data.etapes, projet.id);
+  const synthese = syntheseFinanciere(data.journal, projet, 30);
   const nbEtapes = data.etapes.filter((e) => e.projet_id === projet.id).length;
   const nbJournal = data.journal.filter((j) => j.projet_id === projet.id).length;
   const nbNotes = data.notes.filter((n) => n.projet_id === projet.id).length;
@@ -83,6 +85,14 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier 
           <div className="fiche-projet__badges">
             <CategorieBadge categorie={categorie} />
             <StatutProjetBadge statut={projet.statut} />
+            {synthese.seuilDepasse && (
+              <span
+                className="badge fiche-projet__badge-alerte"
+                title={`Dépenses cumulées à ${formatMontantAbs(synthese.totalDepense)} pour un seuil fixé à ${formatMontantAbs(synthese.seuil ?? 0)}.`}
+              >
+                ⚠ Seuil dépassé
+              </span>
+            )}
           </div>
           <h1>{projet.titre}</h1>
           <p className="fiche-projet__description">{projet.description}</p>

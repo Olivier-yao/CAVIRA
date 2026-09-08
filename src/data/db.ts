@@ -162,6 +162,7 @@ export interface NewProjetInput {
   description: string;
   objectifFinal: string;
   objectifIds: string[];
+  seuilDepenses: number | null;
 }
 
 export async function creerProjet(input: NewProjetInput): Promise<string> {
@@ -172,8 +173,8 @@ export async function creerProjet(input: NewProjetInput): Promise<string> {
   }
   const db = await getDb();
   await db.execute(
-    "INSERT INTO projets (id, titre, categorie_id, statut, description, objectif_final) VALUES ($1, $2, $3, $4, $5, $6)",
-    [id, input.titre, input.categorieId, input.statut, input.description, input.objectifFinal],
+    "INSERT INTO projets (id, titre, categorie_id, statut, description, objectif_final, seuil_depenses) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+    [id, input.titre, input.categorieId, input.statut, input.description, input.objectifFinal, input.seuilDepenses],
   );
   for (const objectifId of input.objectifIds) {
     await db.execute("INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES ($1, $2)", [id, objectifId]);
@@ -188,8 +189,8 @@ export async function modifierProjet(id: string, input: NewProjetInput): Promise
   }
   const db = await getDb();
   await db.execute(
-    "UPDATE projets SET titre = $1, categorie_id = $2, statut = $3, description = $4, objectif_final = $5, updated_at = datetime('now') WHERE id = $6",
-    [input.titre, input.categorieId, input.statut, input.description, input.objectifFinal, id],
+    "UPDATE projets SET titre = $1, categorie_id = $2, statut = $3, description = $4, objectif_final = $5, seuil_depenses = $6, updated_at = datetime('now') WHERE id = $7",
+    [input.titre, input.categorieId, input.statut, input.description, input.objectifFinal, input.seuilDepenses, id],
   );
   await db.execute("DELETE FROM projet_objectifs WHERE projet_id = $1", [id]);
   for (const objectifId of input.objectifIds) {
