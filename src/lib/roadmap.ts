@@ -50,7 +50,7 @@ export function buildRoadmapRows(data: AppData, depuis: Date, nbTrimestres = 6):
   }
 
   const rows: RoadmapRow[] = data.projets
-    .filter((p) => p.statut !== "abandonne")
+    .filter((p) => p.statut !== "abandonne" && !p.masque)
     .map((projet) => {
       const debut = parseSql(projet.created_at);
       const etapesDuProjet = data.etapes.filter((e) => e.projet_id === projet.id);

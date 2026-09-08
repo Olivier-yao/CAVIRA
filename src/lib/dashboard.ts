@@ -146,8 +146,8 @@ export function computeDashboardStats(data: AppData, periode: PeriodeDashboard =
   const now = new Date();
   const projetById = new Map(projets.map((p) => [p.id, p]));
 
-  const projetsActifs = projets.filter((p) => p.statut === "en_cours").length;
-  const projetsPause = projets.filter((p) => p.statut === "pause").length;
+  const projetsActifs = projets.filter((p) => p.statut === "en_cours" && !p.masque).length;
+  const projetsPause = projets.filter((p) => p.statut === "pause" && !p.masque).length;
   const projetsArchives = projets.filter((p) => p.statut === "termine" || p.statut === "abandonne").length;
 
   const fenetre = calculerFenetreComparaison(periode, now);

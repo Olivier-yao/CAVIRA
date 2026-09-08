@@ -1,6 +1,6 @@
-import type { AppData } from "../types";
+import type { AppData, Projet } from "../types";
 import { formatDateMedium, formatMontant, formatMontantAbs } from "./format";
-import { projetProgressionPct } from "./ficheProjet";
+import { projetProgressionPct, repartitionEtapes, streakJoursProjet, syntheseFinanciere } from "./ficheProjet";
 
 export type PeriodeRapport = "30j" | "mois" | "trimestre";
 
@@ -101,6 +101,63 @@ export function genererRapportTexte(data: AppData, fenetre: FenetreRapport): str
   if (retrosGlobales.length > 0) {
     lignes.push("── Rétrospectives globales ──");
     for (const r of retrosGlobales) {
+      lignes.push(`[${r.periode}] Bien marché : ${r.bien_marche}`);
+      lignes.push(`  A bloqué : ${r.a_bloque}`);
+      lignes.push(`  Ajustement : ${r.ajustement}`);
+      lignes.push("");
+    }
+  }
+
+  return lignes.join("\n");
+}
+
+export function genererRapportProjetTexte(data: AppData, projet: Projet, fenetre: FenetreRapport): string {
+  const lignes: string[] = [];
+
+  lignes.push(`CAVIRA — Rapport de projet : ${projet.titre}`);
+  lignes.push(`Période : ${fenetre.label} (${formatDateMedium(fenetre.debut.toISOString())} → ${formatDateMedium(fenetre.fin.toISOString())})`);
+  lignes.push("");
+
+  const progression = projetProgressionPct(data.etapes, projet.id);
+  const repartition = repartitionEtapes(data.etapes, projet.id);
+  const streak = streakJoursProjet(data.journal, projet.id);
+  const joursFenetre = Math.max(1, Math.round((fenetre.fin.getTime() - fenetre.debut.getTime()) / (24 * 60 * 60 * 1000)));
+  const synthese = syntheseFinanciere(data.journal, projet, joursFenetre);
+
+  lignes.push(`Statut : ${projet.statut} · Progression : ${progression}%`);
+  lignes.push(
+    `Étapes : ${repartition.fait} terminée${repartition.fait > 1 ? "s" : ""}, ${repartition.en_cours} en cours, ${repartition.a_faire} à faire, ${repartition.bloque} bloquée${repartition.bloque > 1 ? "s" : ""} (${repartition.total} au total)`,
+  );
+  lignes.push(`Série en cours : ${streak > 0 ? `${streak} jour${streak > 1 ? "s" : ""} d'affilée` : "aucune"}`);
+  lignes.push(
+    `Bilan financier (période) : ${formatMontant(synthese.bilanNet)} (${formatMontantAbs(synthese.totalDepense)} dépensés · ${formatMontantAbs(synthese.totalEconomise)} économisés · ${formatMontantAbs(synthese.totalBenefices)} de bénéfices estimés)`,
+  );
+  if (synthese.seuilDepasse) {
+    lignes.push(`⚠ Seuil de dépenses dépassé (seuil fixé à ${formatMontantAbs(synthese.seuil ?? 0)})`);
+  }
+  lignes.push("");
+
+  const journalProjet = data.journal.filter((j) => j.projet_id === projet.id && dansLaFenetre(j.created_at, fenetre));
+  const actions = journalProjet.filter((j) => j.type === "action");
+  lignes.push(`── Actions dans la période (${actions.length}) ──`);
+  for (const a of actions.slice(0, 15)) {
+    lignes.push(`${formatDateMedium(a.created_at)} · ${a.titre}`);
+  }
+  lignes.push("");
+
+  const notesProjet = data.notes.filter((n) => n.projet_id === projet.id);
+  if (notesProjet.length > 0) {
+    lignes.push(`── Notes (${notesProjet.length}) ──`);
+    for (const n of notesProjet.slice(0, 10)) {
+      lignes.push(`${n.titre} — ${n.contenu}`);
+    }
+    lignes.push("");
+  }
+
+  const retrosProjet = data.retrospectives.filter((r) => r.projet_id === projet.id);
+  if (retrosProjet.length > 0) {
+    lignes.push("── Rétrospectives ──");
+    for (const r of retrosProjet) {
       lignes.push(`[${r.periode}] Bien marché : ${r.bien_marche}`);
       lignes.push(`  A bloqué : ${r.a_bloque}`);
       lignes.push(`  Ajustement : ${r.ajustement}`);

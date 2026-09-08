@@ -122,6 +122,7 @@ function mkProjet(
     echeance_date,
     seuil_depenses,
     importance,
+    masque: false,
     created_at: iso(30),
     updated_at: iso(1),
   };
@@ -600,6 +601,7 @@ export function mockCreerProjet(id: string, input: NewProjetInput): void {
     echeance_date: null,
     seuil_depenses: input.seuilDepenses,
     importance: input.importance,
+    masque: false,
     created_at: now,
     updated_at: now,
   });
@@ -642,6 +644,38 @@ export function mockSupprimerProjet(id: string): void {
   removeWhere(projetLiens, (pl) => pl.projet_id === id || pl.alimente_id === id);
   removeWhere(retrospectives, (r) => r.projet_id === id);
   removeWhere(projets, (p) => p.id === id);
+}
+
+export function mockMasquerProjet(id: string, masque: boolean): void {
+  const p = projets.find((x) => x.id === id);
+  if (p) p.masque = masque;
+}
+
+export function mockArchiverProjetRapide(id: string, statut: "termine" | "abandonne"): void {
+  const p = projets.find((x) => x.id === id);
+  if (p) {
+    p.statut = statut;
+    p.updated_at = new Date().toISOString();
+  }
+}
+
+export function mockDupliquerProjet(id: string, nouveauId: string): string {
+  const source = projets.find((x) => x.id === id);
+  if (!source) throw new Error("Projet introuvable");
+  const now = new Date().toISOString();
+  projets.push({
+    ...source,
+    id: nouveauId,
+    titre: `${source.titre} (copie)`,
+    statut: "preparation",
+    masque: false,
+    created_at: now,
+    updated_at: now,
+  });
+  for (const po of projetObjectifs.filter((x) => x.projet_id === id)) {
+    projetObjectifs.push({ projet_id: nouveauId, objectif_id: po.objectif_id });
+  }
+  return nouveauId;
 }
 
 export function mockModifierEtape(
@@ -800,6 +834,7 @@ export function mockPromouvoirIdee(idee: Idee, nouveauProjetId: string): void {
     echeance_date: null,
     seuil_depenses: null,
     importance: "moyenne",
+    masque: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });

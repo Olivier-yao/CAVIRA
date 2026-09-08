@@ -28,8 +28,11 @@ import {
   mockAddJournalEntry,
   mockAddNote,
   mockAddRetrospective,
+  mockArchiverProjetRapide,
   mockCreerProjet,
   mockDeplacerEcheanceEtape,
+  mockDupliquerProjet,
+  mockMasquerProjet,
   mockModifierCategorie,
   mockModifierEtape,
   mockModifierObjectif,
@@ -59,8 +62,11 @@ export function getDb(): Promise<Database> {
 export async function loadAppData(): Promise<AppData> {
   // Hors runtime Tauri (aperçu navigateur en développement), le plugin SQL
   // n'est pas disponible : on retombe sur les données de seed en mémoire.
+  // Copie superficielle à chaque appel : mockData est un singleton muté en
+  // place, donc renvoyer la même référence ferait que React ignore le
+  // setState (Object.is) pour toute action qui ne change que les données.
   if (!isTauriRuntime()) {
-    return mockData;
+    return { ...mockData };
   }
   const db = await getDb();
   const [
@@ -256,6 +262,59 @@ export async function supprimerProjet(id: string): Promise<void> {
   await db.execute("DELETE FROM projets WHERE id = $1", [id]);
 }
 
+export async function masquerProjet(id: string, masque: boolean): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockMasquerProjet(id, masque);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("UPDATE projets SET masque = $1 WHERE id = $2", [masque ? 1 : 0, id]);
+}
+
+export async function archiverProjetRapide(id: string, statut: "termine" | "abandonne"): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockArchiverProjetRapide(id, statut);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("UPDATE projets SET statut = $1, updated_at = datetime('now') WHERE id = $2", [statut, id]);
+}
+
+export async function dupliquerProjet(id: string): Promise<string> {
+  const nouveauId = uuid();
+  if (!isTauriRuntime()) {
+    return mockDupliquerProjet(id, nouveauId);
+  }
+  const db = await getDb();
+  const rows = await db.select<Projet[]>("SELECT * FROM projets WHERE id = $1", [id]);
+  const source = rows[0];
+  if (!source) throw new Error("Projet introuvable");
+  await db.execute(
+    "INSERT INTO projets (id, titre, categorie_id, statut, description, objectif_final, seuil_depenses, importance) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+    [
+      nouveauId,
+      `${source.titre} (copie)`,
+      source.categorie_id,
+      "preparation",
+      source.description,
+      source.objectif_final,
+      source.seuil_depenses,
+      source.importance,
+    ],
+  );
+  const objectifsRattaches = await db.select<ProjetObjectif[]>(
+    "SELECT * FROM projet_objectifs WHERE projet_id = $1",
+    [id],
+  );
+  for (const po of objectifsRattaches) {
+    await db.execute("INSERT INTO projet_objectifs (projet_id, objectif_id) VALUES ($1, $2)", [
+      nouveauId,
+      po.objectif_id,
+    ]);
+  }
+  return nouveauId;
+}
+
 export async function modifierEtape(
   etapeId: string,
   input: { titre: string; statut: StatutEtape; priorite: PlanEtape["priorite"]; dateCible: string | null; note: string | null },
@@ -434,7 +493,7 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
   }
   for (const p of data.projets) {
     await db.execute(
-      "INSERT INTO projets (id, titre, categorie_id, statut, description, objectif_final, echeance_date, seuil_depenses, importance, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+      "INSERT INTO projets (id, titre, categorie_id, statut, description, objectif_final, echeance_date, seuil_depenses, importance, masque, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
       [
         p.id,
         p.titre,
@@ -445,6 +504,7 @@ export async function restaurerDonnees(data: AppData): Promise<void> {
         p.echeance_date,
         p.seuil_depenses,
         p.importance,
+        p.masque ? 1 : 0,
         p.created_at,
         p.updated_at,
       ],

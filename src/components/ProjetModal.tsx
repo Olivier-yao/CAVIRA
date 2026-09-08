@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./modal.css";
 import type { AppData, ImportanceProjet, Projet, StatutProjet } from "../types";
-import { creerProjet, modifierProjet, supprimerProjet } from "../data/db";
+import { creerProjet, modifierProjet } from "../data/db";
 
 interface ProjetModalProps {
   data: AppData;
@@ -9,7 +9,6 @@ interface ProjetModalProps {
   objectifIdsExistants?: string[];
   onClose: () => void;
   onSaved: (projetId: string) => void;
-  onDeleted?: () => void;
 }
 
 const STATUTS: { id: StatutProjet; label: string }[] = [
@@ -33,11 +32,8 @@ export function ProjetModal({
   objectifIdsExistants,
   onClose,
   onSaved,
-  onDeleted,
 }: ProjetModalProps) {
   const modeEdition = !!projetExistant;
-  const [confirmSuppression, setConfirmSuppression] = useState(false);
-  const [suppressionEnCours, setSuppressionEnCours] = useState(false);
   const [titre, setTitre] = useState(projetExistant?.titre ?? "");
   const [categorieId, setCategorieId] = useState(projetExistant?.categorie_id ?? data.categories[0]?.id ?? "");
   const [statut, setStatut] = useState<StatutProjet>(projetExistant?.statut ?? "preparation");
@@ -103,21 +99,6 @@ export function ProjetModal({
       }
     } finally {
       setEnCours(false);
-    }
-  }
-
-  async function handleSupprimer() {
-    if (!projetExistant) return;
-    if (!confirmSuppression) {
-      setConfirmSuppression(true);
-      return;
-    }
-    setSuppressionEnCours(true);
-    try {
-      await supprimerProjet(projetExistant.id);
-      onDeleted?.();
-    } finally {
-      setSuppressionEnCours(false);
     }
   }
 
@@ -237,11 +218,6 @@ export function ProjetModal({
         </div>
 
         <div className="modal-panel__footer">
-          {modeEdition && (
-            <button className="btn btn--danger" onClick={handleSupprimer} disabled={suppressionEnCours}>
-              {suppressionEnCours ? "Suppression…" : confirmSuppression ? "Confirmer la suppression" : "Supprimer"}
-            </button>
-          )}
           <div className="modal-panel__footer-right">
             <button className="btn btn--ghost" onClick={onClose}>
               Annuler

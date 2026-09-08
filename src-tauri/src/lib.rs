@@ -84,6 +84,12 @@ pub mod migrations {
                 sql: include_str!("../migrations/011_retrospectives.sql"),
                 kind: MigrationKind::Up,
             },
+            Migration {
+                version: 12,
+                description: "masque_projets",
+                sql: include_str!("../migrations/012_masque_projets.sql"),
+                kind: MigrationKind::Up,
+            },
         ]
     }
 }

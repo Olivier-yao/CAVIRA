@@ -6,11 +6,15 @@ import { ProgressRing } from "../components/ProgressRing";
 import { formatDateMedium, formatDateShort, formatRelativeLong, daysUntil } from "../lib/format";
 import { projetProgressionPct, streakJoursProjet, syntheseFinanciere } from "../lib/ficheProjet";
 import { formatMontantAbs } from "../lib/format";
+import { archiverProjetRapide, dupliquerProjet, masquerProjet, supprimerProjet } from "../data/db";
+import { exporterRapport, isTauriRuntime } from "../data/fichiers";
+import { construireFenetre, genererRapportProjetTexte } from "../lib/rapport";
 import { PlanAttaqueTab } from "./fiche-projet/PlanAttaqueTab";
 import { CalendrierTab } from "./fiche-projet/CalendrierTab";
 import { JournalTab } from "./fiche-projet/JournalTab";
 import { NotesTab } from "./fiche-projet/NotesTab";
 import { RetroTab } from "./fiche-projet/RetroTab";
+import { ActionsMenu } from "./fiche-projet/ActionsMenu";
 
 type TabId = "plan" | "calendrier" | "journal" | "notes" | "retros";
 
@@ -21,9 +25,18 @@ interface FicheProjetProps {
   onDataChanged: () => void;
   onModifier: () => void;
   onOpenProjet: (projetId: string) => void;
+  onProjetSupprime: () => void;
 }
 
-export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier, onOpenProjet }: FicheProjetProps) {
+export function FicheProjet({
+  data,
+  projetId,
+  onBack,
+  onDataChanged,
+  onModifier,
+  onOpenProjet,
+  onProjetSupprime,
+}: FicheProjetProps) {
   const projet = data.projets.find((p) => p.id === projetId);
   const [activeTab, setActiveTab] = useState<TabId>("plan");
 
@@ -78,6 +91,40 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier,
     data.calendrier.filter((c) => c.projet_id === projet.id).length;
   const nbRetros = data.retrospectives.filter((r) => r.projet_id === projet.id).length;
 
+  async function handleDupliquer() {
+    const nouveauId = await dupliquerProjet(projet!.id);
+    await onDataChanged();
+    onOpenProjet(nouveauId);
+  }
+
+  async function handleArchiverRapide(statut: "termine" | "abandonne") {
+    await archiverProjetRapide(projet!.id, statut);
+    onDataChanged();
+  }
+
+  async function handleMasquer() {
+    await masquerProjet(projet!.id, !projet!.masque);
+    onDataChanged();
+  }
+
+  async function handleExporter() {
+    if (!isTauriRuntime()) return;
+    const fenetre = construireFenetre("30j");
+    const texte = genererRapportProjetTexte(data, projet!, fenetre);
+    const slug = projet!.titre
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    await exporterRapport(texte, `cavira-${slug || "projet"}.txt`);
+  }
+
+  async function handleSupprimer() {
+    await supprimerProjet(projet!.id);
+    onProjetSupprime();
+  }
+
   const tabs: { id: TabId; label: string; count: number }[] = [
     { id: "plan", label: "Plan d'attaque", count: nbEtapes },
     { id: "calendrier", label: "Calendrier", count: nbCalendrier },
@@ -99,6 +146,7 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier,
           <div className="fiche-projet__badges">
             <CategorieBadge categorie={categorie} />
             <StatutProjetBadge statut={projet.statut} />
+            {projet.masque && <span className="badge fiche-projet__badge-masque">Masqué</span>}
             {synthese.seuilDepasse && (
               <span
                 className="badge fiche-projet__badge-alerte"
@@ -158,9 +206,14 @@ export function FicheProjet({ data, projetId, onBack, onDataChanged, onModifier,
             <button className="btn btn--ghost" onClick={onModifier}>
               Modifier
             </button>
-            <button className="btn btn--ghost fiche-projet__more" title="Bientôt disponible">
-              ···
-            </button>
+            <ActionsMenu
+              projet={projet}
+              onDupliquer={handleDupliquer}
+              onArchiverRapide={handleArchiverRapide}
+              onExporter={handleExporter}
+              onMasquer={handleMasquer}
+              onSupprimer={handleSupprimer}
+            />
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ interface ProjetsProps {
 }
 
 type Vue = "grille" | "liste" | "matrice";
-type Onglet = "actifs" | "archives";
+type Onglet = "actifs" | "masques" | "archives";
 type FiltreStatutActif = "en_cours" | "pause" | "bloque";
 type FiltreStatutArchive = "termine" | "abandonne";
 
@@ -26,11 +26,16 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
 
   const cards = useMemo(() => buildProjetCards(data), [data]);
 
-  const actifs = data.projets.filter((p) => p.statut === "en_cours").length;
-  const pause = data.projets.filter((p) => p.statut === "pause").length;
+  const actifs = data.projets.filter((p) => p.statut === "en_cours" && !p.masque).length;
+  const pause = data.projets.filter((p) => p.statut === "pause" && !p.masque).length;
   const archivesCount = data.projets.filter((p) => EST_ARCHIVE(p.statut)).length;
+  const masquesCount = data.projets.filter((p) => !EST_ARCHIVE(p.statut) && p.masque).length;
 
-  const cardsDeLOnglet = cards.filter((c) => (onglet === "archives" ? EST_ARCHIVE(c.projet.statut) : !EST_ARCHIVE(c.projet.statut)));
+  const cardsDeLOnglet = cards.filter((c) => {
+    if (onglet === "archives") return EST_ARCHIVE(c.projet.statut);
+    if (onglet === "masques") return !EST_ARCHIVE(c.projet.statut) && c.projet.masque;
+    return !EST_ARCHIVE(c.projet.statut) && !c.projet.masque;
+  });
 
   const parCategorie = (catId: string | null) =>
     catId === null ? cardsDeLOnglet.length : cardsDeLOnglet.filter((c) => c.projet.categorie_id === catId).length;
@@ -56,7 +61,7 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
   const filtered = cardsDeLOnglet.filter((c) => {
     if (recherche.trim() && !c.projet.titre.toLowerCase().includes(recherche.trim().toLowerCase())) return false;
     if (categorieId && c.projet.categorie_id !== categorieId) return false;
-    if (onglet === "actifs" && statutsActifs.size > 0) {
+    if (onglet !== "archives" && statutsActifs.size > 0) {
       const matchStatut =
         (statutsActifs.has("en_cours") && c.projet.statut === "en_cours") ||
         (statutsActifs.has("pause") && c.projet.statut === "pause") ||
@@ -79,6 +84,12 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
         <p className="projets-screen__subtitle">
           {actifs} actif{actifs > 1 ? "s" : ""} · {pause} en pause · {archivesCount} archivé
           {archivesCount > 1 ? "s" : ""}
+          {masquesCount > 0 && (
+            <>
+              {" "}
+              · {masquesCount} masqué{masquesCount > 1 ? "s" : ""}
+            </>
+          )}
         </p>
       </header>
 
@@ -86,6 +97,9 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
         <div className="projets-toolbar__onglets">
           <button className={onglet === "actifs" ? "active" : ""} onClick={() => setOnglet("actifs")}>
             Actifs
+          </button>
+          <button className={onglet === "masques" ? "active" : ""} onClick={() => setOnglet("masques")}>
+            Masqués {masquesCount > 0 && <span>{masquesCount}</span>}
           </button>
           <button className={onglet === "archives" ? "active" : ""} onClick={() => setOnglet("archives")}>
             Archives {archivesCount > 0 && <span>{archivesCount}</span>}
@@ -127,7 +141,7 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
       </div>
 
       <div className="projets-filtres projets-filtres--statut">
-        {onglet === "actifs"
+        {onglet !== "archives"
           ? ([
               { id: "en_cours", label: "En cours" },
               { id: "pause", label: "Pause" },
@@ -157,7 +171,11 @@ export function Projets({ data, onOpenProjet }: ProjetsProps) {
 
       {filtered.length === 0 ? (
         <p className="projets-screen__vide">
-          {onglet === "archives" ? "Aucun projet archivé pour l'instant." : "Aucun projet ne correspond à ces filtres."}
+          {onglet === "archives"
+            ? "Aucun projet archivé pour l'instant."
+            : onglet === "masques"
+              ? "Aucun projet masqué."
+              : "Aucun projet ne correspond à ces filtres."}
         </p>
       ) : vue === "grille" ? (
         <div className="projets-grille">

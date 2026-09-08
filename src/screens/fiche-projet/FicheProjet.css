@@ -146,6 +146,68 @@
   padding: 7px 10px;
 }
 
+.fiche-projet__badge-masque {
+  color: var(--text-3);
+  background: var(--surface-3);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ---------- menu actions (···) ---------- */
+
+.actions-menu {
+  position: relative;
+}
+
+.actions-menu__popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  animation: modal-pop-in 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.actions-menu__item {
+  text-align: left;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 12.5px;
+}
+
+.actions-menu__item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.actions-menu__sep {
+  height: 1px;
+  margin: 5px 4px;
+  background: var(--border);
+}
+
+.actions-menu__item--danger {
+  color: var(--danger);
+}
+
+.actions-menu__item--danger:hover {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
 /* ---------- tabs ---------- */
 
 .fiche-projet__tabs {

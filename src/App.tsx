@@ -139,6 +139,7 @@ function App() {
               onDataChanged={refreshData}
               onModifier={() => setProjetAEditerId(openProjetId)}
               onOpenProjet={openProjet}
+              onProjetSupprime={handleProjetSupprime}
             />
           )}
         </div>
@@ -163,7 +164,6 @@ function App() {
           objectifIdsExistants={objectifIdsDuProjetAEditer}
           onClose={() => setProjetAEditerId(null)}
           onSaved={handleProjetEnregistre}
-          onDeleted={handleProjetSupprime}
         />
       )}
     </div>

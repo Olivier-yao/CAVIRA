@@ -30,6 +30,7 @@ export interface Projet {
   echeance_date: string | null;
   seuil_depenses: number | null;
   importance: ImportanceProjet;
+  masque: boolean;
   created_at: string;
   updated_at: string;
 }
