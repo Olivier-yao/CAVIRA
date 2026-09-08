@@ -22,10 +22,19 @@ import { Splash } from "./components/Splash";
 import { Verrouillage } from "./screens/Verrouillage";
 import { verrouillageActif } from "./lib/verrouillage";
 import { loadAppData } from "./data/db";
+import { isTauriRuntime } from "./data/fichiers";
 import { computeDashboardStats, type DashboardStats } from "./lib/dashboard";
 import { buildCalendarEvents } from "./lib/calendrier";
 import { construireRappels } from "./lib/rappels";
 import type { AppData } from "./types";
+
+async function basculerPleinEcran(): Promise<void> {
+  if (!isTauriRuntime()) return;
+  const { getCurrentWindow } = await import("@tauri-apps/api/window");
+  const fenetre = getCurrentWindow();
+  const pleinEcran = await fenetre.isFullscreen();
+  await fenetre.setFullscreen(!pleinEcran);
+}
 
 function App() {
   const [screen, setScreen] = useState<Screen>("dashboard");
@@ -45,6 +54,10 @@ function App() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setPaletteOuverte(true);
+      }
+      if (e.key === "F11") {
+        e.preventDefault();
+        basculerPleinEcran();
       }
     }
     window.addEventListener("keydown", handleKeyDown);
