@@ -60,6 +60,7 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
   const [periodeRapport, setPeriodeRapport] = useState<PeriodeRapport>("30j");
   const [rapportEnCours, setRapportEnCours] = useState(false);
   const [cycleConfig, setCycleConfigState] = useState<CycleConfig>(() => avancerCycleSiNecessaire());
+  const [cycleReinitialise, setCycleReinitialise] = useState(false);
 
   const [verrouille, setVerrouille] = useState(verrouillageActif());
   const [formMdpOuvert, setFormMdpOuvert] = useState(false);
@@ -172,6 +173,8 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
 
   function handleReinitialiserCycle() {
     setCycleConfigState(reinitialiserCycleMaintenant());
+    setCycleReinitialise(true);
+    window.setTimeout(() => setCycleReinitialise(false), 2500);
   }
 
   function handleOuvrirFormMdp() {
@@ -440,6 +443,7 @@ export function Parametres({ data, onDataChanged }: ParametresProps) {
               <button className="btn btn--ghost" onClick={handleReinitialiserCycle}>
                 Réinitialiser maintenant
               </button>
+              {cycleReinitialise && <span className="cycle-config__confirm">✓ Cycle réinitialisé</span>}
             </div>
           </div>
         )}

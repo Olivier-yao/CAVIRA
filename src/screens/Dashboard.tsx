@@ -58,6 +58,8 @@ export function Dashboard({ data, onOpenProjet }: DashboardProps) {
         </div>
       </header>
 
+      {cycleConfig.actif && <CyclesSection data={data} cycleConfig={cycleConfig} />}
+
       <section className="stat-grid">
         <StatCard
           label="Projets actifs"
@@ -108,8 +110,6 @@ export function Dashboard({ data, onOpenProjet }: DashboardProps) {
         <ProgressionObjectifsCard stats={stats} />
         <DerniereActiviteCard stats={stats} onOpenProjet={onOpenProjet} />
       </section>
-
-      {cycleConfig.actif && <CyclesSection data={data} cycleConfig={cycleConfig} />}
     </div>
   );
 }
