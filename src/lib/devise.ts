@@ -1,4 +1,4 @@
-export type DeviseCode = "EUR" | "XOF" | "USD" | "GBP" | "CAD";
+export type DeviseCode = "EUR" | "XOF" | "USD" | "GBP" | "CAD" | "JPY";
 
 export interface DeviseDef {
   code: DeviseCode;
@@ -11,6 +11,7 @@ export const DEVISES: DeviseDef[] = [
   { code: "USD", label: "Dollar américain ($)" },
   { code: "GBP", label: "Livre sterling (£)" },
   { code: "CAD", label: "Dollar canadien ($ CA)" },
+  { code: "JPY", label: "Yen japonais (¥)" },
 ];
 
 const STORAGE_KEY = "cavira:devise";

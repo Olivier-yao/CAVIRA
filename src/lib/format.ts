@@ -6,7 +6,17 @@ function currencyFormatter(): Intl.NumberFormat {
   const devise = getStoredDevise();
   let f = formatteursParDevise.get(devise);
   if (!f) {
-    f = new Intl.NumberFormat("fr-FR", { style: "currency", currency: devise, maximumFractionDigits: 0 });
+    // narrowSymbol pour le yen : le format par défaut ("symbol") affiche le
+    // code "JPY" en locale fr-FR plutôt que ¥ (ambiguïté avec le yuan côté
+    // CLDR). Les autres devises gardent "symbol" (par défaut), qui
+    // désambiguïse déjà $US/$CA/£GB — narrowSymbol les aurait rendues
+    // identiques ($, £).
+    f = new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: devise,
+      currencyDisplay: devise === "JPY" ? "narrowSymbol" : "symbol",
+      maximumFractionDigits: 0,
+    });
     formatteursParDevise.set(devise, f);
   }
   return f;
