@@ -742,6 +742,17 @@ export function mockAjouterFinancePerso(input: NewFinancePersoInput): void {
   financesPerso.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
 }
 
+export function mockModifierFinancePerso(id: string, input: NewFinancePersoInput): void {
+  const f = financesPerso.find((x) => x.id === id);
+  if (f) {
+    f.type = input.type;
+    f.montant = input.montant;
+    f.note = input.note;
+    f.date = input.date;
+  }
+  financesPerso.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
+}
+
 export function mockSupprimerFinancePerso(id: string): void {
   removeWhere(financesPerso, (f) => f.id === id);
 }

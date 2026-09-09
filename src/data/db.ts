@@ -36,6 +36,7 @@ import {
   mockAddRetrospective,
   mockAjouterFinancePerso,
   mockAjouterNoteRoutine,
+  mockModifierFinancePerso,
   mockAjouterPersonneProjet,
   mockAjouterRoutine,
   mockArchiverProjetRapide,
@@ -371,6 +372,21 @@ export async function ajouterFinancePerso(input: NewFinancePersoInput): Promise<
     input.montant,
     input.note,
     input.date,
+  ]);
+}
+
+export async function modifierFinancePerso(id: string, input: NewFinancePersoInput): Promise<void> {
+  if (!isTauriRuntime()) {
+    mockModifierFinancePerso(id, input);
+    return;
+  }
+  const db = await getDb();
+  await db.execute("UPDATE finances_perso SET type = $1, montant = $2, note = $3, date = $4 WHERE id = $5", [
+    input.type,
+    input.montant,
+    input.note,
+    input.date,
+    id,
   ]);
 }
 

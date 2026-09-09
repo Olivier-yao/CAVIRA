@@ -77,6 +77,20 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  border-color: var(--border);
+  transition: border-color 0.15s ease;
+}
+
+.finances-ajout--edition {
+  border-color: var(--accent-line);
+}
+
+.finances-ajout__edition-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .finances-ajout__types {
@@ -169,6 +183,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+.finances-ajout__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .finances-ajout__hint {
@@ -278,6 +299,14 @@
 
 .finances-table__row:not(.finances-table__row--entete):hover {
   background: var(--surface-hover);
+}
+
+.finances-table__row--clic {
+  cursor: pointer;
+}
+
+.finances-table__row--edition {
+  background: var(--accent-dim);
 }
 
 .finances-table__row--entete {

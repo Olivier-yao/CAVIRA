@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./FinancesPerso.css";
-import type { AppData, TypeFinancePerso } from "../types";
-import { ajouterFinancePerso, supprimerFinancePerso } from "../data/db";
+import type { AppData, FinancePerso, TypeFinancePerso } from "../types";
+import { ajouterFinancePerso, modifierFinancePerso, supprimerFinancePerso } from "../data/db";
 import { calculerTotaux, soldeCumule12Mois } from "../lib/financesPerso";
 import { formatDateDDMM, formatMontant, formatMontantAbs } from "../lib/format";
 
@@ -26,20 +26,40 @@ export function FinancesPerso({ data, onDataChanged }: FinancesPersoProps) {
   const [date, setDate] = useState(aujourdhui());
   const [note, setNote] = useState("");
   const [confirmSuppressionId, setConfirmSuppressionId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
 
   const entries = data.financesPerso;
   const totaux = calculerTotaux(entries);
   const courbe = soldeCumule12Mois(entries);
   const maxAbs = Math.max(1, ...courbe.map((p) => Math.abs(p.solde)));
 
-  async function handleAjouter() {
+  function resetForm() {
+    setType("entree");
+    setMontant("");
+    setDate(aujourdhui());
+    setNote("");
+    setEditId(null);
+  }
+
+  async function handleValider() {
     const m = Number(montant.replace(",", "."));
     if (!Number.isFinite(m) || m <= 0 || !note.trim()) return;
-    await ajouterFinancePerso({ type, montant: m, note: note.trim(), date });
-    setMontant("");
-    setNote("");
-    setDate(aujourdhui());
+    if (editId) {
+      await modifierFinancePerso(editId, { type, montant: m, note: note.trim(), date });
+    } else {
+      await ajouterFinancePerso({ type, montant: m, note: note.trim(), date });
+    }
+    resetForm();
     onDataChanged();
+  }
+
+  function handleModifierClick(entry: FinancePerso) {
+    setConfirmSuppressionId(null);
+    setEditId(entry.id);
+    setType(entry.type);
+    setMontant(String(entry.montant).replace(".", ","));
+    setDate(entry.date.slice(0, 10));
+    setNote(entry.note);
   }
 
   async function handleSupprimer(id: string) {
@@ -48,6 +68,7 @@ export function FinancesPerso({ data, onDataChanged }: FinancesPersoProps) {
       return;
     }
     await supprimerFinancePerso(id);
+    if (editId === id) resetForm();
     setConfirmSuppressionId(null);
     onDataChanged();
   }
@@ -102,7 +123,8 @@ export function FinancesPerso({ data, onDataChanged }: FinancesPersoProps) {
         </div>
       </section>
 
-      <section className="card finances-ajout">
+      <section className={`card finances-ajout${editId ? " finances-ajout--edition" : ""}`}>
+        {editId && <div className="finances-ajout__edition-label">Modification d'un mouvement</div>}
         <div className="finances-ajout__types">
           {TYPES.map((t) => (
             <button
@@ -144,10 +166,19 @@ export function FinancesPerso({ data, onDataChanged }: FinancesPersoProps) {
           </label>
         </div>
         <div className="finances-ajout__pied">
-          <p className="finances-ajout__hint">{typeActif.label} · la note reste la trace la plus utile dans six mois.</p>
-          <button className="btn btn--accent" onClick={handleAjouter} disabled={!montant.trim() || !note.trim()}>
-            Ajouter
-          </button>
+          <p className="finances-ajout__hint">
+            {editId ? "Corrige les champs puis enregistre." : `${typeActif.label} · la note reste la trace la plus utile dans six mois.`}
+          </p>
+          <div className="finances-ajout__actions">
+            {editId && (
+              <button className="btn btn--ghost" onClick={resetForm}>
+                Annuler
+              </button>
+            )}
+            <button className="btn btn--accent" onClick={handleValider} disabled={!montant.trim() || !note.trim()}>
+              {editId ? "Enregistrer" : "Ajouter"}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -188,7 +219,12 @@ export function FinancesPerso({ data, onDataChanged }: FinancesPersoProps) {
               const t = TYPES.find((x) => x.id === e.type)!;
               const signe = e.type === "depense" ? -1 : 1;
               return (
-                <div className="finances-table__row" key={e.id}>
+                <div
+                  className={`finances-table__row finances-table__row--clic${editId === e.id ? " finances-table__row--edition" : ""}`}
+                  key={e.id}
+                  onClick={() => handleModifierClick(e)}
+                  title="Cliquer pour corriger ce mouvement"
+                >
                   <span className="mono finances-table__date">{formatDateDDMM(e.date)}</span>
                   <span>
                     <span className="finances-badge" style={{ background: t.couleurDim, color: t.couleur }}>
@@ -203,7 +239,10 @@ export function FinancesPerso({ data, onDataChanged }: FinancesPersoProps) {
                   </span>
                   <button
                     className="finances-table__supprimer"
-                    onClick={() => handleSupprimer(e.id)}
+                    onClick={(evt) => {
+                      evt.stopPropagation();
+                      handleSupprimer(e.id);
+                    }}
                     title={confirmSuppressionId === e.id ? "Confirmer la suppression" : "Supprimer"}
                   >
                     {confirmSuppressionId === e.id ? "confirmer ✕" : "✕"}
